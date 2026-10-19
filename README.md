@@ -1,0 +1,113 @@
+# 🀄 台灣十六張麻將（Tauri v2 + Svelte）
+
+可以連線遊玩的台灣十六張麻將。同一張牌桌可以坐：
+
+- 👤 **人類**：用桌面 App，或直接用瀏覽器打開房主的網址
+- 🤖 **Claude Code**：透過 MCP（`/mcp`）
+- 💬 **ChatGPT**：透過 MCP 連接器或自訂 GPT Actions（`/openapi.json`）
+- 🛠 **任何 AI / 程式**：HTTP API，curl 就能玩（說明在 `/llms.txt`）
+- 💻 **內建電腦**：補空位，或接手斷線玩家
+
+房主的 App 內建一個伺服器（預設埠 7777），所有牌局邏輯都在伺服器端判定，玩家只送出動作。
+
+## 開發
+
+需求：Node 18+、Rust 1.89+（Windows 需 WebView2，Win10/11 已內建）。
+
+```bash
+npm install
+```
+
+```bash
+npm run tauri dev
+```
+
+打包安裝檔：
+
+```bash
+npm run tauri build
+```
+
+只跑伺服器、不開視窗（放在主機上，或給 AI 測試用）：
+
+```bash
+npm run build
+```
+
+```bash
+npm run server -- --port 7777 --dist dist
+```
+
+會印出網址與「房主金鑰」。用瀏覽器開網址、首頁點「我是房主」輸入金鑰，就能當房主。
+其他參數：`--bots 3`（先放 3 個電腦）、`--start`（直接開打）、`--settings '{"turn_timeout":60}'`。
+
+測試：
+
+```bash
+cargo test --manifest-path src-tauri/Cargo.toml --lib
+```
+
+## 怎麼玩
+
+1. 房主在 App 按「開房」。
+2. 大廳右邊的「邀請玩家與 AI」有現成的指令可以複製：
+   - **朋友**：App 選「加入房間」輸入 `IP:7777`，或瀏覽器開 `http://IP:7777/`
+   - **Claude Code**：
+     ```bash
+     claude mcp add --transport http mahjong http://IP:7777/mcp
+     ```
+     然後跟 Claude 說：「用 mahjong MCP 工具加入台灣麻將遊戲，一直玩到結束」
+   - **ChatGPT**：ChatGPT 在雲端，需要 https 公開網址。可用 Cloudflare 臨時通道：
+     ```bash
+     cloudflared tunnel --url http://localhost:7777
+     ```
+     把得到的 `https://xxxx.trycloudflare.com/mcp` 加到 ChatGPT「設定 → 應用程式與連接器 → 進階 → 開發者模式」的自訂連接器，
+     或在自訂 GPT 的「動作」匯入 `https://xxxx.trycloudflare.com/openapi.json`。
+3. 房主按「開始遊戲」，空位會自動補電腦。遊戲中有人加入會接手電腦的座位。
+4. 點一下選牌、再點一下（或雙擊）打出；吃碰槓胡會跳出按鈕。
+
+> 朋友連不進來的話，通常是 Windows 防火牆擋住了 7777 埠，第一次開房時允許存取即可。
+
+## AI 介面
+
+| 端點 | 用途 |
+| --- | --- |
+| `POST /mcp` | MCP（Streamable HTTP）。工具：`join_game`、`wait_for_turn`、`take_action`、`get_state`、`send_chat`、`get_rules` |
+| `POST /api/join` | `{"name":"Claude"}` → `{token, seat}` |
+| `GET /api/wait?token=…&timeout=60&format=text` | 長輪詢，輪到你才回傳（文字版牌桌 + 編號動作） |
+| `GET /api/state?token=…&format=text` | 立即取得狀態 |
+| `POST /api/action?format=text` | `{"token":…, "action_id":3}`，或 `{"type":"discard","tile":"5m"}`、`{"type":"chow","start":"3m"}` |
+| `POST /api/chat` | `{"token":…, "text":"安安"}` |
+| `GET /llms.txt` | 給 AI 讀的完整說明 |
+| `GET /openapi.json` | GPT Actions 用 |
+
+牌代碼：`1m..9m` 萬、`1p..9p` 筒、`1s..9s` 條、`E S W N` 東南西北、`C F P` 中發白、`f1..f8` 春夏秋冬梅蘭竹菊。也接受中文牌名。
+
+每個決定都有時間限制（房主可調）。逾時能胡就自動胡，不然自動「過」或由電腦代打一張，所以 AI 想太久也不會卡住牌局。
+
+## 規則
+
+- 144 張（含 8 花），每人 16 張、莊家 17 張，胡牌為 5 組 + 1 對
+- 只能吃上家；胡 > 碰/槓 > 吃；一砲多響時截胡（離放槍者最近者優先）
+- 過水、搶槓、海底留 16 張、流局連莊
+- 台數：莊家、連N拉N、門清、自摸、門清自摸、三元牌、圈風、門風、正花、花槓、平胡、全求人、半求人、獨聽、海底撈月、河底撈魚、槓上開花、搶槓、三/四/五暗刻、碰碰胡、混一色、清一色、字一色、小/大三元、小/大四喜、嚦咕嚦咕、八仙過海、七搶一、地胡、天胡
+- 計分：底 + 台數 × 台錢，放槍一家付、自摸三家付；牽涉莊家的那筆另加莊家與連莊台
+
+## 程式結構
+
+```
+src-tauri/src/
+  game/tiles.rs     牌的編碼與解析
+  game/rules.rs     胡牌判定、拆解、聽牌、向聽數
+  game/scoring.rs   台數計算
+  game/room.rs      房間與牌局狀態機（權威）、給 UI / AI 的狀態輸出
+  game/bot.rs       內建電腦（向聽數 + 進張數）
+  server.rs         axum：WebSocket、HTTP API、MCP、llms.txt、OpenAPI、靜態檔
+  lib.rs            Tauri 指令：start_host / stop_host / host_status
+  bin/mahjong-server.rs  無介面伺服器
+src/
+  lib/net.svelte.js 連線狀態
+  lib/Home / Lobby / Table / Result …  介面
+```
+
+註：最新版 Tauri 需要 Rust 1.90，`src-tauri/.cargo/config.toml` 設了 `incompatible-rust-versions = "fallback"`，讓 Rust 1.89 自動選用相容的版本（目前是 Tauri 2.11）。npm 的 `@tauri-apps/api` 也固定在 2.11，跟 Rust 的 `tauri` 版本一致。

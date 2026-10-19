@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "mahjong-server",
+      "runtimeExecutable": "src-tauri/target/debug/mahjong-server.exe",
+      "runtimeArgs": ["--port", "7777", "--dist", "dist", "--settings", "{\"bot_delay_ms\":500,\"turn_timeout\":0,\"claim_timeout\":0,\"next_hand_delay\":0}"],
+      "port": 7777
+    }
+  ]
+}

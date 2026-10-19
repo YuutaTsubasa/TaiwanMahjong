@@ -1,0 +1,75 @@
+:root {
+  --felt: #0f5132;
+  --felt-dark: #0a3a24;
+  --wood: #6b4226;
+  --panel: rgba(8, 28, 20, 0.78);
+  --panel-solid: #10291e;
+  --line: rgba(255, 255, 255, 0.12);
+  --text: #f1f5ef;
+  --muted: #a9c2b4;
+  --gold: #ffd166;
+  --red: #ef476f;
+  --accent: #06d6a0;
+  font-family: 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', system-ui, sans-serif;
+  color: var(--text);
+  background: #071a12;
+  font-size: 15px;
+  -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+
+html, body, #app { height: 100%; margin: 0; }
+
+body {
+  background:
+    radial-gradient(ellipse at 50% 40%, #16714a 0%, var(--felt) 45%, var(--felt-dark) 100%);
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 8px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+button:hover:not(:disabled) { background: rgba(255, 255, 255, 0.16); }
+button:active:not(:disabled) { transform: scale(0.97); }
+button:disabled { opacity: 0.45; cursor: default; }
+button.primary { background: linear-gradient(180deg, #ffd166, #f4a261); color: #3d2200; border: none; font-weight: 700; }
+button.primary:hover:not(:disabled) { background: linear-gradient(180deg, #ffe08a, #f6b27c); }
+button.danger { background: rgba(239, 71, 111, 0.25); border-color: rgba(239, 71, 111, 0.6); }
+button.small { padding: 4px 10px; font-size: 13px; border-radius: 8px; }
+
+input, select {
+  font: inherit;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  outline: none;
+}
+input:focus, select:focus { border-color: var(--gold); }
+
+code, pre {
+  font-family: 'Cascadia Code', Consolas, monospace;
+  font-size: 13px;
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(6px);
+}
+
+.muted { color: var(--muted); }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.18); border-radius: 4px; }

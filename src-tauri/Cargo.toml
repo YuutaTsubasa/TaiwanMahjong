@@ -1,0 +1,28 @@
+[package]
+name = "taiwan-mahjong"
+version = "0.1.0"
+description = "台灣十六張麻將：可讓人類與 AI（Claude Code / ChatGPT）連線遊玩"
+edition = "2021"
+rust-version = "1.89"
+default-run = "taiwan-mahjong"
+
+[lib]
+name = "taiwan_mahjong_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[[bin]]
+name = "mahjong-server"
+path = "src/bin/mahjong-server.rs"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["full"] }
+axum = { version = "0.8", features = ["ws"] }
+tower-http = { version = "0.6", features = ["cors"] }
+futures-util = "0.3"
+rand = "0.8"
