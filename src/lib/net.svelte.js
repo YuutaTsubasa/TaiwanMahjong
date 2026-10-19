@@ -143,6 +143,11 @@ export function act(actionId) {
   send({ type: 'action', action_id: actionId, decision_id: net.state?.decision_id });
 }
 
+/** 託管：電腦幫你打，但座位與手牌仍是你的 */
+export function setAuto(on) {
+  send({ type: 'auto', on });
+}
+
 export function hostCmd(cmd, extra = {}) {
   send({ type: 'host', cmd, ...extra });
 }

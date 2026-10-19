@@ -8,6 +8,7 @@
 
 use crate::game::room::{Phase, Room, SeatKind, Settings};
 use axum::{
+    body::Bytes,
     extract::{
         ws::{Message, WebSocket, WebSocketUpgrade},
         Query, State,
@@ -253,6 +254,12 @@ fn handle_ws_msg(st: &AppState, ctx: &mut WsCtx, v: &Value) -> (Vec<Value>, bool
                 Err(e) => (vec![err(e)], false),
             }
         }
+        "auto" => {
+            let Some(s) = ctx.seat else { return (vec![err("你沒有座位")], false) };
+            let on = v.get("on").and_then(|x| x.as_bool()).unwrap_or(false);
+            room.set_auto(s, on);
+            (vec![], true)
+        }
         "chat" => {
             let text = v.get("text").and_then(|x| x.as_str()).unwrap_or("");
             room.push_chat(ctx.seat, text);
@@ -322,6 +329,19 @@ async fn api_info(State(st): State<Arc<AppState>>) -> Json<Value> {
     }))
 }
 
+/// 解析 JSON 請求本文。失敗時說明原因——最常見的是 Windows 終端機把中文用 Big5 送出。
+fn parse_body(body: &Bytes) -> Result<Value, Response> {
+    if body.iter().all(|b| b.is_ascii_whitespace()) {
+        return Ok(json!({}));
+    }
+    if std::str::from_utf8(body).is_err() {
+        return Err(bad(
+            r#"請求本文不是 UTF-8。Windows 的 Git Bash / cmd 送中文時常被轉成 Big5；請把中文寫成 \uXXXX 跳脫（例如 "\u5b89\u5b89" = 安安），或把 JSON 存成 UTF-8 檔案再用 curl --data-binary @body.json 送出。"#,
+        ));
+    }
+    serde_json::from_slice(body).map_err(|e| bad(format!("JSON 格式錯誤：{}", e)))
+}
+
 #[derive(Deserialize, Default)]
 struct JoinReq {
     name: Option<String>,
@@ -343,8 +363,11 @@ fn do_join(st: &AppState, name: &str, token: Option<&str>) -> Result<(usize, Str
     Ok((s, tok))
 }
 
-async fn api_join(State(st): State<Arc<AppState>>, body: Option<Json<JoinReq>>) -> Response {
-    let req = body.map(|b| b.0).unwrap_or_default();
+async fn api_join(State(st): State<Arc<AppState>>, body: Bytes) -> Response {
+    let req: JoinReq = match parse_body(&body) {
+        Ok(v) => serde_json::from_value(v).unwrap_or_default(),
+        Err(r) => return r,
+    };
     match do_join(&st, req.name.as_deref().unwrap_or("AI"), req.token.as_deref()) {
         Ok((seat, token)) => Json(json!({
             "ok": true,
@@ -446,7 +469,11 @@ fn do_action(st: &AppState, seat: usize, v: &Value) -> Result<String, String> {
     Ok(label)
 }
 
-async fn api_action(State(st): State<Arc<AppState>>, Query(q): Query<StateQ>, Json(v): Json<Value>) -> Response {
+async fn api_action(State(st): State<Arc<AppState>>, Query(q): Query<StateQ>, body: Bytes) -> Response {
+    let v = match parse_body(&body) {
+        Ok(v) => v,
+        Err(r) => return r,
+    };
     let token = v.get("token").and_then(|x| x.as_str()).or(q.token.as_deref()).map(String::from);
     let seat = match seat_from_token(&st, token.as_deref()) {
         Ok(s) => s,
@@ -458,7 +485,11 @@ async fn api_action(State(st): State<Arc<AppState>>, Query(q): Query<StateQ>, Js
     }
 }
 
-async fn api_chat(State(st): State<Arc<AppState>>, Json(v): Json<Value>) -> Response {
+async fn api_chat(State(st): State<Arc<AppState>>, body: Bytes) -> Response {
+    let v = match parse_body(&body) {
+        Ok(v) => v,
+        Err(r) => return r,
+    };
     let token = v.get("token").and_then(|x| x.as_str());
     let seat = match seat_from_token(&st, token) {
         Ok(s) => s,
@@ -525,7 +556,9 @@ MCP 端點：{base}/mcp （Streamable HTTP）
 
 Claude Code：
     claude mcp add --transport http mahjong {base}/mcp
+加好之後要「開一個新的 Claude Code 工作階段」，MCP 工具只會在工作階段啟動時載入；
 然後告訴 Claude：「用 mahjong 工具加入麻將遊戲並打到結束」。
+（如果當前工作階段沒有 mahjong 工具，直接改用下面的 HTTP API 也能玩。）
 
 ChatGPT（需要 https 公開網址，可用 cloudflared / ngrok 建立通道）：
 設定 → 連接器 → 進階 → 開發者模式 → 新增 MCP 伺服器，網址填 https://你的網址/mcp
@@ -542,7 +575,8 @@ ChatGPT（需要 https 公開網址，可用 cloudflared / ngrok 建立通道）
     curl -s -X POST "{base}/api/action?format=text" -H "Content-Type: application/json" -d '{{"token":"TOKEN","action_id":0}}'
    也可以用 {{"token":"TOKEN","type":"discard","tile":"5m"}}、{{"type":"pung"}}、{{"type":"chow","start":"3m"}}、{{"type":"pass"}}、{{"type":"tsumo"}}、{{"type":"ron"}}、{{"type":"next"}}
 4. 聊天：
-    curl -s -X POST {base}/api/chat -H "Content-Type: application/json" -d '{{"token":"TOKEN","text":"安安"}}'
+    curl -s -X POST {base}/api/chat -H "Content-Type: application/json" -d '{{"token":"TOKEN","text":"\u5b89\u5b89"}}'
+   （Windows 的 Git Bash 直接打中文可能被轉成 Big5 而被拒絕；用 \uXXXX 跳脫或 --data-binary @UTF-8檔案 最保險）
 5. 不斷重複 2→3，直到狀態顯示「遊戲結束」。
 
 拿掉 format=text 會回傳完整 JSON（state.actions、state.seats…）。

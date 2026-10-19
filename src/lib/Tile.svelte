@@ -55,7 +55,8 @@
     5: [[15, 21], [45, 21], [30, 40], [15, 59], [45, 59]],
     6: [[14, 21], [30, 21], [46, 21], [14, 59], [30, 59], [46, 59]],
     7: [[30, 13], [14, 40], [30, 40], [46, 40], [14, 67], [30, 67], [46, 67]],
-    8: [[9, 21], [23, 21], [37, 21], [51, 21], [9, 59], [23, 59], [37, 59], [51, 59]],
+    // 八條：上半部是 M 形（中間兩根往內靠），下半部是 W 形（中間兩根往外開）；第三個值是傾斜角度
+    8: [[10, 21], [24, 21, 22], [36, 21, -22], [50, 21], [10, 59], [24, 59, -22], [36, 59, 22], [50, 59]],
     9: [[14, 13], [30, 13], [46, 13], [14, 40], [30, 40], [46, 40], [14, 67], [30, 67], [46, 67]],
   };
   function stickColor(n, i) {
@@ -111,12 +112,14 @@
           <path d="M-5 0 Q0 12 5 0" stroke="#fffaf0" stroke-width="2" fill="none" />
         </g>
       {:else}
-        {#each STICKS[t.n] as [x, y], i}
+        {#each STICKS[t.n] as [x, y, angle = 0], i}
           {@const h = stickH(t.n)}
           {@const w = t.n === 8 ? 7 : 8}
-          <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={w / 2} fill={stickColor(t.n, i)} />
-          <line x1={x - w / 2} x2={x + w / 2} y1={y} y2={y} stroke="#fffaf0" stroke-width="1.6" />
-          <line x1={x} x2={x} y1={y - h / 2 + 3} y2={y + h / 2 - 3} stroke="#fffaf0" stroke-opacity=".45" stroke-width="1.2" />
+          <g transform="rotate({angle} {x} {y})">
+            <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={w / 2} fill={stickColor(t.n, i)} />
+            <line x1={x - w / 2} x2={x + w / 2} y1={y} y2={y} stroke="#fffaf0" stroke-width="1.6" />
+            <line x1={x} x2={x} y1={y - h / 2 + 3} y2={y + h / 2 - 3} stroke="#fffaf0" stroke-opacity=".45" stroke-width="1.2" />
+          </g>
         {/each}
       {/if}
     </svg>

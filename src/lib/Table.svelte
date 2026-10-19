@@ -1,5 +1,5 @@
 <script>
-  import { net, act, clock, leave, hostCmd, disconnect } from './net.svelte.js';
+  import { net, act, clock, leave, hostCmd, disconnect, setAuto } from './net.svelte.js';
   import Tile from './Tile.svelte';
   import Melds from './Melds.svelte';
   import Nameplate from './Nameplate.svelte';
@@ -13,7 +13,9 @@
   const mine = $derived(s.seats[me]);
   const isPlayer = $derived(s.you != null);
 
-  const actions = $derived(s.actions ?? []);
+  const auto = $derived(!!mine.auto);
+  // 託管時由電腦出手，介面不顯示動作按鈕、手牌也不能點
+  const actions = $derived(auto ? [] : (s.actions ?? []));
   const discardById = $derived(new Map(actions.filter((a) => a.type === 'discard').map((a) => [a.tile, a])));
   const special = $derived(actions.filter((a) => a.type !== 'discard' && a.type !== 'next'));
   const canDiscard = $derived(discardById.size > 0);
@@ -112,8 +114,20 @@
           <div class="waits">聽：{#each s.my_waits as w}<Tile code={w} size="xs" />{/each}</div>
         {/if}
         <div class="spacer"></div>
+        {#if isPlayer && s.phase === 'playing'}
+          <button class="small auto-btn" class:on={auto} onclick={() => setAuto(!auto)} title="讓電腦幫你打，隨時可以取消">
+            🤖 {auto ? '取消託管' : '託管'}
+          </button>
+        {/if}
         <Melds melds={mine.melds ?? []} flowers={mine.flowers ?? []} size="md" />
       </div>
+
+      {#if auto && s.phase === 'playing'}
+        <div class="auto-bar">
+          <span>🤖 託管中，電腦正在幫你打</span>
+          <button class="small" onclick={() => setAuto(false)}>我要自己打</button>
+        </div>
+      {/if}
 
       {#if special.length}
         <div class="actions">
@@ -267,6 +281,17 @@
   .cd { font-variant-numeric: tabular-nums; color: var(--muted); }
   .hand { display: flex; align-items: flex-end; gap: 3px; min-height: 86px; padding-top: 14px; }
   .drawn-gap { width: 18px; }
+  .auto-btn.on { background: rgba(76, 201, 240, 0.3); border-color: #4cc9f0; }
+  .auto-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(76, 201, 240, 0.18);
+    border: 1px solid #4cc9f0;
+    border-radius: 12px;
+    padding: 6px 8px 6px 14px;
+    font-size: 15px;
+  }
   .hint { font-size: 12px; color: var(--muted); }
   .spect { align-self: center; }
   .side { display: flex; flex-direction: column; gap: 10px; min-height: 0; padding: 14px; }

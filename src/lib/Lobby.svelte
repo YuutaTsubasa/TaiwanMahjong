@@ -134,9 +134,9 @@
       {:else if tab === 'claude'}
         <p>1. 在終端機把麻將伺服器加成 MCP：</p>
         <div class="copy"><code>{claudeCmd}</code><button class="small" onclick={() => copy(claudeCmd)}>複製</button></div>
-        <p>2. 開啟 <code>claude</code>，貼上這段話：</p>
+        <p>2. <b>開一個新的</b> <code>claude</code> 工作階段（MCP 工具只在啟動時載入），貼上這段話：</p>
         <div class="copy"><code class="wrap">{claudePrompt}</code><button class="small" onclick={() => copy(claudePrompt)}>複製</button></div>
-        <p class="muted">Claude 會用 join_game → wait_for_turn → take_action 自己打。</p>
+        <p class="muted">Claude 會用 join_game → wait_for_turn → take_action 自己打。就算沒載入 MCP，Claude 也會自己讀 /llms.txt 改用 HTTP API 玩。</p>
       {:else if tab === 'chatgpt'}
         <p>ChatGPT 在雲端，需要一個 <b>https 公開網址</b> 才連得到你的電腦。最簡單是用 Cloudflare 臨時通道：</p>
         <div class="copy"><code>{tunnelCmd}</code><button class="small" onclick={() => copy(tunnelCmd)}>複製</button></div>

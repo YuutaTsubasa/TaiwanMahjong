@@ -10,6 +10,7 @@
       <span>{SEAT_KIND_ICON[seat.kind] ?? ''}</span>
       <b>{seat.name ?? '空位'}</b>
       {#if isMe}<span class="me">你</span>{/if}
+      {#if seat.auto}<span class="auto">託管</span>{/if}
       {#if !seat.connected && seat.kind !== 'bot'}<span class="off">離線</span>{/if}
     </div>
     <div class="score" class:neg={seat.score < 0}>{seat.score > 0 ? '+' : ''}{seat.score}</div>
@@ -52,6 +53,7 @@
   .score { font-size: 12px; color: var(--accent); font-variant-numeric: tabular-nums; }
   .score.neg { color: #ff8fa3; }
   .me { background: var(--gold); color: #3d2200; font-size: 10px; padding: 0 5px; border-radius: 5px; font-weight: 700; }
+  .auto { background: #4cc9f0; color: #062033; font-size: 10px; padding: 0 5px; border-radius: 5px; font-weight: 700; }
   .off { background: #555; font-size: 10px; padding: 0 5px; border-radius: 5px; }
   .dealer-tag {
     position: absolute;

@@ -191,6 +191,8 @@ pub struct Room {
     pub hand: Option<Hand>,
     pub result: Option<HandResult>,
     pub ready: [bool; 4],
+    /// 託管：座位仍屬於玩家，但由電腦代為出手
+    pub auto: [bool; 4],
     pub decision_id: u64,
     pub decision_started: Instant,
     pub deadline: Option<Instant>,
@@ -221,6 +223,7 @@ impl Room {
             hand: None,
             result: None,
             ready: [false; 4],
+            auto: [false; 4],
             decision_id: 0,
             decision_started: Instant::now(),
             deadline: None,
@@ -265,6 +268,20 @@ impl Room {
             return None;
         }
         (0..4).find(|&s| self.seats[s].as_ref().map_or(false, |i| i.token == token))
+    }
+
+    /// 電腦或託管中的座位，由內建電腦出手
+    pub fn auto_plays(&self, seat: usize) -> bool {
+        self.is_bot(seat) || self.auto[seat]
+    }
+
+    pub fn set_auto(&mut self, seat: usize, on: bool) {
+        if seat >= 4 || self.seats[seat].is_none() || self.auto[seat] == on {
+            return;
+        }
+        self.auto[seat] = on;
+        let name = self.name(seat);
+        self.push_log(format!("{} {}", name, if on { "開啟託管" } else { "取消託管" }));
     }
 
     pub fn is_bot(&self, seat: usize) -> bool {
@@ -318,6 +335,7 @@ impl Room {
         };
         let token = gen_token();
         let replaced = self.seats[seat].as_ref().map(|i| i.name.clone());
+        self.auto[seat] = false;
         self.seats[seat] = Some(SeatInfo {
             name: name.clone(),
             kind,
@@ -342,6 +360,7 @@ impl Room {
             return Err("該座位已有人".into());
         }
         const BOT_NAMES: [&str; 4] = ["阿財", "小美", "老王", "阿嬤"];
+        self.auto[seat] = false;
         self.seats[seat] = Some(SeatInfo {
             name: format!("{}(電腦)", BOT_NAMES[seat]),
             kind: SeatKind::Bot,
@@ -364,6 +383,7 @@ impl Room {
         } else if let Some(i) = self.seats[seat].as_mut() {
             if i.kind != SeatKind::Bot {
                 i.kind = SeatKind::Bot;
+                self.auto[seat] = false;
                 i.token = gen_token();
                 i.name = format!("{}(電腦代打)", i.name);
                 let n = i.name.clone();
@@ -403,6 +423,7 @@ impl Room {
 
     pub fn reset_to_lobby(&mut self) {
         self.phase = Phase::Lobby;
+        self.auto = [false; 4];
         self.hand = None;
         self.result = None;
         self.deadline = None;
@@ -646,7 +667,7 @@ impl Room {
         }
         if self.phase == Phase::HandOver {
             self.ready[seat] = true;
-            if (0..4).all(|s| self.ready[s] || self.is_bot(s)) {
+            if (0..4).all(|s| self.ready[s] || self.auto_plays(s)) {
                 self.next_hand();
             }
             return Ok(());
@@ -1039,7 +1060,7 @@ impl Room {
             let mut acted = false;
             if now.duration_since(self.decision_started) >= Duration::from_millis(self.settings.bot_delay_ms) {
                 for s in 0..4 {
-                    if !self.is_bot(s) {
+                    if !self.auto_plays(s) {
                         continue;
                     }
                     let legal = self.legal_actions(s);
@@ -1252,6 +1273,7 @@ impl Room {
                     "score": self.scores[s],
                     "wind": if started { Some(WIND_ZH[self.seat_wind(s) as usize]) } else { None },
                     "is_dealer": started && s == self.dealer,
+                    "auto": self.auto[s],
                 });
                 if let Some(h) = &self.hand {
                     let p = &h.players[s];
@@ -1511,6 +1533,25 @@ mod tests {
         }
         assert_eq!(room.scores.iter().sum::<i64>(), 0);
         println!("hands: {} log tail: {:?}", room.hand_no, room.log.iter().rev().take(5).collect::<Vec<_>>());
+    }
+
+    /// 託管中的真人座位要被電腦打完整場，而且座位仍是真人的。
+    #[test]
+    fn auto_play_seat_finishes_game() {
+        let mut room = Room::new(Settings { bot_delay_ms: 0, turn_timeout: 0, claim_timeout: 0, next_hand_delay: 0, ..Default::default() });
+        let (seat, token) = room.join("悠太", SeatKind::Human).unwrap();
+        room.set_auto(seat, true);
+        room.start_game().unwrap();
+        let mut steps = 0;
+        while room.phase != Phase::GameOver {
+            assert!(room.tick(), "stuck at {:?}", room.phase);
+            steps += 1;
+            assert!(steps < 200_000);
+        }
+        assert_eq!(room.seat_of_token(&token), Some(seat));
+        assert_eq!(room.seats[seat].as_ref().unwrap().kind, SeatKind::Human);
+        room.set_auto(seat, false);
+        assert!(!room.auto[seat]);
     }
 
     #[test]
