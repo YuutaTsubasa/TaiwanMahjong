@@ -68,12 +68,23 @@ cargo test --manifest-path src-tauri/Cargo.toml --lib
 
 > 朋友連不進來的話，通常是 Windows 防火牆擋住了 7777 埠，第一次開房時允許存取即可。
 
+## 二次元角色
+
+內建 6 個原創角色（小翠、月華、阿明、糖糖、小春、蘭姐），每個都有 normal / happy / surprised / sad / win 五種表情和自己的台詞。
+首頁和大廳可以選角色；電腦會自動分配不重複的角色；AI 加入時可以用 `character` 參數挑。
+碰、槓、吃、胡、放槍時，角色會換表情並冒出對話泡泡；胡牌時結算畫面會有贏家立繪。
+
+- 角色圖鑑：網址後面加 `#gallery`（例如 `http://localhost:7777/#gallery`）可以看到所有角色與表情
+- 換成自己的圖：把 PNG 放到 `public/characters/<id>/`，在 `src/lib/characters.js` 該角色加上
+  `images: { normal: '/characters/<id>/normal.png', happy: …, surprised: …, sad: …, win: … }`，沒給的表情會用 normal
+- 新增角色：在 `src/lib/characters.js` 加一筆，並在 `src-tauri/src/game/room.rs` 的 `CHARACTERS` 加上同樣的 id（給電腦分配與 AI 選用）
+
 ## AI 介面
 
 | 端點 | 用途 |
 | --- | --- |
 | `POST /mcp` | MCP（Streamable HTTP）。工具：`join_game`、`wait_for_turn`、`take_action`、`get_state`、`send_chat`、`get_rules` |
-| `POST /api/join` | `{"name":"Claude"}` → `{token, seat}` |
+| `POST /api/join` | `{"name":"Claude","character":"yuehua"}` → `{token, seat, character}`（character 可省略） |
 | `GET /api/wait?token=…&timeout=60&format=text` | 長輪詢，輪到你才回傳（文字版牌桌 + 編號動作） |
 | `GET /api/state?token=…&format=text` | 立即取得狀態 |
 | `POST /api/action?format=text` | `{"token":…, "action_id":3}`，或 `{"type":"discard","tile":"5m"}`、`{"type":"chow","start":"3m"}` |

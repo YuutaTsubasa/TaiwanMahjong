@@ -23,8 +23,37 @@ pub enum SeatKind {
     Bot,
 }
 
+/// 內建角色（id, 名字, 介紹）。前端 src/lib/characters.js 的外觀與台詞要跟這裡同步。
+pub const CHARACTERS: [(&str, &str, &str); 6] = [
+    ("xiaocui", "小翠", "綠色雙馬尾的元氣少女"),
+    ("yuehua", "月華", "銀髮的冷靜大小姐"),
+    ("aming", "阿明", "熱血的刺蝟頭少年"),
+    ("tangtang", "糖糖", "愛撒嬌的粉紅包包頭"),
+    ("xiaochun", "小春", "橘色馬尾的運動少女"),
+    ("lanjie", "蘭姐", "戴眼鏡的麻將館老闆娘"),
+];
+
+pub fn character_name(id: &str) -> Option<&'static str> {
+    CHARACTERS.iter().find(|c| c.0 == id).map(|c| c.1)
+}
+
+/// 也允許自訂角色 id（前端有對應設定即可）
+fn valid_character_id(id: &str) -> bool {
+    (1..=32).contains(&id.len()) && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '_' || c == '-')
+}
+
+/// 給畫面播角色反應用的事件（碰、胡、放槍…）
+#[derive(Clone, Debug, Serialize)]
+pub struct GameEvent {
+    pub seq: u64,
+    pub seat: usize,
+    pub kind: &'static str,
+    pub tile: Option<String>,
+}
+
 pub struct SeatInfo {
     pub name: String,
+    pub character: String,
     pub kind: SeatKind,
     pub token: String,
     pub connections: u32,
@@ -198,6 +227,8 @@ pub struct Room {
     pub deadline: Option<Instant>,
     pub log: VecDeque<String>,
     pub chat: VecDeque<ChatMsg>,
+    pub events: VecDeque<GameEvent>,
+    event_seq: u64,
 }
 
 fn gen_token() -> String {
@@ -229,6 +260,8 @@ impl Room {
             deadline: None,
             log: VecDeque::new(),
             chat: VecDeque::new(),
+            events: VecDeque::new(),
+            event_seq: 0,
         }
     }
 
@@ -239,6 +272,41 @@ impl Room {
             .as_ref()
             .map(|s| s.name.clone())
             .unwrap_or_else(|| format!("座位{}", seat))
+    }
+
+    fn push_event(&mut self, seat: usize, kind: &'static str, tile: Option<Tile>) {
+        self.event_seq += 1;
+        self.events.push_back(GameEvent { seq: self.event_seq, seat, kind, tile: tile.map(code) });
+        while self.events.len() > 12 {
+            self.events.pop_front();
+        }
+    }
+
+    /// 選角色：指定的有效就用，否則挑一個還沒人用的內建角色。`free_seat` 是即將被取代的座位。
+    fn pick_character(&self, wanted: Option<&str>, free_seat: Option<usize>) -> String {
+        if let Some(w) = wanted.map(str::trim).filter(|w| valid_character_id(w)) {
+            return w.to_string();
+        }
+        let used: Vec<&str> = (0..4)
+            .filter(|&s| Some(s) != free_seat)
+            .filter_map(|s| self.seats[s].as_ref().map(|i| i.character.as_str()))
+            .collect();
+        let mut free: Vec<&str> = CHARACTERS.iter().map(|c| c.0).filter(|c| !used.contains(c)).collect();
+        if free.is_empty() {
+            free = CHARACTERS.iter().map(|c| c.0).collect();
+        }
+        free.choose(&mut rand::thread_rng()).unwrap().to_string()
+    }
+
+    pub fn set_character(&mut self, seat: usize, id: &str) -> Result<(), String> {
+        if !valid_character_id(id) {
+            return Err("角色 id 不合法".into());
+        }
+        let Some(i) = self.seats.get_mut(seat).and_then(|s| s.as_mut()) else {
+            return Err("你沒有座位".into());
+        };
+        i.character = id.to_string();
+        Ok(())
     }
 
     fn push_log(&mut self, s: String) {
@@ -320,7 +388,7 @@ impl Room {
     }
 
     /// 加入房間：大廳時坐空位；遊戲中則接手電腦的位置。
-    pub fn join(&mut self, name: &str, kind: SeatKind) -> Result<(usize, String), String> {
+    pub fn join(&mut self, name: &str, kind: SeatKind, character: Option<&str>) -> Result<(usize, String), String> {
         let mut name: String = name.trim().chars().take(16).collect();
         if name.is_empty() {
             name = if kind == SeatKind::Agent { "AI".into() } else { "玩家".into() };
@@ -335,9 +403,11 @@ impl Room {
         };
         let token = gen_token();
         let replaced = self.seats[seat].as_ref().map(|i| i.name.clone());
+        let character = self.pick_character(character, Some(seat));
         self.auto[seat] = false;
         self.seats[seat] = Some(SeatInfo {
             name: name.clone(),
+            character,
             kind,
             token: token.clone(),
             connections: 0,
@@ -359,10 +429,12 @@ impl Room {
         if self.seats[seat].is_some() {
             return Err("該座位已有人".into());
         }
-        const BOT_NAMES: [&str; 4] = ["阿財", "小美", "老王", "阿嬤"];
+        let character = self.pick_character(None, None);
+        let name = format!("{}(電腦)", character_name(&character).unwrap_or("電腦"));
         self.auto[seat] = false;
         self.seats[seat] = Some(SeatInfo {
-            name: format!("{}(電腦)", BOT_NAMES[seat]),
+            name,
+            character,
             kind: SeatKind::Bot,
             token: gen_token(),
             connections: 0,
@@ -582,6 +654,9 @@ impl Room {
 
     fn exhaustive_draw(&mut self) {
         self.push_log("流局（海底）".into());
+        for s in 0..4 {
+            self.push_event(s, "draw", None);
+        }
         self.result = Some(HandResult {
             draw: true,
             winner: None,
@@ -854,6 +929,7 @@ impl Room {
                     from: Some(origin),
                 });
                 self.push_log(format!("{} {} {}", name, if is_kong { "槓" } else { "碰" }, zh(tile)));
+                self.push_event(s, if is_kong { "kong" } else { "pung" }, Some(tile));
                 if is_kong {
                     self.draw(s, true, true);
                 } else {
@@ -880,6 +956,7 @@ impl Room {
                 });
                 h.step = Step::Turn { seat: s, drawn: None, after_kong: false, claimed: true };
                 self.push_log(format!("{} 吃 {}", name, zh(tile)));
+                self.push_event(s, "chow", Some(tile));
                 self.new_decision(self.settings.turn_timeout);
             }
             Some(_) => {}
@@ -910,6 +987,7 @@ impl Room {
         Self::remove_tiles(&mut p.concealed, t, 4);
         p.melds.push(Meld { kind: MeldKind::ConcealedKong, tiles: vec![t; 4], from: None });
         self.push_log(format!("{} 暗槓", name));
+        self.push_event(seat, "kong", None);
         self.draw(seat, true, true);
     }
 
@@ -948,6 +1026,7 @@ impl Room {
             m.tiles.push(t);
         }
         self.push_log(format!("{} 加槓 {}", name, zh(t)));
+        self.push_event(seat, "kong", Some(t));
         self.draw(seat, true, true);
     }
 
@@ -1004,6 +1083,10 @@ impl Room {
             (None, false) => format!("{} 胡牌！{} 台", wname, shown_tai),
         };
         self.push_log(summary.clone());
+        self.push_event(w, if f.self_draw { "tsumo" } else { "ron" }, win_tile);
+        if let Some(l) = payer {
+            self.push_event(l, "deal_in", win_tile);
+        }
         self.result = Some(HandResult {
             draw: false,
             winner: Some(w),
@@ -1274,6 +1357,7 @@ impl Room {
                     "wind": if started { Some(WIND_ZH[self.seat_wind(s) as usize]) } else { None },
                     "is_dealer": started && s == self.dealer,
                     "auto": self.auto[s],
+                    "character": info.map(|i| i.character.clone()),
                 });
                 if let Some(h) = &self.hand {
                     let p = &h.players[s];
@@ -1348,6 +1432,7 @@ impl Room {
             "result": self.result,
             "log": self.log.iter().rev().take(30).rev().collect::<Vec<_>>(),
             "chat": self.chat,
+            "events": self.events,
             "settings": self.settings,
         })
     }
@@ -1539,7 +1624,7 @@ mod tests {
     #[test]
     fn auto_play_seat_finishes_game() {
         let mut room = Room::new(Settings { bot_delay_ms: 0, turn_timeout: 0, claim_timeout: 0, next_hand_delay: 0, ..Default::default() });
-        let (seat, token) = room.join("悠太", SeatKind::Human).unwrap();
+        let (seat, token) = room.join("悠太", SeatKind::Human, None).unwrap();
         room.set_auto(seat, true);
         room.start_game().unwrap();
         let mut steps = 0;
@@ -1557,8 +1642,14 @@ mod tests {
     #[test]
     fn text_view_works() {
         let mut room = Room::new(Settings { bot_delay_ms: 0, ..Default::default() });
-        let (seat, _) = room.join("Claude", SeatKind::Agent).unwrap();
+        let (seat, _) = room.join("Claude", SeatKind::Agent, Some("yuehua")).unwrap();
         room.start_game().unwrap();
+        assert_eq!(room.seats[seat].as_ref().unwrap().character, "yuehua");
+        // 電腦的角色不重複
+        let mut cs: Vec<String> = room.seats.iter().map(|s| s.as_ref().unwrap().character.clone()).collect();
+        cs.sort();
+        cs.dedup();
+        assert_eq!(cs.len(), 4);
         let t = room.text_view(seat);
         assert!(t.contains("你的手牌"));
         let v = room.view(Some(seat));

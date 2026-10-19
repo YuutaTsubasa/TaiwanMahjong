@@ -55,7 +55,7 @@ export function normalizeAddress(a) {
   return a;
 }
 
-export function connect(address, { name, hostKey, spectate = false } = {}) {
+export function connect(address, { name, hostKey, spectate = false, character } = {}) {
   disconnect();
   address = normalizeAddress(address);
   if (!address) return;
@@ -68,6 +68,7 @@ export function connect(address, { name, hostKey, spectate = false } = {}) {
     name,
     host_key: hostKey || load(hostKeyKey(address)) || undefined,
     spectate,
+    character: character || load('mj_character') || undefined,
   };
   open();
 }
@@ -141,6 +142,17 @@ export function send(obj) {
 
 export function act(actionId) {
   send({ type: 'action', action_id: actionId, decision_id: net.state?.decision_id });
+}
+
+/** 換角色（並記住，下次加入沿用） */
+export function setCharacter(id) {
+  store('mj_character', id);
+  if (hello) hello.character = id;
+  if (net.seat != null) send({ type: 'character', id });
+}
+
+export function savedCharacter() {
+  return load('mj_character');
 }
 
 /** 託管：電腦幫你打，但座位與手牌仍是你的 */

@@ -2,6 +2,9 @@
   import { net, act, hostCmd, disconnect, clock } from './net.svelte.js';
   import Tile from './Tile.svelte';
   import Melds from './Melds.svelte';
+  import Avatar from './Avatar.svelte';
+  import { reactions } from './reactions.svelte.js';
+  import { getCharacter, pickLine } from './characters.js';
 
   const s = $derived(net.state);
   const r = $derived(s.result);
@@ -12,6 +15,11 @@
   );
   const dealerInvolved = $derived(r && r.payments.some((p) => p.from === s.dealer || p.to === s.dealer));
   const winIdx = $derived(winner?.hand ? winner.hand.indexOf(r.win_tile) : -1);
+  const loser = $derived(r?.loser != null ? s.seats[r.loser] : null);
+  // 贏家的台詞：沿用剛剛泡泡講的那句，沒有就再抽一句
+  const winLine = $derived(
+    winner ? reactions[r.winner]?.text ?? pickLine(winner.character, r.self_draw ? 'tsumo' : 'ron') : '',
+  );
   const ranking = $derived([...s.seats].sort((a, b) => b.score - a.score));
   const medals = ['🥇', '🥈', '🥉', '4'];
 </script>
@@ -43,6 +51,20 @@
         <h2>🌊 流局</h2>
         <p class="muted">牌摸完了，莊家連莊。</p>
       {:else}
+        {#if winner?.character}
+          <div class="cutin">
+            <div class="portrait"><Avatar id={winner.character} expression="win" size={170} /></div>
+            <div class="say">
+              <div class="who">{getCharacter(winner.character).name}</div>
+              <div class="line">「{winLine}」</div>
+            </div>
+            {#if loser?.character}
+              <div class="loser" title="{loser.name} 放槍">
+                <Avatar id={loser.character} expression="sad" size={64} crop />
+              </div>
+            {/if}
+          </div>
+        {/if}
         <h2>🀄 {r.summary}</h2>
         {#if winner}
           <div class="hand">
@@ -108,6 +130,23 @@
   @keyframes fade { from { opacity: 0; } }
   .box { min-width: 420px; max-width: min(860px, 94%); max-height: 92%; overflow: auto; background: rgba(10, 32, 22, 0.96); }
   h2 { margin: 0 0 14px; color: var(--gold); }
+  .cutin {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    margin: -20px -20px 12px;
+    padding: 0 20px;
+    background: linear-gradient(100deg, rgba(255, 209, 102, 0.28), rgba(255, 209, 102, 0) 70%);
+    border-bottom: 1px solid rgba(255, 209, 102, 0.4);
+    border-radius: 16px 16px 0 0;
+    overflow: hidden;
+  }
+  .portrait { animation: slide 0.5s cubic-bezier(0.2, 1.3, 0.4, 1); margin-bottom: -4px; }
+  @keyframes slide { from { transform: translateX(-60px); opacity: 0; } }
+  .say { flex: 1; padding-bottom: 26px; animation: fade 0.6s ease 0.2s both; }
+  .say .who { color: var(--gold); font-weight: 700; font-size: 14px; }
+  .say .line { font-size: 22px; font-weight: 700; }
+  .loser { padding-bottom: 18px; opacity: 0.9; }
   .hand { display: flex; flex-wrap: wrap; gap: 2px; align-items: flex-end; margin-bottom: 8px; }
   .gap { width: 14px; }
   .wt { display: flex; align-items: center; gap: 6px; margin: 4px 0 10px; }

@@ -2,6 +2,13 @@
   import { net, hostCmd, leave, disconnect, serverUrls, toast } from './net.svelte.js';
   import { SEAT_KIND_ICON, SEAT_KIND_LABEL } from './tiles.js';
   import Chat from './Chat.svelte';
+  import Avatar from './Avatar.svelte';
+  import CharacterPicker from './CharacterPicker.svelte';
+  import { setCharacter } from './net.svelte.js';
+  import { getCharacter } from './characters.js';
+
+  const myCharacter = $derived(net.seat != null ? s.seats[net.seat]?.character : null);
+  const takenCharacters = $derived(s.seats.filter((x) => x.character).map((x) => x.character));
 
   const s = $derived(net.state);
   const urls = $derived(serverUrls());
@@ -62,6 +69,12 @@
           <div class="seat" class:me={i === net.seat} class:empty={!seat.name}>
             <div class="idx">座位 {i}</div>
             {#if seat.name}
+              {#if seat.character}
+                <div class="seat-av">
+                  <Avatar id={seat.character} size={64} crop expression={i === net.seat ? 'happy' : 'normal'} />
+                  <span class="muted">{getCharacter(seat.character).name}</span>
+                </div>
+              {/if}
               <div class="who">
                 <span class="icon">{SEAT_KIND_ICON[seat.kind]}</span>
                 <span class="nm">{seat.name}</span>
@@ -83,6 +96,11 @@
           </div>
         {/each}
       </div>
+
+      {#if net.seat != null}
+        <h2 class="sub">你的角色</h2>
+        <CharacterPicker value={myCharacter} onpick={setCharacter} taken={takenCharacters} size={56} />
+      {/if}
 
       {#if net.isHost}
         <div class="start">
@@ -181,6 +199,8 @@
     gap: 6px;
     align-items: flex-start;
   }
+  .seat { position: relative; }
+  .seat-av { position: absolute; right: 12px; top: 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; }
   .seat.me { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
   .seat.empty { border-style: dashed; }
   .idx { font-size: 12px; color: var(--muted); }

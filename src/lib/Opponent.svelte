@@ -8,7 +8,7 @@
 </script>
 
 <div class="opp {pos}">
-  <Nameplate {seat} {active} {thinking} />
+  <Nameplate {seat} {active} {thinking} bubble="down" />
   <div class="body" class:vertical>
     {#if seat.hand}
       <div class="hand">

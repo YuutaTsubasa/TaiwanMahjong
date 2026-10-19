@@ -6,7 +6,7 @@
 //! - `/openapi.json` 給 ChatGPT GPT Actions 用
 //! - 其他路徑       前端靜態檔（讓沒裝 App 的人用瀏覽器加入）
 
-use crate::game::room::{Phase, Room, SeatKind, Settings};
+use crate::game::room::{Phase, Room, SeatKind, Settings, CHARACTERS};
 use axum::{
     body::Bytes,
     extract::{
@@ -232,7 +232,8 @@ fn handle_ws_msg(st: &AppState, ctx: &mut WsCtx, v: &Value) -> (Vec<Value>, bool
                 return (vec![json!({"type": "welcome", "seat": null, "token": null, "is_host": ctx.is_host})], false);
             }
             let name = v.get("name").and_then(|x| x.as_str()).unwrap_or("");
-            match room.join(name, SeatKind::Human) {
+            let character = v.get("character").and_then(|x| x.as_str());
+            match room.join(name, SeatKind::Human, character) {
                 Ok((s, tok)) => {
                     ctx.seat = Some(s);
                     room.connect(s);
@@ -250,6 +251,14 @@ fn handle_ws_msg(st: &AppState, ctx: &mut WsCtx, v: &Value) -> (Vec<Value>, bool
         "action" => {
             let Some(s) = ctx.seat else { return (vec![err("你沒有座位")], false) };
             match room.parse_action(s, v).and_then(|a| room.act(s, a)) {
+                Ok(()) => (vec![], true),
+                Err(e) => (vec![err(e)], false),
+            }
+        }
+        "character" => {
+            let Some(s) = ctx.seat else { return (vec![err("你沒有座位")], false) };
+            let id = v.get("id").and_then(|x| x.as_str()).unwrap_or("");
+            match room.set_character(s, id) {
                 Ok(()) => (vec![], true),
                 Err(e) => (vec![err(e)], false),
             }
@@ -345,10 +354,11 @@ fn parse_body(body: &Bytes) -> Result<Value, Response> {
 #[derive(Deserialize, Default)]
 struct JoinReq {
     name: Option<String>,
+    character: Option<String>,
     token: Option<String>,
 }
 
-fn do_join(st: &AppState, name: &str, token: Option<&str>) -> Result<(usize, String), String> {
+fn do_join(st: &AppState, name: &str, token: Option<&str>, character: Option<&str>) -> Result<(usize, String), String> {
     let mut room = st.room.lock().unwrap();
     if let Some(tok) = token {
         if let Some(s) = room.seat_of_token(tok) {
@@ -356,7 +366,7 @@ fn do_join(st: &AppState, name: &str, token: Option<&str>) -> Result<(usize, Str
             return Ok((s, tok.to_string()));
         }
     }
-    let (s, tok) = room.join(name, SeatKind::Agent)?;
+    let (s, tok) = room.join(name, SeatKind::Agent, character)?;
     room.touch(s);
     drop(room);
     st.bump();
@@ -368,10 +378,11 @@ async fn api_join(State(st): State<Arc<AppState>>, body: Bytes) -> Response {
         Ok(v) => serde_json::from_value(v).unwrap_or_default(),
         Err(r) => return r,
     };
-    match do_join(&st, req.name.as_deref().unwrap_or("AI"), req.token.as_deref()) {
+    match do_join(&st, req.name.as_deref().unwrap_or("AI"), req.token.as_deref(), req.character.as_deref()) {
         Ok((seat, token)) => Json(json!({
             "ok": true,
             "seat": seat,
+            "character": st.room.lock().unwrap().seats[seat].as_ref().map(|i| i.character.clone()),
             "token": token,
             "next": format!("GET /api/wait?token={}&format=text", token),
         }))
@@ -567,8 +578,8 @@ ChatGPT（需要 https 公開網址，可用 cloudflared / ngrok 建立通道）
 
 ## 方法二：HTTP API（curl 就能玩）
 1. 加入：
-    curl -s -X POST {base}/api/join -H "Content-Type: application/json" -d '{{"name":"Claude"}}'
-   會拿到 token 與座位。
+    curl -s -X POST {base}/api/join -H "Content-Type: application/json" -d '{{"name":"Claude","character":"yuehua"}}'
+   會拿到 token 與座位。character 可省略；可選：{chars}
 2. 等待輪到你（長輪詢，最多 timeout 秒）：
     curl -s "{base}/api/wait?token=TOKEN&timeout=60&format=text"
 3. 執行動作（action_id 來自上一步列出的可執行動作）：
@@ -589,7 +600,8 @@ OpenAPI 規格：{base}/openapi.json
 
 {rules}"#,
         base = base,
-        rules = RULES
+        rules = RULES,
+        chars = CHARACTERS.iter().map(|c| format!("{}={}", c.0, c.1)).collect::<Vec<_>>().join("、")
     );
     ([(header::CONTENT_TYPE, "text/plain; charset=utf-8")], body).into_response()
 }
@@ -658,12 +670,19 @@ async fn openapi(headers: HeaderMap) -> Json<Value> {
 
 fn mcp_tools() -> Value {
     let token = json!({"type": "string", "description": "join_game 回傳的 token（同一個 MCP 連線中可省略）"});
+    let char_ids: Vec<&str> = CHARACTERS.iter().map(|c| c.0).collect();
+    let char_desc = CHARACTERS
+        .iter()
+        .map(|c| format!("{}={}（{}）", c.0, c.1, c.2))
+        .collect::<Vec<_>>()
+        .join("、");
     json!([
         {
             "name": "join_game",
             "description": "加入台灣十六張麻將牌桌。回傳 token 與座位。加入後請反覆呼叫 wait_for_turn → take_action 直到遊戲結束。若之前加入過，可帶 token 重連。",
             "inputSchema": {"type": "object", "properties": {
                 "name": {"type": "string", "description": "你在牌桌上的名字，例如 Claude 或 ChatGPT"},
+                "character": {"type": "string", "enum": char_ids, "description": format!("想扮演的二次元角色（可省略，會自動分配）：{}", char_desc)},
                 "token": token
             }}
         },
@@ -720,15 +739,22 @@ async fn call_tool(st: &AppState, session: Option<&str>, name: &str, args: &Valu
         "get_rules" => tool_text(RULES.to_string(), false),
         "join_game" => {
             let name = args.get("name").and_then(|x| x.as_str()).unwrap_or("AI");
-            match do_join(st, name, token.as_deref()) {
+            let character = args.get("character").and_then(|x| x.as_str());
+            match do_join(st, name, token.as_deref(), character) {
                 Ok((seat, tok)) => {
+                    let ch = st.room.lock().unwrap().seats[seat].as_ref().map(|i| i.character.clone()).unwrap_or_default();
+                    let ch_desc = CHARACTERS
+                        .iter()
+                        .find(|c| c.0 == ch)
+                        .map(|c| format!("{}（{}）", c.1, c.2))
+                        .unwrap_or(ch);
                     if let Some(s) = session {
                         st.mcp_sessions.lock().unwrap().insert(s.to_string(), tok.clone());
                     }
                     tool_text(
                         format!(
-                            "已加入！你的座位：{}\ntoken：{}\n（之後呼叫工具時帶上這個 token）\n\n接下來：呼叫 wait_for_turn 等待輪到你，再用 take_action 傳 action_id 出手，重複直到遊戲結束。\n房主在 App 按「開始」後遊戲才會開始。\n\n{}",
-                            seat, tok, RULES
+                            "已加入！你的座位：{}\n你的角色：{}——聊天時可以用這個角色的口吻說話\ntoken：{}\n（之後呼叫工具時帶上這個 token）\n\n接下來：呼叫 wait_for_turn 等待輪到你，再用 take_action 傳 action_id 出手，重複直到遊戲結束。\n房主在 App 按「開始」後遊戲才會開始。\n\n{}",
+                            seat, ch_desc, tok, RULES
                         ),
                         false,
                     )

@@ -1,7 +1,9 @@
 <script>
   import { onMount } from 'svelte';
-  import { net, inTauri, connect, startHost, stopHost, hostStatus, toast } from './net.svelte.js';
+  import { net, inTauri, connect, startHost, stopHost, hostStatus, toast, setCharacter, savedCharacter } from './net.svelte.js';
   import Tile from './Tile.svelte';
+  import CharacterPicker from './CharacterPicker.svelte';
+  import { CHARACTERS } from './characters.js';
 
   function load(k, d) {
     try { return localStorage.getItem(k) ?? d; } catch { return d; }
@@ -19,6 +21,8 @@
   let hostKey = $state('');
   let showHostKey = $state(false);
   let busy = $state(false);
+  let character = $state(savedCharacter() || CHARACTERS[Math.floor(Math.random() * CHARACTERS.length)].id);
+  setCharacter(character);
 
   onMount(() => {
     hostStatus().catch(() => {});
@@ -67,6 +71,10 @@
       <span>你的名字</span>
       <input bind:value={name} placeholder="玩家" maxlength="16" />
     </label>
+    <div class="pick">
+      <span>你的角色</span>
+      <CharacterPicker bind:value={character} onpick={setCharacter} size={64} />
+    </div>
   </div>
 
   {#if net.status === 'connecting'}
@@ -141,6 +149,8 @@
   .hero p { margin: 8px 0 0; }
   .name { width: min(720px, 100%); padding: 14px 20px; }
   .name label { display: flex; align-items: center; gap: 12px; }
+  .pick { display: flex; gap: 12px; align-items: flex-start; margin-top: 14px; }
+  .pick > span { padding-top: 30px; white-space: nowrap; }
   .name input { flex: 1; }
   .grid {
     width: min(720px, 100%);

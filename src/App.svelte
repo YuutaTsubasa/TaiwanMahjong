@@ -3,9 +3,21 @@
   import Home from './lib/Home.svelte';
   import Lobby from './lib/Lobby.svelte';
   import Table from './lib/Table.svelte';
+  import Gallery from './lib/Gallery.svelte';
+  import { processEvents, resetReactions } from './lib/reactions.svelte.js';
+
+  $effect(() => {
+    if (net.state) processEvents(net.state);
+    else resetReactions();
+  });
+
+  let hash = $state(location.hash);
+  window.addEventListener('hashchange', () => (hash = location.hash));
 </script>
 
-{#if !net.state}
+{#if hash === '#gallery'}
+  <Gallery />
+{:else if !net.state}
   <Home />
 {:else if net.state.phase === 'lobby'}
   <Lobby />
