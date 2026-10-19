@@ -71,13 +71,25 @@ cargo test --manifest-path src-tauri/Cargo.toml --lib
 ## 二次元角色
 
 內建 6 個原創角色（小翠、月華、阿明、糖糖、小春、蘭姐），每個都有 normal / happy / surprised / sad / win 五種表情和自己的台詞。
+遊戲上方的「角色畫風」可切換 **90 年代、PC-98、MS-DOS**，首頁、大廳、牌桌、結算與圖鑑的角色會立即一起更新。選擇會記在這台裝置的瀏覽器／App 中，重新開啟仍會沿用；每位玩家可自行選擇喜歡的畫風。
+三套共 90 張 512 × 512 透明 PNG：90 年代版在 `public/characters/<id>/`，PC-98 和 MS-DOS 版分別在其 `pc98/`、`msdos/` 子目錄。復古版使用像素顯示，保留抖色與像素邊緣。
+素材由內建 imagegen 繪製；提示與表情排列記錄在 `docs/art/character-generation.json`、`docs/art/retro-character-generation.json`。
 首頁和大廳可以選角色；電腦會自動分配不重複的角色；AI 加入時可以用 `character` 參數挑。
 碰、槓、吃、胡、放槍時，角色會換表情並冒出對話泡泡；胡牌時結算畫面會有贏家立繪。
 
 - 角色圖鑑：網址後面加 `#gallery`（例如 `http://localhost:7777/#gallery`）可以看到所有角色與表情
-- 換成自己的圖：把 PNG 放到 `public/characters/<id>/`，在 `src/lib/characters.js` 該角色加上
-  `images: { normal: '/characters/<id>/normal.png', happy: …, surprised: …, sad: …, win: … }`，沒給的表情會用 normal
+- 換成自己的圖：把 90 年代版 PNG 放到 `public/characters/<id>/`，在 `src/lib/characters.js` 該角色加上
+  `images: { normal: '/characters/<id>/normal.png', happy: …, surprised: …, sad: …, win: … }`，沒給的表情會用 normal。
+  另外兩種畫風請放入對應的 `pc98/`、`msdos/` 子目錄，五張檔名均為 `normal.png`、`happy.png`、`surprised.png`、`sad.png`、`win.png`。
 - 新增角色：在 `src/lib/characters.js` 加一筆，並在 `src-tauri/src/game/room.rs` 的 `CHARACTERS` 加上同樣的 id（給電腦分配與 AI 選用）
+
+## 音樂與音效（PC-98 風）
+
+全部用 Web Audio 即時合成，沒有任何音檔：模仿 PC-98 的 YM2608（OPNA）音源——FM 音色、SSG 方波、節奏音源。
+曲子用 MML 寫在 `src/lib/audio/music.js`，全部原創：大廳、對局、海底（剩 16 張以內）三首循環曲，
+加上胡牌、別人胡、放槍、流局、遊戲結束五段短曲；打牌、吃碰、槓、補花、輪到你、倒數也都有音效。
+上方工具列可以調整音樂／音效音量或靜音（瀏覽器規定要先點一下畫面才會出聲）。
+`npm test` 會檢查每首循環曲的各音軌小節數是否對齊。
 
 ## AI 介面
 

@@ -16,7 +16,7 @@ export function processEvents(state) {
     return;
   }
   for (const e of events) {
-    if (e.seq <= lastSeq) continue;
+    if (e.seq <= lastSeq || !(e.kind in EVENT_EXPRESSION)) continue;
     const character = state.seats[e.seat]?.character;
     const long = e.kind === 'tsumo' || e.kind === 'ron' || e.kind === 'deal_in';
     reactions[e.seat] = {

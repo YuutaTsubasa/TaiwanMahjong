@@ -205,7 +205,7 @@
 </div>
 
 <style>
-  .game { height: 100%; display: grid; grid-template-columns: 1fr 290px; gap: 10px; padding: 10px; }
+  .game { position: relative; height: 100%; display: grid; grid-template-columns: 1fr 290px; gap: 10px; padding: 10px; }
   .game.noside { grid-template-columns: 1fr; }
   .board {
     position: relative;
@@ -297,5 +297,5 @@
   .side { display: flex; flex-direction: column; gap: 10px; min-height: 0; padding: 14px; }
   .side-head { display: flex; justify-content: space-between; align-items: center; }
   .side-btns { display: flex; gap: 8px; flex-wrap: wrap; }
-  .open-side { position: fixed; right: 12px; top: 12px; z-index: 5; }
+  .open-side { position: absolute; right: 12px; top: 12px; z-index: 5; }
 </style>

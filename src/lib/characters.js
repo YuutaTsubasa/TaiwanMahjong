@@ -11,9 +11,20 @@
 //   accessory ribbons | ribbon | moon | headband | star | glasses | flower
 //   accent    飾品顏色
 
+// 90 年代賽璐璐動畫風格，五種表情均使用獨立透明 PNG。
+function characterImages(id, style = 'anime90') {
+  const directory = `/characters/${id}${style === 'anime90' ? '' : `/${style}`}`;
+  return Object.fromEntries(
+    ['normal', 'happy', 'surprised', 'sad', 'win'].map((expression) => [
+      expression, `${directory}/${expression}.png`,
+    ]),
+  );
+}
+
 export const CHARACTERS = [
   {
     id: 'xiaocui',
+    images: characterImages('xiaocui'),
     name: '小翠',
     intro: '綠色雙馬尾的元氣少女',
     hair: '#3fbf86',
@@ -36,6 +47,7 @@ export const CHARACTERS = [
   },
   {
     id: 'yuehua',
+    images: characterImages('yuehua'),
     name: '月華',
     intro: '銀髮的冷靜大小姐',
     hair: '#e6e9f2',
@@ -58,6 +70,7 @@ export const CHARACTERS = [
   },
   {
     id: 'aming',
+    images: characterImages('aming'),
     name: '阿明',
     intro: '熱血的刺蝟頭少年',
     hair: '#2f2f3a',
@@ -80,6 +93,7 @@ export const CHARACTERS = [
   },
   {
     id: 'tangtang',
+    images: characterImages('tangtang'),
     name: '糖糖',
     intro: '愛撒嬌的粉紅包包頭',
     hair: '#ff9ec7',
@@ -102,6 +116,7 @@ export const CHARACTERS = [
   },
   {
     id: 'xiaochun',
+    images: characterImages('xiaochun'),
     name: '小春',
     intro: '橘色馬尾的運動少女',
     hair: '#f8961e',
@@ -124,6 +139,7 @@ export const CHARACTERS = [
   },
   {
     id: 'lanjie',
+    images: characterImages('lanjie'),
     name: '蘭姐',
     intro: '戴眼鏡的麻將館老闆娘',
     hair: '#6a4c93',
@@ -144,12 +160,25 @@ export const CHARACTERS = [
       draw: ['流局，喝杯茶再來。'],
     },
   },
-];
+].map((character) => ({
+  ...character,
+  imageStyles: {
+    anime90: character.images,
+    pc98: characterImages(character.id, 'pc98'),
+    msdos: characterImages(character.id, 'msdos'),
+  },
+}));
 
 const BY_ID = Object.fromEntries(CHARACTERS.map((c) => [c.id, c]));
 
 export function getCharacter(id) {
   return BY_ID[id] ?? CHARACTERS[0];
+}
+
+export function getCharacterImage(id, expression = 'normal', style = 'anime90') {
+  const character = getCharacter(id);
+  const images = character.imageStyles?.[style] ?? character.images;
+  return images?.[expression] ?? images?.normal ?? character.images?.normal ?? null;
 }
 
 /** 每種事件對應的表情 */

@@ -1,12 +1,13 @@
 <script>
   // 二次元角色頭像。內建用 SVG 畫；角色設定有 images 時改用圖片。
-  import { getCharacter } from './characters.js';
+  import { getCharacter, getCharacterImage } from './characters.js';
+  import { artStyle } from './art-style.js';
 
   /** expression: normal | happy | surprised | sad | win */
   let { id, expression = 'normal', size = 64, crop = false } = $props();
 
   const c = $derived(getCharacter(id));
-  const img = $derived(c.images ? c.images[expression] ?? c.images.normal : null);
+  const img = $derived(getCharacterImage(id, expression, $artStyle));
   const uid = `av${Math.random().toString(36).slice(2, 9)}`;
 
   const SKIN = '#ffe6d6';
@@ -33,7 +34,7 @@
 
 <div class="avatar" class:crop style:width="{size}px" style:height="{size}px">
   {#if img}
-    <img src={img} alt={c.name} />
+    <img src={img} alt={c.name} class:pixel={$artStyle !== 'anime90'} />
   {:else}
     <svg viewBox={view} xmlns="http://www.w3.org/2000/svg" aria-label={c.name}>
       <defs>
@@ -190,4 +191,5 @@
   }
   svg, img { width: 100%; height: 100%; display: block; }
   img { object-fit: cover; object-position: top; }
+  img.pixel { image-rendering: pixelated; }
 </style>

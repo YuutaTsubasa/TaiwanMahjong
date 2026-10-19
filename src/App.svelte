@@ -1,9 +1,12 @@
 <script>
-  import { net } from './lib/net.svelte.js';
+  import { net, clock } from './lib/net.svelte.js';
+  import SoundControl from './lib/SoundControl.svelte';
+  import { onGameState, onCountdown } from './lib/audio/sound.svelte.js';
   import Home from './lib/Home.svelte';
   import Lobby from './lib/Lobby.svelte';
   import Table from './lib/Table.svelte';
   import Gallery from './lib/Gallery.svelte';
+  import ArtStylePicker from './lib/ArtStylePicker.svelte';
   import { processEvents, resetReactions } from './lib/reactions.svelte.js';
 
   $effect(() => {
@@ -13,17 +16,32 @@
 
   let hash = $state(location.hash);
   window.addEventListener('hashchange', () => (hash = location.hash));
+
+  // 音樂與音效跟著牌局走
+  $effect(() => onGameState(net.state));
+  $effect(() => {
+    const s = net.state;
+    onCountdown(s, s?.deadline_ms == null ? null : s.deadline_ms - (clock.now - net.receivedAt));
+  });
 </script>
 
-{#if hash === '#gallery'}
-  <Gallery />
-{:else if !net.state}
-  <Home />
-{:else if net.state.phase === 'lobby'}
-  <Lobby />
-{:else}
-  <Table />
-{/if}
+<div class="app-shell">
+  <div class="topbar">
+    <ArtStylePicker />
+    <SoundControl />
+  </div>
+  <div class="screen">
+    {#if hash === '#gallery'}
+      <Gallery />
+    {:else if !net.state}
+      <Home />
+    {:else if net.state.phase === 'lobby'}
+      <Lobby />
+    {:else}
+      <Table />
+    {/if}
+  </div>
+</div>
 
 {#if net.status === 'reconnecting'}
   <div class="banner">連線中斷，重新連線中…</div>
@@ -36,6 +54,10 @@
 </div>
 
 <style>
+  .topbar { display: flex; flex-wrap: wrap; }
+  .topbar > :global(.style-picker) { flex: 1; }
+  .app-shell { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+  .screen { min-width: 0; min-height: 0; overflow: hidden; }
   .banner {
     position: fixed;
     top: 0;

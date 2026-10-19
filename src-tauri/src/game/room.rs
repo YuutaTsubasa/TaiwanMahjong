@@ -277,7 +277,7 @@ impl Room {
     fn push_event(&mut self, seat: usize, kind: &'static str, tile: Option<Tile>) {
         self.event_seq += 1;
         self.events.push_back(GameEvent { seq: self.event_seq, seat, kind, tile: tile.map(code) });
-        while self.events.len() > 12 {
+        while self.events.len() > 32 {
             self.events.pop_front();
         }
     }
@@ -631,6 +631,7 @@ impl Room {
             if is_flower(t) {
                 h.players[seat].flowers.push(t);
                 self.push_log(format!("{} 補花 {}", name, zh(t)));
+                self.push_event(seat, "flower", Some(t));
                 if self.check_flower_win() {
                     return;
                 }
@@ -829,6 +830,7 @@ impl Room {
             };
         }
         self.push_log(format!("{} 打出 {}", name, zh(t)));
+        self.push_event(seat, "discard", Some(t));
         if nobody {
             self.draw((seat + 1) % 4, false, false);
         } else {
