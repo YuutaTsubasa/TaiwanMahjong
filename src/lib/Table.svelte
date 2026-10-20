@@ -123,6 +123,10 @@
 
   function askLeave() {
     if (!isPlayer) return disconnect();
+    // 單機：沒有別人在等，離開就是整場結束；連線：座位交給電腦代打
+    if (net.mode === 'local') {
+      return confirmation.ask({ message: '單機牌局會直接結束、不會保留（沒有電腦代打），確定要離開嗎？', confirmLabel: '離開牌局', onconfirm: leave });
+    }
     confirmation.ask({ message: '離開後由電腦代打，確定？', confirmLabel: '離開房局', onconfirm: leave });
   }
   function askEnd() {
@@ -274,7 +278,12 @@
   </div>
 
   {#if showSide}
-    <SideLog onclose={() => (showSide = false)} onleave={askLeave} onend={net.isHost ? askEnd : null} />
+    <SideLog
+      onclose={() => (showSide = false)}
+      onleave={askLeave}
+      leaveLabel={net.mode === 'local' ? '離開牌局' : '離開房局'}
+      onend={net.isHost && net.mode !== 'local' ? askEnd : null}
+    />
   {:else}
     <button class="open-side" onclick={() => (showSide = true)}>‹ 紀錄</button>
   {/if}

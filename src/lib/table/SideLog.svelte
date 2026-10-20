@@ -3,7 +3,7 @@
   import { net, send } from '../net.svelte.js';
   import Avatar from '../Avatar.svelte';
 
-  let { onclose, onleave, onend } = $props();
+  let { onclose, onleave, onend, leaveLabel = '離開房局' } = $props();
 
   const s = $derived(net.state);
   let text = $state('');
@@ -112,7 +112,7 @@
     {#if onend}
       <button type="button" class="end" onclick={onend}>結束牌局</button>
     {/if}
-    <button type="button" class="exit" onclick={onleave}>⇦ 離開房局</button>
+    <button type="button" class="exit" onclick={onleave}>⇦ {leaveLabel}</button>
   </div>
 </aside>
 
