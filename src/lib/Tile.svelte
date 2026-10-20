@@ -7,6 +7,7 @@
     back = false,
     selected = false,
     hl = false,
+    hint = false,
     dim = false,
     clickable = false,
     onclick = undefined,
@@ -81,6 +82,7 @@
   class:back={t.kind === 'back'}
   class:selected
   class:hl
+  class:hint
   class:dim
   class:clickable
   title={t.kind === 'back' ? '' : tileName(code)}
@@ -178,6 +180,11 @@
   .clickable:hover { transform: translateY(-4px); }
   .selected { transform: translateY(-14px) !important; box-shadow: 0 0 0 3px #ffd166, 0 calc(var(--w) * 0.12) 0 #1b6b47, 0 8px 16px rgba(0,0,0,.45); }
   .hl { box-shadow: 0 0 0 3px #ff6b6b, 0 calc(var(--w) * 0.12) 0 #1b6b47, 0 0 14px #ff6b6b; }
+  /* 新手提示建議打的牌：淡淡的金光，一閃一閃 */
+  .hint { animation: hint-glow 1.6s ease-in-out infinite; }
+  @keyframes hint-glow {
+    50% { box-shadow: 0 0 0 3px #ffd166, 0 calc(var(--w) * 0.12) 0 #1b6b47, 0 0 16px #ffd166; }
+  }
   .dim { filter: brightness(0.82) saturate(0.7); }
   svg { width: 86%; height: 86%; }
   .man {

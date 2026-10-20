@@ -6,6 +6,10 @@
   import FinalRanking from './FinalRanking.svelte';
   import { reactions } from './reactions.svelte.js';
   import { getCharacter, pickLine } from './characters.js';
+  import { showHints, taiInfo } from './hints.js';
+
+  let openTai = $state(null);
+  const toggleTai = (name) => (openTai = openTai === name ? null : name);
 
   const s = $derived(net.state);
   const r = $derived(s.result);
@@ -59,13 +63,14 @@
             <p class="muted wt">胡：<Tile code={r.win_tile} size="sm" /> {r.self_draw ? '（自摸）' : ''}</p>
           {/if}
         {/if}
+        <!-- 台數：點一下看說明 -->
         <div class="items">
           {#each r.items as it}
-            <div class="item"><span>{it.name}</span><b>{it.tai} 台</b></div>
+            <button type="button" class="item" class:open={openTai === it.name} title={taiInfo(it.name)} onclick={() => toggleTai(it.name)}><span>{it.name}</span><b>{it.tai} 台</b></button>
           {/each}
           {#if dealerInvolved}
             {#each r.dealer_items as it}
-              <div class="item dealer"><span>{it.name}<small>（莊家相關）</small></span><b>{it.tai} 台</b></div>
+              <button type="button" class="item dealer" class:open={openTai === it.name} title={taiInfo(it.name)} onclick={() => toggleTai(it.name)}><span>{it.name}<small>（莊家相關）</small></span><b>{it.tai} 台</b></button>
             {/each}
           {/if}
           {#if r.items.length === 0}
@@ -73,8 +78,12 @@
           {/if}
         </div>
         <div class="pay">
-          {#each r.payments as p}
-            <div>{s.seats[p.from].name} → {s.seats[p.to].name}：{p.tai} 台，{p.amount}</div>
+          {#if openTai && taiInfo(openTai)}
+            <!-- 說明浮在下面的內容上，不撐高結果視窗；再點一下關掉 -->
+            <button type="button" class="tai-info" onclick={() => (openTai = null)}><b>{openTai}</b>：{taiInfo(openTai)}</button>
+          {/if}
+          {#each r.payments as p, i}
+            <div>{s.seats[p.from].name} → {s.seats[p.to].name}：{p.tai} 台，{p.amount}{#if $showHints && i === r.payments.length - 1}<span class="tai-tip">（點台數看說明）</span>{/if}</div>
           {/each}
         </div>
       {/if}
@@ -136,6 +145,13 @@
   .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; margin: clamp(6px, 1.2vh, 10px) 0; }
   .item { display: flex; justify-content: space-between; background: rgba(255, 255, 255, 0.06); padding: 6px 10px; border-radius: 8px; }
   .item b { color: var(--gold); }
+  :global(html[data-ui-style]) button.item { width: 100%; min-height: 0; border: 1px solid transparent; border-radius: 8px; font: inherit; color: inherit; text-align: left; cursor: pointer; background: rgba(255, 255, 255, 0.06); box-shadow: none; padding: 6px 10px; letter-spacing: normal; }
+  :global(html[data-ui-style]) button.item.dealer { background: rgba(193, 18, 31, 0.18); }
+  :global(html[data-ui-style]) button.item:hover, :global(html[data-ui-style]) button.item.open { border-color: var(--gold); }
+  .pay { position: relative; }
+  :global(html[data-ui-style]) .tai-info { position: absolute; left: 0; right: 0; top: -2px; z-index: 2; min-height: 0; margin: 0; padding: 6px 10px; font: 13px/1.5 var(--ui-font, inherit); letter-spacing: normal; text-align: left; color: var(--text); background: var(--art-panel); border: 1px solid var(--gold); border-radius: 8px; box-shadow: 0 6px 16px #000a; cursor: pointer; }
+  .tai-info b { color: var(--gold); }
+  .tai-tip { margin-left: 6px; color: var(--muted); font-size: 11px; }
   .item.dealer { background: rgba(193, 18, 31, 0.18); }
   .item small { color: var(--muted); font-size: 11px; }
   .pay { font-size: 13px; color: var(--muted); margin-bottom: 10px; }

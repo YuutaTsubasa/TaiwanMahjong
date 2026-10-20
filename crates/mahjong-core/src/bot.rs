@@ -5,7 +5,7 @@ use super::rules::*;
 use super::skills::Skill;
 use super::tiles::*;
 
-fn visible_counts(h: &Hand, seat: usize) -> Counts {
+pub fn visible_counts(h: &Hand, seat: usize) -> Counts {
     let mut v = counts(&h.players[seat].concealed);
     for p in &h.players {
         for &t in &p.discards {

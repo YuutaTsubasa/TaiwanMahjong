@@ -13,6 +13,8 @@
   import ConfirmDialog from './ConfirmDialog.svelte';
   import PlayerCard from './table/PlayerCard.svelte';
   import SideLog from './table/SideLog.svelte';
+  import Avatar from './Avatar.svelte';
+  import { showHints, setShowHints } from './hints.js';
 
   let confirmation;
 
@@ -33,6 +35,17 @@
   const discardById = $derived(new Map(actions.filter((a) => a.type === 'discard').map((a) => [a.tile, a])));
   const special = $derived(actions.filter((a) => a.type !== 'discard' && a.type !== 'next'));
   const canDiscard = $derived(discardById.size > 0);
+
+  // 新手提示（引擎算好放在 s.hint）：建議打的牌發光、建議的吃碰按鈕標出來，並由自己的角色說明原因
+  const hint = $derived($showHints && !auto ? s.hint : null);
+  const hintKey = $derived.by(() => {
+    if (hint?.type !== 'discard') return null;
+    if (mine.drawn === hint.tile) return 'drawn';
+    const i = (mine.hand ?? []).indexOf(hint.tile);
+    return i < 0 ? null : keyFor(hint.tile, i);
+  });
+  const recommended = (a) =>
+    hint?.type === 'claim' && hint.advice === a.type && (a.type !== 'chow' || a.start === hint.start);
 
   const remainingMs = $derived(s.deadline_ms == null ? null : Math.max(0, s.deadline_ms - (clock.now - net.receivedAt)));
   const remaining = $derived(remainingMs == null ? null : Math.ceil(remainingMs / 1000));
@@ -232,7 +245,7 @@
         {:else if special.length}
           <div class="actions">
             {#each special as a (a.id)}
-              <button class="act {btnClass[a.type]}" onclick={() => act(a.id)}>
+              <button class="act {btnClass[a.type]}" class:recommended={recommended(a)} onclick={() => act(a.id)}>
                 <span>{a.type === 'skill' ? a.label : btnText[a.type]}</span>
                 {#if a.type === 'chow'}
                   <span class="mini">{#each a.tiles as t}<Tile code={t} size="xs" />{/each}</span>
@@ -242,10 +255,18 @@
               </button>
             {/each}
             {#if remaining != null}<span class="cd" class:urgent={remaining <= 5}>{remaining}s</span>{/if}
+            {#if hint}
+              <span class="hint-say" title={hint.skill ?? ''}><Avatar id={mine.character} size={26} crop />{hint.text}</span>
+            {/if}
           </div>
         {:else if canDiscard}
           <div class="banner turn" title="鍵盤／手把：方向鍵選牌 · Enter／A 確認 · Esc／B 取消">
-            <b>輪到你出牌</b><span class="sep"></span><span>點一下選牌，再點一下打出</span>
+            <b>輪到你出牌</b><span class="sep"></span>
+            {#if hint}
+              <span class="hint-say" title={hint.skill ?? ''}><Avatar id={mine.character} size={26} crop />{hint.text}</span>
+            {:else}
+              <span>點一下選牌，再點一下打出</span>
+            {/if}
           </div>
         {:else if waitingText}
           <div class="banner quiet"><span>{waitingText}</span></div>
@@ -271,10 +292,13 @@
         {/if}
 
         {#if s.my_waits?.length && !auto}
-          <div class="waits">聽 {#each s.my_waits as w}<Tile code={w} size="xs" />{/each}</div>
+          <div class="waits" title={$showHints ? '聽的牌，以及各還剩幾張沒出現' : ''}>
+            聽 {#each s.my_waits as w, i}<Tile code={w} size="xs" />{#if $showHints && s.my_waits_left}<small class="left" class:none={!s.my_waits_left[i]}>×{s.my_waits_left[i]}</small>{/if}{/each}
+          </div>
         {/if}
 
         {#if isPlayer && s.phase === 'playing'}
+          <button class="hint-btn" class:on={$showHints} onclick={() => setShowHints(!$showHints)} title={$showHints ? '關閉新手提示' : '開啟新手提示'} aria-pressed={$showHints}>提示</button>
           <button class="auto-btn" class:on={auto} onclick={() => setAuto(!auto)} title="讓電腦幫你打，隨時可以取消">
             {auto ? '我要自己打' : '託管'}
           </button>
@@ -283,12 +307,12 @@
 
       <div class="hand" class:turn={canDiscard}>
         {#each mine.hand ?? [] as t, i (keyFor(t, i))}
-          <Tile code={t} size="xl" clickable={canDiscard} selected={selected === keyFor(t, i)} onclick={() => clickTile(t, keyFor(t, i))} />
+          <Tile code={t} size="xl" clickable={canDiscard} selected={selected === keyFor(t, i)} hint={hintKey === keyFor(t, i)} onclick={() => clickTile(t, keyFor(t, i))} />
         {/each}
         {#if mine.drawn}
           <span class="drawn-gap"></span>
           <span class="drawn">
-            <Tile code={mine.drawn} size="xl" clickable={canDiscard} selected={selected === 'drawn'} onclick={() => clickTile(mine.drawn, 'drawn')} />
+            <Tile code={mine.drawn} size="xl" clickable={canDiscard} selected={selected === 'drawn'} hint={hintKey === 'drawn'} onclick={() => clickTile(mine.drawn, 'drawn')} />
           </span>
         {/if}
       </div>
@@ -488,6 +512,15 @@
     border: 1px solid var(--art-line);
     border-radius: var(--surface-radius);
   }
+  /* 新手提示：自己的角色小頭像＋一句說明 */
+  .hint-say { display: inline-flex; align-items: center; gap: 6px; max-width: min(520px, 60vw); font-size: 13px !important; line-height: 1.4; color: var(--text); }
+  .hint-say :global(.avatar) { flex: none; border-radius: 50%; }
+  .actions .hint-say { padding: 4px 10px; background: var(--art-panel); border: 1px solid var(--art-line); border-radius: var(--surface-radius); }
+  :global(html[data-ui-style]) .act.recommended { box-shadow: 0 0 0 2px var(--gold), 0 0 14px color-mix(in srgb, var(--gold) 70%, transparent); }
+  .waits .left { font-size: 11px; color: var(--muted); margin: 0 4px 0 1px; }
+  .waits .left.none { color: var(--red); }
+  .hint-btn { min-width: 0; padding: 8px 12px; font-family: var(--heading-font); font-size: 15px; letter-spacing: 0.1em; background: var(--art-panel); color: var(--muted); border: 1px solid var(--art-line); }
+  .hint-btn.on { color: var(--gold); border-color: var(--gold); }
   .skill-info { color: var(--gold); gap: 4px; }
   .skill-info b { font-family: var(--heading-font); letter-spacing: 0.1em; margin-right: 2px; }
   .skill-info .who { margin-left: 6px; color: var(--text); font-size: 12px; }

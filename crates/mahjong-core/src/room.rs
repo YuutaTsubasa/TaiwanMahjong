@@ -1,6 +1,7 @@
 //! 房間與牌局狀態機。伺服器端權威：所有動作都經過 `Room::act` 驗證。
 
 use super::bot;
+use super::hints;
 use super::rules::*;
 use super::scoring::*;
 use super::skills::{bool_or_number, Skill};
@@ -1607,10 +1608,18 @@ impl Room {
         let hand = self.hand.as_ref();
         let deadline_ms = self.deadline.map(|d| d.saturating_duration_since(Instant::now()).as_millis() as u64);
         let mut waits_v = Value::Null;
+        let mut waits_left_v = Value::Null;
+        let mut hint_v = Value::Null;
         if let (Some(h), Some(v)) = (hand, viewer) {
             let p = &h.players[v];
             if p.concealed.len() % 3 == 1 && self.phase == Phase::Playing {
-                waits_v = json!(list_codes(&waits(&counts(&p.concealed))));
+                // 聽的牌，以及各還剩幾張沒出現（新手提示用）
+                let wl = hints::waits_left(h, v);
+                waits_v = json!(wl.iter().map(|&(t, _)| code(t)).collect::<Vec<_>>());
+                waits_left_v = json!(wl.iter().map(|&(_, n)| n).collect::<Vec<_>>());
+            }
+            if self.phase == Phase::Playing {
+                hint_v = hints::hint(self, v);
             }
         }
         let skill_info = match (hand, viewer) {
@@ -1637,6 +1646,8 @@ impl Room {
             "actions": actions,
             "waiting_on": self.waiting_on(),
             "my_waits": waits_v,
+            "my_waits_left": waits_left_v,
+            "hint": hint_v,
             "result": self.result,
             "log": self.log.iter().rev().take(30).rev().collect::<Vec<_>>(),
             "chat": self.chat,
@@ -2074,6 +2085,44 @@ mod tests {
         assert_eq!(r.deltas, [0; 4]);
         assert!(room.shield_used[0]);
         assert!(r.summary.contains("銀之盾"));
+    }
+
+    /// 阿翼：別人自摸時銀之盾不會發動，也不會用掉；放槍用掉後，下一局仍然是用過的
+    #[test]
+    fn shield_only_for_deal_in_and_once_per_game() {
+        let mut room = skill_room(["xiaocui", "ayi", "tangtang", "lanjie"]);
+        // 座位 0 自摸：一般型 5 組 + 1 對
+        let h = room.hand.as_mut().unwrap();
+        h.players[0].concealed = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 27, 27];
+        h.step = Step::Turn { seat: 0, drawn: Some(27), after_kong: false, claimed: false };
+        h.players[0].draws = 3;
+        room.act(0, Action::Tsumo).unwrap();
+        let r = room.result.as_ref().unwrap();
+        assert!(r.self_draw);
+        assert!(r.deltas[1] < 0, "自摸時阿翼照樣要付");
+        assert!(!room.shield_used[1], "自摸不會用掉銀之盾");
+        // 下一局阿翼放槍：盾發動、之後一直是用過的
+        room.next_hand();
+        let h = room.hand.as_mut().unwrap();
+        for p in h.players.iter_mut() {
+            *p = PlayerState::default();
+        }
+        h.players[1].concealed = vec![2, 30];
+        h.players[2].concealed = vec![3, 4, 27, 27];
+        h.players[0].concealed = vec![28, 28, 29, 29];
+        h.players[3].concealed = vec![31, 31, 32, 32];
+        h.step = Step::Turn { seat: 1, drawn: None, after_kong: false, claimed: false };
+        room.act(1, Action::Discard(2)).unwrap();
+        room.act(2, Action::Ron).unwrap();
+        assert!(room.shield_used[1]);
+        assert_eq!(room.result.as_ref().unwrap().deltas, [0; 4]);
+        room.next_hand();
+        assert!(room.shield_used[1], "一場一次：下一局還是用過的");
+        assert_eq!(room.view(Some(1))["seats"][1]["skill"]["used"], true);
+        // 新的一場重新開始才會恢復
+        room.phase = Phase::GameOver;
+        room.start_game().unwrap();
+        assert!(!room.shield_used[1]);
     }
 
     /// 阿明：分數最低時開局換牌（洗牌是隨機的，試幾次一定會發動）

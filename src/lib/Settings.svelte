@@ -7,6 +7,7 @@
   import OrnateHeading from './ui/OrnateHeading.svelte';
   import SectionBanner from './ui/SectionBanner.svelte';
   import ToggleSwitch from './ui/ToggleSwitch.svelte';
+  import { showHints, setShowHints } from './hints.js';
   import FancyButton from './ui/FancyButton.svelte';
 </script>
 
@@ -28,7 +29,7 @@
           </button>
         {/each}
       </div>
-      <SectionBanner text="聲音設定" />
+      <SectionBanner text="聲音與輔助" />
       <div class="audio-settings">
         <label class="volume-row">
           <span>音樂音量</span>
@@ -40,7 +41,10 @@
           <input type="range" min="0" max="1" step="0.05" value={soundSettings.sfx} oninput={(event) => setVolume('sfx', Number(event.currentTarget.value))} />
           <output>{Math.round(soundSettings.sfx * 100)}%</output>
         </label>
-        <div class="mute-row"><span>靜音</span><ToggleSwitch label="靜音" checked={soundSettings.muted} onchange={toggleMute} /></div>
+        <div class="toggle-pair">
+          <div class="mute-row"><span>靜音</span><ToggleSwitch label="靜音" checked={soundSettings.muted} onchange={toggleMute} /></div>
+          <div class="mute-row" title="輪到你時，提示建議打哪張、要不要吃碰，並說明原因"><span>新手提示</span><ToggleSwitch label="新手提示" checked={$showHints} onchange={setShowHints} /></div>
+        </div>
       </div>
       <p class="save-note">— 設定會自動儲存。—</p>
       <div class="done"><FancyButton variant="red" href="#title">完　成</FancyButton></div>
@@ -74,6 +78,10 @@
   .volume-row input { width: 100%; padding: 0; accent-color: var(--gold); min-height: 28px; }
   output { color: var(--gold); text-align: right; font-variant-numeric: tabular-nums; }
   .mute-row { display: grid; grid-template-columns: 100px 1fr; gap: 18px; align-items: center; }
+  /* 靜音與新手提示排在同一行 */
+  .toggle-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .toggle-pair .mute-row { grid-template-columns: auto 1fr; gap: 12px; }
+  .toggle-pair .mute-row:first-child { grid-template-columns: 100px 1fr; gap: 18px; }
   .mute-toggle { width: fit-content; min-width: 110px; }
   .mute-toggle[aria-pressed='true'] { background: #68412e; border-color: var(--gold); }
   .save-note { text-align: center; color: var(--muted); font-size: 13px; margin: clamp(6px, 1.8vh, 20px) 0 clamp(6px, 1.4vh, 16px); }
