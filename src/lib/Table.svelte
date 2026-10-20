@@ -119,14 +119,15 @@
         <div class="felt">
           <!-- 對家 -->
           <div class="seat-top"><PlayerCard seat={top} variant="top" active={active(at(2))} thinking={thinking(at(2))} /></div>
+          <!-- 副露擺在各家手牌的右手邊（對家的右手邊是畫面左邊），跟手牌連成一排 -->
           <div class="wall wall-top">
+            <div class="melds"><Melds melds={top.melds ?? []} flowers={top.flowers ?? []} size="sm" /></div>
             {#if top.hand}
               {#each top.hand as t}<Tile code={t} size="xs" />{/each}
             {:else}
               {#each backs(top.hand_count) as _}<span class="back-up"></span>{/each}
             {/if}
           </div>
-          <div class="melds melds-top"><Melds melds={top.melds ?? []} flowers={top.flowers ?? []} size="sm" /></div>
 
           <!-- 上家（左）、下家（右）：直排的手牌牆 -->
           <div class="wall wall-left">
@@ -135,16 +136,16 @@
             {:else}
               {#each backs(left.hand_count) as _}<span class="back-side"></span>{/each}
             {/if}
+            <div class="melds"><Melds melds={left.melds ?? []} flowers={left.flowers ?? []} size="sm" turn="left" /></div>
           </div>
-          <div class="melds melds-left"><Melds melds={left.melds ?? []} flowers={left.flowers ?? []} size="sm" /></div>
           <div class="wall wall-right">
+            <div class="melds"><Melds melds={right.melds ?? []} flowers={right.flowers ?? []} size="sm" turn="right" /></div>
             {#if right.hand}
               {#each right.hand as t}<Tile code={t} size="xs" />{/each}
             {:else}
               {#each backs(right.hand_count) as _}<span class="back-side"></span>{/each}
             {/if}
           </div>
-          <div class="melds melds-right"><Melds melds={right.melds ?? []} flowers={right.flowers ?? []} size="sm" /></div>
 
           <!-- 自己的副露與花放在桌面右下角 -->
           <div class="melds melds-me"><Melds melds={mine.melds ?? []} flowers={mine.flowers ?? []} size="md" /></div>
@@ -273,8 +274,9 @@
     column-gap: clamp(8px, 1.2vw, 20px);
     row-gap: 6px;
   }
-  .seat-left { grid-area: sl; align-self: center; }
-  .seat-right { grid-area: sr; align-self: center; }
+  /* z-index 讓名牌的對話泡泡留在結果視窗（z-index 20）底下 */
+  .seat-left { grid-area: sl; align-self: center; position: relative; z-index: 3; }
+  .seat-right { grid-area: sr; align-self: center; position: relative; z-index: 3; }
   .seat-me { grid-area: me; align-self: end; z-index: 3; }
 
   /* ───── 牌桌：table.png 是 1600×1100，桌子在 (300,50) 起 1000×1000 ───── */
@@ -289,14 +291,24 @@
   /* 絨布區（木框約占 4.6%） */
   .felt { position: absolute; inset: 4.6%; container-type: size; }
 
+  /* 對家名牌依絨布大小縮放，手牌牆排在名牌正下方，不會被蓋住 */
+  .felt { --top-card-h: clamp(62px, 14cqh, 128px); }
   .seat-top { position: absolute; top: -3%; left: 50%; transform: translateX(-50%); z-index: 4; }
+  .seat-top :global(.v-top) { width: clamp(190px, 46cqw, 360px); height: var(--top-card-h); }
 
-  .wall { position: absolute; display: flex; gap: 1px; }
-  .wall-top { top: 17%; left: 50%; transform: translateX(-50%); }
+  .wall { position: absolute; display: flex; align-items: center; gap: 1px; }
+  .wall-top { top: calc(var(--top-card-h) - 1.5cqh); left: 50%; transform: translateX(-50%); }
   .wall-left { left: 3%; top: 50%; transform: translateY(-50%); flex-direction: column; }
   .wall-right { right: 3%; top: 50%; transform: translateY(-50%); flex-direction: column; }
-  .wall :global(.tile) { --w: clamp(14px, 4.1cqw, 30px); margin-bottom: 0; }
-  .wall-left :global(.tile), .wall-right :global(.tile) { --w: clamp(12px, 2.9cqh, 20px); margin-bottom: calc(var(--w) * 0.1); }
+  .wall > :global(.tile) { --w: clamp(14px, 4.1cqw, 30px); margin-bottom: 0; }
+  .wall-left > :global(.tile), .wall-right > :global(.tile) { --w: clamp(12px, 2.9cqh, 20px); margin-bottom: calc(var(--w) * 0.1); }
+  /* 副露跟手牌之間留一點空隙 */
+  .wall-top .melds { margin-right: clamp(4px, 1.2cqw, 10px); }
+  .wall-left .melds { margin-top: clamp(4px, 1.2cqh, 10px); }
+  .wall-right .melds { margin-bottom: clamp(4px, 1.2cqh, 10px); }
+  .wall .melds :global(.melds) { gap: clamp(3px, 0.8cqw, 6px); flex-wrap: nowrap; }
+  .wall-top .melds :global(.tile) { --w: clamp(13px, 3.3cqw, 26px); }
+  .wall-left .melds, .wall-right .melds { --lay-w: clamp(11px, 2.7cqh, 20px); }
   /* 牌背：對家是立著的長方形，左右兩家是側面 */
   .back-up, .back-side {
     display: block;
@@ -308,16 +320,9 @@
   .back-side { width: clamp(22px, 6cqw, 42px); height: clamp(13px, 3.9cqh, 27px); box-shadow: inset -3px 0 0 var(--tile-face), 0 2px 0 var(--tile-edge), 1px 3px 4px #0006; }
   .wall-right .back-side { box-shadow: inset 3px 0 0 var(--tile-face), 0 2px 0 var(--tile-edge), 1px 3px 4px #0006; }
 
-  .melds { position: absolute; }
-  .melds :global(.melds) { gap: 4px; }
-  .melds-top { top: 17%; right: 2%; max-width: 22%; }
-  .melds-top :global(.melds) { justify-content: flex-end; }
-  .melds-left { left: 12%; bottom: 3%; max-width: 30%; }
-  .melds-right { right: 12%; top: 3%; max-width: 30%; }
-  .melds-right :global(.melds) { justify-content: flex-end; }
-  .melds-me { right: 2%; bottom: 2%; max-width: 46%; }
-  .melds-me :global(.melds) { justify-content: flex-end; }
-  .melds :global(.tile) { --w: clamp(16px, 4cqw, 30px); }
+  .melds-me { position: absolute; right: 2%; bottom: 2%; max-width: 46%; }
+  .melds-me :global(.melds) { gap: 4px; justify-content: flex-end; }
+  .melds-me :global(.tile) { --w: clamp(16px, 4cqw, 30px); }
 
   /* 牌河：上下兩家每排 8 張，左右兩家每列 6 張；往外長 */
   .river { position: absolute; display: flex; gap: 2px; }
