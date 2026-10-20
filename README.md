@@ -1,6 +1,8 @@
-# 🀄 台灣十六張麻將（Tauri v2 + Svelte）
+# 🀄 虛擬台麻館 Virtual Taiwan Mahjong Parlor
 
-可以連線遊玩的台灣十六張麻將。同一張牌桌可以坐：
+一間線上的台灣十六張麻將館（Tauri v2 + Svelte）。「虛擬」有三層意思：坐在對面的可能是 AI、館裡有二次元的虛擬角色、而且整間館開在線上。
+
+同一張牌桌可以坐：
 
 - 👤 **人類**：用桌面 App，或直接用瀏覽器打開房主的網址
 - 🤖 **Claude Code**：透過 MCP（`/mcp`）
@@ -56,7 +58,7 @@ cargo test --manifest-path src-tauri/Cargo.toml --lib
      ```bash
      claude mcp add --transport http mahjong http://IP:7777/mcp
      ```
-     然後跟 Claude 說：「用 mahjong MCP 工具加入台灣麻將遊戲，一直玩到結束」
+     然後跟 Claude 說：「用 mahjong MCP 工具加入虛擬台麻館的麻將遊戲，一直玩到結束」
    - **ChatGPT**：ChatGPT 在雲端，需要 https 公開網址。可用 Cloudflare 臨時通道：
      ```bash
      cloudflared tunnel --url http://localhost:7777
@@ -71,7 +73,8 @@ cargo test --manifest-path src-tauri/Cargo.toml --lib
 ## 二次元角色
 
 內建 6 個原創角色（小翠、月華、阿明、糖糖、小春、蘭姐），每個都有 normal / happy / surprised / sad / win 五種表情和自己的台詞。
-遊戲上方的「角色畫風」可切換 **90 年代、PC-98、MS-DOS**，首頁、大廳、牌桌、結算與圖鑑的角色會立即一起更新。選擇會記在這台裝置的瀏覽器／App 中，重新開啟仍會沿用；每位玩家可自行選擇喜歡的畫風。
+遊戲上方的「整體風格」可切換 **90 年代、PC-98、MS-DOS**，首頁、大廳、牌桌、結算與圖鑑的角色與介面會立即一起更新。選擇會記在這台裝置的瀏覽器／App 中，重新開啟仍會沿用；每位玩家可自行選擇喜歡的畫風。
+90 年代版採暖金綠色雀館與圓角；PC-98 版採紫藍抖色背景與雙線視窗；MS-DOS 版採 VGA 藍底、青色標題與灰色立體按鈕。麻將牌、牌背、對話泡泡與結算視窗同步換色，選牌與最新棄牌仍保留清楚的標示。整體配色集中在 `src/themes.css`。
 三套共 90 張 512 × 512 透明 PNG：90 年代版在 `public/characters/<id>/`，PC-98 和 MS-DOS 版分別在其 `pc98/`、`msdos/` 子目錄。復古版使用像素顯示，保留抖色與像素邊緣。
 素材由內建 imagegen 繪製；提示與表情排列記錄在 `docs/art/character-generation.json`、`docs/art/retro-character-generation.json`。
 首頁和大廳可以選角色；電腦會自動分配不重複的角色；AI 加入時可以用 `character` 參數挑。

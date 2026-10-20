@@ -1458,7 +1458,7 @@ impl Room {
                 _ => "上家",
             }
         };
-        let _ = writeln!(o, "=== 台灣十六張麻將 ===");
+        let _ = writeln!(o, "=== 虛擬台麻館・台灣十六張麻將 ===");
         match self.phase {
             Phase::Lobby => {
                 let _ = writeln!(o, "階段：大廳，等待房主開始遊戲。");

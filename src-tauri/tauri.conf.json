@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "TaiwanMahjong",
+  "productName": "VirtualTaiwanMahjongParlor",
   "version": "0.1.0",
   "identifier": "com.yuuta.taiwanmahjong",
   "build": {
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "台灣十六張麻將",
+        "title": "虛擬台麻館",
         "width": 1320,
         "height": 900,
         "minWidth": 960,

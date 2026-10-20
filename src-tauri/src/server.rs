@@ -329,7 +329,8 @@ async fn api_info(State(st): State<Arc<AppState>>) -> Json<Value> {
         })
         .collect();
     Json(json!({
-        "game": "台灣十六張麻將",
+        "game": "虛擬台麻館",
+        "rules": "台灣十六張麻將",
         "phase": room.phase,
         "seats": seats,
         "docs": "/llms.txt",
@@ -514,7 +515,7 @@ async fn api_chat(State(st): State<Arc<AppState>>, body: Bytes) -> Response {
 
 // ───────────── 說明文件 ─────────────
 
-pub const RULES: &str = r#"# 台灣十六張麻將 — 規則摘要
+pub const RULES: &str = r#"# 台灣十六張麻將 — 規則摘要（虛擬台麻館）
 
 ## 牌的代碼
 - 萬子 1m..9m、筒子 1p..9p、條子 1s..9s
@@ -557,9 +558,9 @@ fn base_url(headers: &HeaderMap) -> String {
 async fn llms_txt(headers: HeaderMap) -> Response {
     let base = base_url(&headers);
     let body = format!(
-        r#"# 台灣十六張麻將 — AI 玩家連線說明
+        r#"# 虛擬台麻館 — AI 玩家連線說明
 
-這是一個可以連線遊玩的台灣十六張麻將伺服器：{base}
+這是「虛擬台麻館」：一間線上的台灣十六張麻將館，伺服器在 {base}
 人類、Claude Code、ChatGPT 或任何程式都可以坐上同一張牌桌。
 
 ## 方法一：MCP（推薦）
@@ -612,7 +613,7 @@ async fn openapi(headers: HeaderMap) -> Json<Value> {
     let text_resp = json!({"200": {"description": "文字版牌桌狀態", "content": {"text/plain": {"schema": {"type": "string"}}}}});
     Json(json!({
         "openapi": "3.1.0",
-        "info": {"title": "台灣十六張麻將", "version": "0.1.0",
+        "info": {"title": "虛擬台麻館", "version": "0.1.0",
                  "description": "加入麻將桌並遊玩。流程：joinGame → 反覆 waitForTurn → takeAction，直到遊戲結束。"},
         "servers": [{"url": base}],
         "paths": {
@@ -679,7 +680,7 @@ fn mcp_tools() -> Value {
     json!([
         {
             "name": "join_game",
-            "description": "加入台灣十六張麻將牌桌。回傳 token 與座位。加入後請反覆呼叫 wait_for_turn → take_action 直到遊戲結束。若之前加入過，可帶 token 重連。",
+            "description": "加入虛擬台麻館的台灣十六張麻將牌桌。回傳 token 與座位。加入後請反覆呼叫 wait_for_turn → take_action 直到遊戲結束。若之前加入過，可帶 token 重連。",
             "inputSchema": {"type": "object", "properties": {
                 "name": {"type": "string", "description": "你在牌桌上的名字，例如 Claude 或 ChatGPT"},
                 "character": {"type": "string", "enum": char_ids, "description": format!("想扮演的二次元角色（可省略，會自動分配）：{}", char_desc)},
@@ -844,8 +845,8 @@ async fn handle_rpc(st: &AppState, req: &Value, session: Option<&str>) -> Option
             Ok(json!({
                 "protocolVersion": pv,
                 "capabilities": {"tools": {"listChanged": false}},
-                "serverInfo": {"name": "taiwan-mahjong", "title": "台灣十六張麻將", "version": "0.1.0"},
-                "instructions": "這是台灣十六張麻將伺服器。先 join_game 加入，然後反覆 wait_for_turn → take_action(action_id) 直到遊戲結束。每一手都有時間限制，請快速決定。"
+                "serverInfo": {"name": "taiwan-mahjong", "title": "虛擬台麻館", "version": "0.1.0"},
+                "instructions": "這是虛擬台麻館（台灣十六張麻將）的伺服器。先 join_game 加入，然後反覆 wait_for_turn → take_action(action_id) 直到遊戲結束。每一手都有時間限制，請快速決定。"
             }))
         }
         "ping" => Ok(json!({})),
@@ -935,8 +936,8 @@ async fn static_handler(State(st): State<Arc<AppState>>, uri: Uri, headers: Head
     (
         StatusCode::NOT_FOUND,
         Html(format!(
-            "<meta charset=utf-8><title>台灣麻將伺服器</title><body style='font-family:sans-serif;max-width:640px;margin:40px auto'>\
-             <h1>🀄 台灣十六張麻將伺服器</h1><p>伺服器運作中，但沒有內建網頁介面（開發模式）。</p>\
+            "<meta charset=utf-8><title>虛擬台麻館伺服器</title><body style='font-family:sans-serif;max-width:640px;margin:40px auto'>\
+             <h1>🀄 虛擬台麻館伺服器</h1><p>伺服器運作中，但沒有內建網頁介面（開發模式）。</p>\
              <ul><li>AI 連線說明：<a href='/llms.txt'>{base}/llms.txt</a></li>\
              <li>MCP：<code>{base}/mcp</code></li><li>OpenAPI：<a href='/openapi.json'>{base}/openapi.json</a></li></ul>"
         )),

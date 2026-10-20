@@ -36,8 +36,8 @@
   }
 
   const claudeCmd = $derived(`claude mcp add --transport http mahjong ${base}/mcp`);
-  const claudePrompt = '用 mahjong MCP 工具，以「Claude」的名字加入台灣麻將遊戲。之後不斷重複：呼叫 wait_for_turn，輪到你時用 take_action 選擇最好的 action_id，直到遊戲結束。打牌要快，每次決定都有時間限制。可以用 send_chat 跟大家聊天。';
-  const curlPrompt = $derived(`請讀 ${base}/llms.txt 的說明，用 curl 以「AI」的名字加入台灣十六張麻將遊戲，然後一直玩到遊戲結束。`);
+  const claudePrompt = '用 mahjong MCP 工具，以「Claude」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲。之後不斷重複：呼叫 wait_for_turn，輪到你時用 take_action 選擇最好的 action_id，直到遊戲結束。打牌要快，每次決定都有時間限制。可以用 send_chat 跟大家聊天。';
+  const curlPrompt = $derived(`請讀 ${base}/llms.txt 的說明，用 curl 以「AI」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲，然後一直玩到遊戲結束。`);
   const tunnelCmd = $derived(`cloudflared tunnel --url ${base.replace(/\/\/[^:]+:/, '//localhost:')}`);
 
   const fields = [
@@ -220,7 +220,7 @@
   .invite ul { margin: 6px 0; padding-left: 20px; font-size: 14px; line-height: 1.6; }
   .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
   .tabs button, .urls button { padding: 6px 12px; font-size: 14px; }
-  .sel { background: rgba(255, 209, 102, 0.22) !important; border-color: var(--gold) !important; }
+  .sel { background: var(--selected-bg, rgba(255, 209, 102, 0.22)); border-color: var(--gold); }
   .urls { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
   .copy {
     display: flex;

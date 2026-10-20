@@ -15,9 +15,9 @@
 
   const t = $derived(back ? { kind: 'back' } : parseCode(code));
 
-  const BLUE = '#1d4e89';
-  const GREEN = '#1f7a3a';
-  const RED = '#c1121f';
+  const BLUE = 'var(--tile-blue, #1d4e89)';
+  const GREEN = 'var(--tile-green, #1f7a3a)';
+  const RED = 'var(--tile-red, #c1121f)';
 
   // 筒子：點的位置 (viewBox 60x80)
   const DOTS = {

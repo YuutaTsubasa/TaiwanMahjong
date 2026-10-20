@@ -66,7 +66,7 @@ async fn main() {
             room.start_game().unwrap();
         }
     }
-    println!("台灣十六張麻將伺服器已啟動");
+    println!("虛擬台麻館伺服器已啟動（台灣十六張麻將）");
     println!("  網頁：http://localhost:{}/ {}", h.port, if dist.is_some() { "" } else { "（找不到 dist，網頁介面停用）" });
     for ip in server::local_ips() {
         println!("  區網：http://{}:{}/", ip, h.port);

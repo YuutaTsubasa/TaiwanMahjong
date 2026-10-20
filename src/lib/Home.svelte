@@ -4,6 +4,9 @@
   import Tile from './Tile.svelte';
   import CharacterPicker from './CharacterPicker.svelte';
   import { CHARACTERS } from './characters.js';
+  import { ART_STYLES, artStyle } from './art-style.js';
+
+  const theme = $derived(ART_STYLES.find((style) => style.id === $artStyle));
 
   function load(k, d) {
     try { return localStorage.getItem(k) ?? d; } catch { return d; }
@@ -55,6 +58,7 @@
 
 <main>
   <div class="hero">
+    <div class="edition"><span class="edition-light" aria-hidden="true"></span>{theme.edition}</div>
     <div class="tiles">
       {#each demo as c, i}
         <div style:transform="rotate({(i - 3.5) * 4}deg) translateY({Math.abs(i - 3.5) * 4}px)">
@@ -62,8 +66,9 @@
         </div>
       {/each}
     </div>
-    <h1>台灣十六張麻將</h1>
-    <p class="muted">區網連線對戰 · 人類、Claude Code、ChatGPT 都能上桌</p>
+    <h1>虛擬台麻館</h1>
+    <p class="mood">{theme.mood}</p>
+    <p class="muted">線上的台灣十六張麻將 · 人類、AI 與虛擬角色同桌</p>
   </div>
 
   <div class="name card">
@@ -137,6 +142,9 @@
     gap: 20px;
   }
   .hero { text-align: center; }
+  .edition { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 22px; font-size: 11px; letter-spacing: 3px; color: var(--gold); }
+  .edition-light { width: 6px; height: 6px; background: var(--accent); }
+  .hero .mood { margin-top: 12px; color: var(--text); font-size: 16px; letter-spacing: 2px; }
   .tiles { display: flex; gap: 4px; justify-content: center; margin-bottom: 18px; }
   h1 {
     font-size: 44px;

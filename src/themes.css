@@ -1,0 +1,376 @@
+/* Theme tokens are inherited by every screen, including result overlays.
+   Layout and interaction stay in the components; this file owns appearance. */
+:root,
+:root[data-ui-style='anime90'] {
+  --ui-font: 'Microsoft JhengHei', 'PingFang TC', system-ui, sans-serif;
+  --heading-font: 'DFKai-SB', '標楷體', 'Kaiti TC', serif;
+  --felt: #175c48;
+  --felt-dark: #092e27;
+  --wood: #9f6341;
+  --panel: #122f29;
+  --panel-solid: #102b25;
+  --raised: #23463a;
+  --recessed: #0b241e;
+  --line: #65816a;
+  --text: #fff3d8;
+  --muted: #b8cbb6;
+  --gold: #ffd083;
+  --red: #ff9e9d;
+  --accent: #96e8bf;
+  --negative: #ffadbb;
+  --app-background: radial-gradient(ellipse at 50% 15%, #33795a 0%, #164c3c 55%, #092e27 100%);
+  --surface-radius: 14px;
+  --small-radius: 7px;
+  --avatar-radius: 50%;
+  --panel-border: 1px solid var(--line);
+  --panel-shadow: 0 5px 0 #071d18, inset 0 1px 0 #87916a, 0 12px 24px #001b1833;
+  --button-bg: #284a3e;
+  --button-text: #fff3d8;
+  --button-border: 1px solid #8a9c7d;
+  --button-shadow: 0 3px 0 #071d18, inset 0 1px 0 #ffffff16;
+  --button-hover: #3b6351;
+  --selected-bg: #5b452b;
+  --selected-text: #ffe2a7;
+  --primary-bg: linear-gradient(#ffdc9b, #e6a65f);
+  --primary-text: #38261c;
+  --toolbar-bg: #102820;
+  --toolbar-text: #fff3d8;
+  --toolbar-muted: #bfd0b5;
+  --toolbar-danger: #ff9e9d;
+  --title-bg: linear-gradient(90deg, #694c2f, #233d2d);
+  --title-text: #ffe1a0;
+  --title-shadow: 2px 3px 0 #432e23, 0 5px 12px #001b1866;
+  --board-bg: radial-gradient(ellipse at 50% 40%, #337e5d, #18523e 75%);
+  --board-radius: 22px;
+  --board-frame: inset 0 0 0 7px #ac7047, inset 0 0 0 10px #5c3421, inset 0 0 0 12px #e2b578, inset 0 0 32px #071c19aa;
+  --table-center: #163b2e;
+  --portrait-bg: radial-gradient(circle at 50% 35%, #ffe8ba, #d59d65);
+  --active-shadow: 0 0 0 2px var(--gold), 0 0 16px #ffd08355;
+  --bubble-bg: #fff2ce;
+  --bubble-text: #35271f;
+  --bubble-shadow: 3px 4px 0 #051e1c99;
+  --overlay-bg: #071b17ba;
+  --tile-face: linear-gradient(160deg, #fffbed, #f6e9c7);
+  --tile-edge: #cfba87;
+  --tile-base: #22573d;
+  --tile-back: linear-gradient(150deg, #4b9870, #25583e);
+  --tile-back-line: #9bc9a0;
+  --tile-round: 0.13;
+  --tile-border: 1px solid #f7e4b7;
+  --tile-blue: #173d70;
+  --tile-green: #186536;
+  --tile-red: #ac1732;
+  --tile-highlight: #ff8d84;
+  --control-inset: inset 1px 2px 0 #0005;
+  --win-bg: #a22c45;
+  --claim-bg: #265b78;
+  --action-text: #fff8e5;
+  --scroll-thumb: #95ad84;
+  --shadow-blur: 8px;
+}
+
+:root[data-ui-style='pc98'] {
+  --ui-font: 'MingLiU', '細明體', 'MS Gothic', 'Cascadia Mono', monospace;
+  --heading-font: 'MingLiU', '細明體', serif;
+  --felt: #232641;
+  --felt-dark: #111329;
+  --wood: #9b80b4;
+  --panel: #24203e;
+  --panel-solid: #211c38;
+  --raised: #393050;
+  --recessed: #14152a;
+  --line: #8c80ac;
+  --text: #fae8cd;
+  --muted: #bdb4d2;
+  --gold: #ffd69a;
+  --red: #ff9fae;
+  --accent: #90e3d3;
+  --negative: #ffabbc;
+  --app-background: repeating-conic-gradient(#181a30 0% 25%, #1d1e37 0% 50%) 0 0 / 4px 4px;
+  --surface-radius: 0px;
+  --small-radius: 0px;
+  --avatar-radius: 0px;
+  --panel-border: 3px double #a79ac5;
+  --panel-shadow: 5px 5px 0 #090d1c, inset 0 0 0 2px #111326;
+  --button-bg: #3b3157;
+  --button-text: #fae8cd;
+  --button-border: 1px solid #b4a3c9;
+  --button-shadow: 2px 2px 0 #080b1b, inset 1px 1px 0 #71638b;
+  --button-hover: #51416f;
+  --selected-bg: #6b3e65;
+  --selected-text: #ffdfad;
+  --primary-bg: #9ce0cc;
+  --primary-text: #12283a;
+  --toolbar-bg: #211b37;
+  --toolbar-text: #fae8cd;
+  --toolbar-muted: #cfc0dd;
+  --toolbar-danger: #ff9fae;
+  --title-bg: repeating-linear-gradient(0deg, #4b365b 0 1px, #493455 1px 2px);
+  --title-text: #ffe1a8;
+  --title-shadow: 2px 2px 0 #9a4d77, 4px 4px 0 #080b1b;
+  --board-bg: repeating-conic-gradient(#283b4c 0% 25%, #2c4050 0% 50%) 0 0 / 4px 4px;
+  --board-radius: 0px;
+  --board-frame: inset 0 0 0 2px #d9c5aa, inset 0 0 0 5px #302b48, inset 0 0 0 6px #a996ba, inset 0 0 0 10px #151b30;
+  --table-center: #1c2037;
+  --portrait-bg: repeating-conic-gradient(#4e3d61 0% 25%, #57446a 0% 50%) 0 0 / 4px 4px;
+  --active-shadow: 0 0 0 2px #ffd69a, 3px 3px 0 #0b0e20;
+  --bubble-bg: #24203e;
+  --bubble-text: #fff0d0;
+  --bubble-shadow: 3px 3px 0 #090d1c;
+  --overlay-bg: #090d20d9;
+  --tile-face: #f2e3bd;
+  --tile-edge: #ada087;
+  --tile-base: #37324f;
+  --tile-back: repeating-conic-gradient(#3b426b 0% 25%, #465181 0% 50%) 0 0 / 4px 4px;
+  --tile-back-line: #aba8d4;
+  --tile-round: 0;
+  --tile-border: 1px solid #8c8073;
+  --tile-blue: #273d85;
+  --tile-green: #1b6949;
+  --tile-red: #ae2844;
+  --tile-highlight: #f5a6c8;
+  --control-inset: inset 2px 2px 0 #080b1b;
+  --win-bg: #8f375e;
+  --claim-bg: #345572;
+  --action-text: #fff0d0;
+  --scroll-thumb: #a896bc;
+  --shadow-blur: 0px;
+}
+
+:root[data-ui-style='msdos'] {
+  --ui-font: 'Cascadia Mono', 'Consolas', 'MingLiU', '細明體', monospace;
+  --heading-font: 'Cascadia Mono', 'Consolas', 'MingLiU', monospace;
+  --felt: #0000a0;
+  --felt-dark: #000060;
+  --wood: #c0c0c0;
+  --panel: #000080;
+  --panel-solid: #000080;
+  --raised: #0000aa;
+  --recessed: #000055;
+  --line: #c0c0c0;
+  --text: #ffffff;
+  --muted: #b4e6f2;
+  --gold: #ffff55;
+  --red: #ff9999;
+  --accent: #55ffff;
+  --negative: #ffaaaa;
+  --app-background: repeating-conic-gradient(#005757 0% 25%, #006767 0% 50%) 0 0 / 4px 4px;
+  --surface-radius: 0px;
+  --small-radius: 0px;
+  --avatar-radius: 0px;
+  --panel-border: 3px double #d6d6d6;
+  --panel-shadow: 7px 7px 0 #000000;
+  --button-bg: #c0c0c0;
+  --button-text: #111111;
+  --button-border: 1px solid #ffffff;
+  --button-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #555, 3px 3px 0 #000;
+  --button-hover: #e0e0e0;
+  --selected-bg: #0000aa;
+  --selected-text: #ffff55;
+  --primary-bg: #55ffff;
+  --primary-text: #000044;
+  --toolbar-bg: #c0c0c0;
+  --toolbar-text: #000000;
+  --toolbar-muted: #252525;
+  --toolbar-danger: #a00000;
+  --title-bg: #00aaaa;
+  --title-text: #001717;
+  --title-shadow: 3px 3px 0 #000000;
+  --board-bg: #000080;
+  --board-radius: 0px;
+  --board-frame: inset 0 0 0 2px #fff, inset 0 0 0 5px #c0c0c0, inset 0 0 0 7px #555, inset 0 0 0 10px #000;
+  --table-center: #000055;
+  --portrait-bg: #008888;
+  --active-shadow: 0 0 0 2px #ffff55, 3px 3px 0 #000;
+  --bubble-bg: #c0c0c0;
+  --bubble-text: #000044;
+  --bubble-shadow: 4px 4px 0 #000;
+  --overlay-bg: #000033dd;
+  --tile-face: #e6e6d6;
+  --tile-edge: #a2a298;
+  --tile-base: #555555;
+  --tile-back: #008888;
+  --tile-back-line: #55ffff;
+  --tile-round: 0;
+  --tile-border: 1px solid #fff;
+  --tile-blue: #0000aa;
+  --tile-green: #00672b;
+  --tile-red: #aa0000;
+  --tile-highlight: #ff7777;
+  --control-inset: inset 2px 2px 0 #000;
+  --win-bg: #aa0000;
+  --claim-bg: #006666;
+  --action-text: #ffffff;
+  --scroll-thumb: #c0c0c0;
+  --shadow-blur: 0px;
+}
+
+/* Explicit theme scope outranks Svelte's component appearance declarations. */
+html[data-ui-style] { font-family: var(--ui-font); color: var(--text); background: var(--felt-dark); }
+html[data-ui-style] body { background: var(--app-background); }
+html[data-ui-style] :is(button, input, select) { font-family: var(--ui-font); }
+html[data-ui-style] button {
+  color: var(--button-text);
+  background: var(--button-bg);
+  border: var(--button-border);
+  border-radius: var(--small-radius);
+  box-shadow: var(--button-shadow);
+}
+html[data-ui-style] button:hover:not(:disabled) { background: var(--button-hover); }
+html[data-ui-style] button:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: var(--control-inset); }
+html[data-ui-style] :is(button, input, select):focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+html[data-ui-style] button.primary { background: var(--primary-bg); color: var(--primary-text); font-weight: 700; }
+html[data-ui-style] button.primary:hover:not(:disabled) { background: var(--primary-bg); filter: brightness(1.12); }
+html[data-ui-style] button.danger { background: var(--win-bg); color: var(--action-text); border-color: var(--red); }
+html[data-ui-style] :is(button.selected, button.sel, .opt.sel),
+html[data-ui-style] :is(button.selected, button.sel, .opt.sel):hover:not(:disabled) {
+  background: var(--selected-bg);
+  color: var(--selected-text);
+  border-color: var(--gold);
+}
+html[data-ui-style] :is(input:not([type='range']), select) {
+  color: var(--text);
+  background: var(--recessed);
+  border: 1px solid var(--line);
+  border-radius: var(--small-radius);
+  box-shadow: var(--control-inset);
+}
+html[data-ui-style] input::placeholder { color: var(--muted); opacity: 0.85; }
+html[data-ui-style] :is(.card, .box) {
+  color: var(--text);
+  background: var(--panel);
+  border: var(--panel-border);
+  border-radius: var(--surface-radius);
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: none;
+}
+html[data-ui-style] :is(.seat, figure, .item, .d, .rrow, .auto-bar, .copy, .waits) {
+  border-radius: var(--small-radius);
+  background: var(--raised);
+}
+html[data-ui-style] .seat.me { border-color: var(--gold); }
+html[data-ui-style] :is(.copy code, .status, .hint) { color: var(--muted); }
+html[data-ui-style] .status.mine { color: var(--gold); }
+html[data-ui-style] :is(.neg, .score.neg, .pts.neg) { color: var(--negative); }
+html[data-ui-style] :is(.pos, .score, .pts) { color: var(--accent); }
+html[data-ui-style] .topbar { background: var(--toolbar-bg); border-bottom: 2px solid var(--line); }
+html[data-ui-style] :is(.style-picker, .sound) { background: transparent; border-bottom: 0; color: var(--toolbar-text); }
+html[data-ui-style] :is(.style-picker .label, .sound label) { color: var(--toolbar-muted); }
+html[data-ui-style] .sound button.muted { color: var(--toolbar-danger); border-color: var(--toolbar-danger); }
+html[data-ui-style] .hero h1 { font-family: var(--heading-font); color: var(--gold); text-shadow: var(--title-shadow); }
+html[data-ui-style] .hero .edition {
+  width: fit-content;
+  margin-inline: auto;
+  padding: 6px 14px;
+  border-block: 1px solid var(--line);
+  color: var(--gold);
+}
+html[data-ui-style] .hero .mood { color: var(--text); }
+html[data-ui-style] .hero .tiles { filter: drop-shadow(0 6px var(--shadow-blur) #0004); }
+html[data-ui-style] :is(.invite > h2, .seats > h2:first-child, .side-head) {
+  background: var(--title-bg);
+  color: var(--title-text);
+  padding: 6px 9px;
+  border-bottom: 1px solid var(--line);
+}
+html[data-ui-style] .side-head { margin: -5px -5px 0; }
+html[data-ui-style] .opt { background: var(--raised); color: var(--text); border-radius: var(--surface-radius); }
+html[data-ui-style] .opt:hover:not(:disabled) { background: var(--selected-bg); color: var(--selected-text); }
+html[data-ui-style] .avatar.crop { border-radius: var(--avatar-radius); background: var(--portrait-bg); box-shadow: 0 0 0 2px var(--line); }
+html[data-ui-style] .board { background: var(--board-bg); box-shadow: var(--board-frame); border-radius: var(--board-radius); }
+html[data-ui-style] .center > .info {
+  background: var(--table-center);
+  border: var(--panel-border);
+  border-radius: var(--surface-radius);
+  box-shadow: var(--panel-shadow);
+}
+html[data-ui-style] .plate { border-radius: var(--surface-radius); background: var(--recessed); border-color: var(--line); }
+html[data-ui-style] .plate.active { border-color: var(--gold); box-shadow: var(--active-shadow); }
+html[data-ui-style] .plate.thinking { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+html[data-ui-style] :is(.wind, .dealer-tag, .me, .auto, .off, .streak, .badge) { border-radius: var(--small-radius); }
+html[data-ui-style] .wind { background: var(--tile-face); color: var(--tile-blue); }
+html[data-ui-style] .wind.dealer { background: var(--gold); color: #39251b; }
+html[data-ui-style] :is(.bubble, .bubble.big) {
+  color: var(--bubble-text);
+  background: var(--bubble-bg);
+  border: 1px solid var(--line);
+  border-radius: var(--surface-radius);
+  box-shadow: var(--bubble-shadow);
+}
+html[data-ui-style] .bubble.big { border: 2px solid var(--gold); }
+html[data-ui-style] :is(.bubble.up, .bubble.big.up)::after { border-top-color: var(--bubble-bg); }
+html[data-ui-style] :is(.bubble.down, .bubble.big.down)::after { border-bottom-color: var(--bubble-bg); }
+html[data-ui-style] .act.win { background: var(--win-bg); color: var(--action-text); border: 1px solid var(--red); }
+html[data-ui-style] .act.claim { background: var(--claim-bg); color: var(--action-text); border: 1px solid var(--accent); }
+html[data-ui-style] .act.pass { background: var(--button-bg); color: var(--button-text); }
+html[data-ui-style] :is(.auto-btn.on, .auto-bar) { background: var(--claim-bg); color: var(--action-text); border-color: var(--accent); }
+html[data-ui-style] :is(button.danger, .act.win):hover:not(:disabled) { background: var(--win-bg); }
+html[data-ui-style] :is(.act.claim, .auto-btn.on):hover:not(:disabled) { background: var(--claim-bg); }
+html[data-ui-style] .overlay { background: var(--overlay-bg); backdrop-filter: none; }
+html[data-ui-style] .cutin { background: var(--title-bg); border-color: var(--gold); border-radius: var(--surface-radius) var(--surface-radius) 0 0; }
+html[data-ui-style] .cutin .say { color: var(--title-text); }
+html[data-ui-style] .cutin .who { color: var(--title-text); }
+html[data-ui-style] .toast { background: var(--panel-solid); color: var(--text); border-radius: var(--small-radius); box-shadow: var(--panel-shadow); }
+html[data-ui-style] .banner { color: #191222; border-radius: 0 0 var(--small-radius) var(--small-radius); }
+html[data-ui-style] ::-webkit-scrollbar-thumb { background: var(--scroll-thumb); border-radius: var(--small-radius); }
+html[data-ui-style] ::-webkit-scrollbar-track { background: var(--recessed); }
+
+/* Tile identity and selected/last-discard feedback remain legible in every set. */
+html[data-ui-style] .tile {
+  border: var(--tile-border);
+  border-radius: calc(var(--w) * var(--tile-round));
+  background: var(--tile-face);
+  box-shadow: 0 calc(var(--w) * 0.06) 0 var(--tile-edge),
+    0 calc(var(--w) * 0.12) 0 var(--tile-base),
+    2px calc(var(--w) * 0.16) var(--shadow-blur) #0005;
+}
+html[data-ui-style] .tile.back {
+  background: var(--tile-back);
+  box-shadow: inset 0 0 0 calc(var(--w) * 0.06) var(--tile-back-line),
+    0 calc(var(--w) * 0.12) 0 var(--tile-edge),
+    2px calc(var(--w) * 0.16) var(--shadow-blur) #0005;
+}
+html[data-ui-style] .tile.hl { box-shadow: 0 0 0 3px var(--tile-highlight), 0 calc(var(--w) * 0.12) 0 var(--tile-base); }
+html[data-ui-style] .tile.selected { box-shadow: 0 0 0 3px var(--gold), 0 calc(var(--w) * 0.12) 0 var(--tile-base), 3px 6px var(--shadow-blur) #0008; }
+html[data-ui-style] .tile .num { color: var(--tile-blue); }
+html[data-ui-style] .tile .wan { color: var(--tile-red); }
+html[data-ui-style] .tile .white { border-color: var(--tile-blue); border-radius: calc(var(--w) * var(--tile-round)); box-shadow: inset 0 0 0 calc(var(--w) * 0.05) #fffaf0, inset 0 0 0 calc(var(--w) * 0.1) var(--tile-blue); }
+
+/* Era-specific finishing touches, without flicker or obstructive CRT overlays. */
+html[data-ui-style='anime90'] .hero h1 { letter-spacing: 8px; }
+html[data-ui-style='anime90'] .hero .edition-light { border-radius: 50%; box-shadow: 0 0 8px var(--accent); }
+html[data-ui-style='pc98'] :is(h1, h2) { letter-spacing: 2px; }
+html[data-ui-style='pc98'] .card > .head { border-bottom: 3px double var(--line); padding-bottom: 12px; }
+html[data-ui-style='pc98'] .hero .edition { border: 3px double var(--line); background: var(--panel); }
+html[data-ui-style='msdos'] .hero h1 { font-weight: 900; letter-spacing: 3px; }
+html[data-ui-style='msdos'] .hero .edition { background: #000080; border: 1px solid #c0c0c0; box-shadow: 3px 3px #000; letter-spacing: 2px; }
+html[data-ui-style='msdos'] .card > .head { background: #00aaaa; color: #001717; padding: 8px; margin: -8px -8px 14px; }
+html[data-ui-style='msdos'] .card > .head .muted { color: #002c2c; }
+html[data-ui-style='msdos'] .side-head button { color: #000; }
+html[data-ui-style='msdos'] .sound input { accent-color: #0000aa; }
+html[data-ui-style='msdos'] .topbar :focus-visible { outline-color: #0000aa; }
+html[data-ui-style='msdos'] :is(.dealer-tag, .streak) { background: #aa0000; color: #fff; }
+html[data-ui-style='msdos'] .tile { font-family: 'MingLiU', '細明體', monospace; }
+html[data-ui-style='msdos'] .tile .flower { color: #790091; }
+html[data-ui-style='msdos'] .tile .flower.season { color: #994400; }
+html[data-ui-style='pc98'] *,
+html[data-ui-style='msdos'] * { -webkit-font-smoothing: auto; }
+html[data-ui-style='pc98'] :is(button, .tile, .plate),
+html[data-ui-style='msdos'] :is(button, .tile, .plate) { transition: none; }
+html[data-ui-style='pc98'] :is(.portrait, .say, .av.pop, .bubble, .actions),
+html[data-ui-style='msdos'] :is(.portrait, .say, .av.pop, .bubble, .actions) { animation: none; }
+
+@media (max-width: 600px) {
+  html[data-ui-style] .hero h1 { font-size: 30px; letter-spacing: 2px; }
+  html[data-ui-style] .hero .edition { font-size: 10px; letter-spacing: 1px; }
+  html[data-ui-style] .hero .tiles { gap: 2px; }
+  html[data-ui-style] .hero .tile { --w: 34px; }
+  html[data-ui-style] .name .pick { flex-direction: column; }
+  html[data-ui-style] .name .pick > span { padding-top: 0; }
+  html[data-ui-style] .name input { min-width: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui-style] :is(button, .tile, .plate, .av) { transition: none; }
+  html[data-ui-style] :is(.portrait, .say, .av.pop, .bubble, .actions, .overlay) { animation: none; }
+}

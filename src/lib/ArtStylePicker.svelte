@@ -2,8 +2,8 @@
   import { ART_STYLES, artStyle, setArtStyle } from './art-style.js';
 </script>
 
-<div class="style-picker" role="group" aria-label="角色畫風">
-  <span class="label">角色畫風</span>
+<div class="style-picker" role="group" aria-label="整體風格：介面與角色">
+  <span class="label">整體風格</span>
   {#each ART_STYLES as style}
     <button
       type="button"

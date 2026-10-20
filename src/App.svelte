@@ -7,11 +7,16 @@
   import Table from './lib/Table.svelte';
   import Gallery from './lib/Gallery.svelte';
   import ArtStylePicker from './lib/ArtStylePicker.svelte';
+  import { artStyle } from './lib/art-style.js';
   import { processEvents, resetReactions } from './lib/reactions.svelte.js';
 
   $effect(() => {
     if (net.state) processEvents(net.state);
     else resetReactions();
+  });
+
+  $effect(() => {
+    document.documentElement.dataset.uiStyle = $artStyle;
   });
 
   let hash = $state(location.hash);
