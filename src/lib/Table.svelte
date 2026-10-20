@@ -86,6 +86,26 @@
   const keyFor = (t, i) => `${t}-${i}`;
   const backs = (n) => Array.from({ length: n ?? 0 });
 
+  // 手機：窄（直向）或矮（橫向）。名牌改成小名牌，直向時三家排在牌桌上方
+  const COMPACT_QUERY = '(max-width: 760px), (max-height: 520px)';
+  const hasWindow = typeof window !== 'undefined';
+  let compact = $state(hasWindow && window.matchMedia(COMPACT_QUERY).matches);
+  let portrait = $state(hasWindow && window.innerHeight > window.innerWidth);
+  onMount(() => {
+    const mq = window.matchMedia(COMPACT_QUERY);
+    const update = () => {
+      compact = mq.matches;
+      portrait = window.innerHeight > window.innerWidth;
+    };
+    mq.addEventListener('change', update);
+    window.addEventListener('resize', update);
+    return () => {
+      mq.removeEventListener('change', update);
+      window.removeEventListener('resize', update);
+    };
+  });
+  const stripMode = $derived(compact && portrait);
+
   let showSide = $state(typeof window === 'undefined' || window.innerWidth >= 1100);
   let wasWide = typeof window === 'undefined' || window.innerWidth >= 1100;
   onMount(() => {
@@ -108,17 +128,28 @@
   }
 </script>
 
-<div class="gamescreen" class:noside={!showSide} style:--table-img={`url('${asset(`/ui/${$artStyle}/table.png`)}')`}>
+<div class="gamescreen" class:noside={!showSide} class:compact class:strip={stripMode} style:--table-img={`url('${asset(`/ui/${$artStyle}/table.png`)}')`}>
   <div class="tableboard">
-    <!-- 左右兩家的名牌在桌子外側 -->
-    <div class="seat-left"><PlayerCard seat={left} active={active(at(3))} thinking={thinking(at(3))} bubble="right" /></div>
-    <div class="seat-right"><PlayerCard seat={right} active={active(at(1))} thinking={thinking(at(1))} bubble="left" /></div>
+    {#if stripMode}
+      <!-- 手機直向：上家｜對家｜下家 排在牌桌上方 -->
+      <div class="opp-strip">
+        <PlayerCard seat={left} variant="chip" active={active(at(3))} thinking={thinking(at(3))} bubble="down" />
+        <PlayerCard seat={top} variant="chip" active={active(at(2))} thinking={thinking(at(2))} bubble="down" />
+        <PlayerCard seat={right} variant="chip" active={active(at(1))} thinking={thinking(at(1))} bubble="down" />
+      </div>
+    {:else}
+      <!-- 左右兩家的名牌在桌子外側 -->
+      <div class="seat-left"><PlayerCard seat={left} variant={compact ? 'chip' : 'side'} active={active(at(3))} thinking={thinking(at(3))} bubble="right" /></div>
+      <div class="seat-right"><PlayerCard seat={right} variant={compact ? 'chip' : 'side'} active={active(at(1))} thinking={thinking(at(1))} bubble="left" /></div>
+    {/if}
 
     <div class="table-wrap">
       <div class="table">
         <div class="felt">
           <!-- 對家 -->
-          <div class="seat-top"><PlayerCard seat={top} variant="top" active={active(at(2))} thinking={thinking(at(2))} /></div>
+          {#if !stripMode}
+            <div class="seat-top"><PlayerCard seat={top} variant={compact ? 'chip' : 'top'} active={active(at(2))} thinking={thinking(at(2))} /></div>
+          {/if}
           <!-- 副露擺在各家手牌的右手邊（對家的右手邊是畫面左邊），跟手牌連成一排 -->
           <div class="wall wall-top">
             <div class="melds"><Melds melds={top.melds ?? []} flowers={top.flowers ?? []} size="sm" /></div>
@@ -175,7 +206,7 @@
 
     <!-- 自己 -->
     <div class="seat-me">
-      <PlayerCard seat={mine} variant="me" active={active(me)} thinking={thinking(me)} isMe={isPlayer} bubble="up" />
+      <PlayerCard seat={mine} variant={compact ? 'chip' : 'me'} active={active(me)} thinking={thinking(me)} isMe={isPlayer} bubble="up" />
     </div>
     <div class="bottom">
       <div class="prompt-row">
@@ -466,13 +497,59 @@
     }
     .seat-left :global(.v-side), .seat-right :global(.v-side) { width: 110px; }
   }
-  @media (max-width: 760px) {
-    .tableboard {
-      grid-template-columns: minmax(0, 1fr);
-      grid-template-rows: auto minmax(300px, 1fr) auto auto;
-      grid-template-areas: 'sides' 'table' 'bottom' 'me';
-    }
-    .seat-left, .seat-right { display: none; }
-    .seat-me { justify-self: center; }
+
+  /* ───── 手機（.compact）：名牌都是小名牌 ───── */
+  .compact { padding: 6px; gap: 6px; }
+  .compact .tableboard { column-gap: 6px; row-gap: 4px; }
+  .compact .felt { --top-card-h: 46px; }
+  .compact .seat-top :global(.v-chip) { width: max-content; height: auto; }
+  .compact .seat-left :global(.v-chip), .compact .seat-right :global(.v-chip) { flex-direction: column; padding: 4px; max-width: 86px; }
+  .compact .seat-left :global(.v-chip .portrait), .compact .seat-right :global(.v-chip .portrait) { width: 46px; height: 46px; }
+  .compact .seat-left :global(.v-chip .meta), .compact .seat-right :global(.v-chip .meta) { align-items: center; }
+  .compact .seat-left :global(.v-chip .line1), .compact .seat-right :global(.v-chip .line1) { flex-direction: column; gap: 2px; }
+  .compact .prompt-row { min-height: 34px; gap: 6px; }
+  .compact .banner { padding: 4px 12px; gap: 8px; }
+  .compact .banner b { font-size: 16px; letter-spacing: 0.1em; }
+  .compact .banner span { font-size: 12px; }
+  .compact .act { font-size: 18px; padding: 4px 14px; }
+  .compact .auto-btn { min-width: 0; padding: 4px 12px; font-size: 15px; letter-spacing: 0.1em; }
+  .compact .hand { padding: 10px 4px 4px; }
+  .compact .hand :global(.tile) { --w: clamp(22px, min(calc((100cqw - 40px) / 18.4), 9vh), 54px); }
+  .compact .open-side { top: 6px; right: 6px; padding: 4px 10px; }
+  /* 牌桌小的時候，中央資訊框放寬一點、字縮小，局數才不會斷行 */
+  .compact .center-panel { width: 36%; }
+  .compact .round { font-size: clamp(9px, 3.6cqw, 15px); letter-spacing: 0; white-space: nowrap; }
+  .compact .left-count small { font-size: clamp(9px, 3.2cqw, 14px); }
+  .compact .timer { font-size: clamp(9px, 3.2cqw, 14px); }
+
+  /* 直向：上方三家小名牌、牌桌滿寬、下方自己＋提示列、手牌兩排 */
+  .strip .tableboard {
+    grid-template-columns: auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      'strip strip'
+      'table table'
+      'me bottom';
+    align-items: end;
   }
+  .opp-strip { grid-area: strip; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; position: relative; z-index: 5; }
+  .opp-strip :global(.v-chip) { width: 100%; }
+  .opp-strip :global(.v-chip:nth-child(2)) { justify-content: center; }
+  .strip .felt { --top-card-h: 4cqh; }
+  /* 牌桌區沒有內容高度（它是 size container），一定要撐滿那一列 */
+  .strip .table-wrap { align-self: stretch; }
+  .strip .seat-me { align-self: start; padding-top: 2px; }
+  .strip .bottom { grid-column: 1 / -1; grid-row: 3; }
+  .strip .prompt-row { padding-left: 132px; justify-content: flex-start; }
+  .strip .hand { flex-wrap: wrap; justify-content: center; overflow: visible; row-gap: 6px; }
+  .strip .hand :global(.tile) { --w: clamp(26px, calc((100cqw - 40px) / 9.6), 48px); }
+  .strip .drawn-gap { width: 6px; }
+  /* 直向：提示列只留主要文字，跟託管按鈕排在同一行 */
+  .strip .banner .sep, .strip .banner span:not(.sep) { display: none; }
+  .strip .banner.quiet span { display: inline; font-size: 12px; }
+  .strip .prompt-row { flex-wrap: nowrap; }
+  /* 「紀錄」按鈕移到牌桌右上角，不擋到下家的名牌 */
+  .strip .open-side { top: 62px; right: 10px; }
+  .compact .seat-left :global(.v-chip .wind), .compact .seat-right :global(.v-chip .wind) { left: 33px; top: 31px; }
+
 </style>

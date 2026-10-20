@@ -1,6 +1,6 @@
 <script>
   // 對局畫面的角色名牌：有框的半身立繪＋名字、門風、分數、各種標記與對話泡泡。
-  // variant：side（左右兩家，直式）、top（對家，橫式）、me（自己，橫式）
+  // variant：side（左右兩家，直式）、top（對家，橫式）、me（自己，橫式）、chip（手機用的小名牌）
   import Avatar from '../Avatar.svelte';
   import { reactionFor } from '../reactions.svelte.js';
 
@@ -120,6 +120,20 @@
   .v-me { width: clamp(220px, 17vw, 300px); height: clamp(110px, 15vh, 150px); }
   .v-me .portrait { width: 48%; height: 100%; border-right: 1px solid var(--art-line); }
   .v-me .meta { flex: 1; }
+  /* 手機：小名牌（小頭像＋名字、門風、分數），對話泡泡照樣會出現 */
+  .v-chip { align-items: center; gap: 6px; padding: 3px 8px 3px 3px; width: max-content; max-width: 100%; }
+  .v-chip .portrait { width: 40px; height: 40px; border-radius: var(--small-radius); }
+  .v-chip .portrait :global(.avatar) { width: 150% !important; top: -8%; }
+  .v-chip .meta { padding: 0; gap: 1px; min-width: 0; }
+  .v-chip .line1 { gap: 5px; justify-content: flex-start; }
+  .v-chip .nm { font-size: 13px; letter-spacing: 0.02em; max-width: 7em; }
+  /* 門風疊在頭像右下角，名字才有空間 */
+  .v-chip .wind { position: absolute; left: 27px; top: 25px; width: 19px; height: 19px; font-size: 12px; box-shadow: 0 1px 3px #000a; z-index: 1; }
+  .v-chip .line2 { gap: 3px; border-top: 0; padding-top: 0; flex-wrap: nowrap; }
+  .v-chip .score { font-size: 11px; margin-right: 2px; }
+  .v-chip .tag { font-size: 9px; padding: 0 4px; line-height: 1.6; }
+  .v-chip .bubble { font-size: 12px; padding: 3px 9px; }
+  .v-chip .bubble.big { font-size: 14px; }
 
   .empty { opacity: 0.6; }
 

@@ -82,6 +82,11 @@
 <style>
   .topbar { display: flex; flex-wrap: wrap; align-items: center; }
   .topbar-brand { display: flex; align-items: center; padding: 2px 4px 2px 14px; }
+  /* 手機對局時把上方工具列收起來，空間留給牌桌（畫風、音量在「遊戲設定」可以調） */
+  @media (max-width: 760px), (max-height: 520px) {
+    .app-shell:not(.menu-shell) .topbar { display: none; }
+    .app-shell:not(.menu-shell) { grid-template-rows: minmax(0, 1fr); }
+  }
   .topbar > :global(.style-picker) { flex: 1; }
   .app-shell { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); }
   .menu-shell { grid-template-rows: minmax(0, 1fr) auto; }
