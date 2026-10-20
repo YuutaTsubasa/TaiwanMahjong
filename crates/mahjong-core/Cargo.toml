@@ -1,0 +1,17 @@
+[package]
+name = "mahjong-core"
+version = "0.1.0"
+description = "虛擬台麻館的牌局引擎：台灣十六張麻將的規則、台數、電腦玩家與房間狀態機"
+edition = "2021"
+rust-version = "1.89"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+rand = "0.8"
+# 瀏覽器（wasm32）沒有 std::time::Instant；web-time 在原生平台就是 std 的
+web-time = "1"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+# 讓 rand 在瀏覽器裡用 crypto.getRandomValues
+getrandom = { version = "0.2", features = ["js"] }
