@@ -120,6 +120,8 @@
   .sidelog {
     display: grid;
     grid-template-rows: minmax(0, 1.25fr) minmax(0, 1fr) auto;
+    /* 欄寬固定為面板寬度，不讓較長的紀錄把按鈕撐出框外 */
+    grid-template-columns: minmax(0, 1fr);
     gap: 12px;
     min-height: 0;
     height: 100%;
