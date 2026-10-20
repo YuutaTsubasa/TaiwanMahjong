@@ -922,13 +922,25 @@ async fn mcp_delete(State(st): State<Arc<AppState>>, headers: HeaderMap) -> Resp
 async fn static_handler(State(st): State<Arc<AppState>>, uri: Uri, headers: HeaderMap) -> Response {
     let path = uri.path().trim_start_matches('/');
     let path = if path.is_empty() { "index.html" } else { path };
+    // index.html 不能快取，否則改版後瀏覽器會繼續載入舊的程式；
+    // assets/ 底下的檔名帶雜湊值，可以放心長期快取
+    let cache = |p: &str| {
+        if p.starts_with("assets/") {
+            "public, max-age=31536000, immutable"
+        } else if p.ends_with(".html") {
+            "no-cache"
+        } else {
+            "public, max-age=3600"
+        }
+    };
     if let Some(f) = &st.assets {
         if let Some((bytes, mime)) = f(path) {
-            return ([(header::CONTENT_TYPE, mime)], bytes).into_response();
+            return ([(header::CONTENT_TYPE, mime), (header::CACHE_CONTROL, cache(path).to_string())], bytes).into_response();
         }
         if !path.contains('.') {
             if let Some((bytes, mime)) = f("index.html") {
-                return ([(header::CONTENT_TYPE, mime)], bytes).into_response();
+                return ([(header::CONTENT_TYPE, mime), (header::CACHE_CONTROL, "no-cache".to_string())], bytes)
+                    .into_response();
             }
         }
     }

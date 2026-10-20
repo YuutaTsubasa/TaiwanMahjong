@@ -11,6 +11,7 @@
   import Controls from './lib/Controls.svelte';
   import { resolvePage } from './lib/menu.js';
   import ArtStylePicker from './lib/ArtStylePicker.svelte';
+  import Brand from './lib/Brand.svelte';
   import { artStyle } from './lib/art-style.js';
   import { processEvents, resetReactions } from './lib/reactions.svelte.js';
 
@@ -42,6 +43,7 @@
 
 <div class="app-shell" class:menu-shell={!inGame}>
   <div class="topbar">
+    {#if page === 'table'}<div class="topbar-brand"><Brand compact /></div>{/if}
     <ArtStylePicker />
     <SoundControl />
   </div>
@@ -78,7 +80,8 @@
 </div>
 
 <style>
-  .topbar { display: flex; flex-wrap: wrap; }
+  .topbar { display: flex; flex-wrap: wrap; align-items: center; }
+  .topbar-brand { display: flex; align-items: center; padding: 2px 4px 2px 14px; }
   .topbar > :global(.style-picker) { flex: 1; }
   .app-shell { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); }
   .menu-shell { grid-template-rows: minmax(0, 1fr) auto; }

@@ -1,13 +1,17 @@
 <script>
+  // 對局畫面，依 docs/art/concepts/gameplay-anime90-v2.png 排版：
+  //   中間是俯視牌桌（public/ui/<畫風>/table.png），四家各有半身立繪名牌；
+  //   桌面上是各家的手牌牆、副露、花與牌河，中央是局數／剩餘張數／倒數；
+  //   下方是自己的名牌、提示列與手牌；右側是牌桌紀錄與聊天。
   import { onMount } from 'svelte';
   import { net, act, clock, leave, hostCmd, disconnect, setAuto } from './net.svelte.js';
+  import { artStyle } from './art-style.js';
   import Tile from './Tile.svelte';
   import Melds from './Melds.svelte';
-  import Nameplate from './Nameplate.svelte';
-  import Opponent from './Opponent.svelte';
   import Result from './Result.svelte';
-  import Chat from './Chat.svelte';
   import ConfirmDialog from './ConfirmDialog.svelte';
+  import PlayerCard from './table/PlayerCard.svelte';
+  import SideLog from './table/SideLog.svelte';
 
   let confirmation;
 
@@ -16,6 +20,9 @@
   const at = (k) => (me + k) % 4;
   const mine = $derived(s.seats[me]);
   const isPlayer = $derived(s.you != null);
+  const top = $derived(s.seats[at(2)]);
+  const left = $derived(s.seats[at(3)]);
+  const right = $derived(s.seats[at(1)]);
 
   const auto = $derived(!!mine.auto);
   // 託管時由電腦出手，介面不顯示動作按鈕、手牌也不能點
@@ -30,11 +37,13 @@
   const active = (seat) => s.phase === 'playing' && s.step === 'turn' && s.turn === seat;
   const thinking = (seat) => s.phase === 'playing' && s.step !== 'turn' && s.waiting_on.includes(seat);
 
-  // 選牌：第一下選取、第二下打出（或雙擊）
+  // 選牌：第一下選取、第二下打出
   let selected = $state(null);
   let submittedDecision = null;
   onMount(() => {
-    const cancel = () => { selected = null; };
+    const cancel = () => {
+      selected = null;
+    };
     window.addEventListener('mahjong-cancel-selection', cancel);
     return () => window.removeEventListener('mahjong-cancel-selection', cancel);
   });
@@ -57,130 +66,167 @@
     }
   }
 
-  const lastDiscard = $derived(s.last_discard);
   function isLast(seat, i, river) {
-    return (
-      lastDiscard && lastDiscard.seat === seat && i === river.length - 1 && river[i] === lastDiscard.tile && s.phase === 'playing'
-    );
+    const ld = s.last_discard;
+    return ld && ld.seat === seat && i === river.length - 1 && river[i] === ld.tile && s.phase === 'playing';
   }
 
   const btnClass = { tsumo: 'win', ron: 'win', pung: 'claim', kong: 'claim', chow: 'claim', concealed_kong: 'claim', added_kong: 'claim', pass: 'pass' };
   const btnText = { tsumo: '自摸', ron: '胡', pung: '碰', kong: '槓', chow: '吃', concealed_kong: '暗槓', added_kong: '加槓', pass: '過' };
 
-  const status = $derived.by(() => {
+  const waitingText = $derived.by(() => {
     if (s.phase !== 'playing') return '';
     const name = (i) => s.seats[i]?.name;
-    if (s.step === 'turn') return s.turn === s.you ? '輪到你出牌' : `${name(s.turn)} 思考中…`;
-    if (s.step === 'claims' || s.step === 'rob_kong') {
-      const who = s.waiting_on.filter((i) => i !== s.you).map(name);
-      if (s.waiting_on.includes(s.you)) return '要吃碰胡嗎？';
-      return who.length ? `等待 ${who.join('、')} 決定…` : '';
-    }
-    return '';
+    if (s.step === 'turn') return s.turn === s.you ? '' : `${name(s.turn)} 思考中…`;
+    const who = s.waiting_on.filter((i) => i !== s.you).map(name);
+    return who.length ? `等待 ${who.join('、')} 決定…` : '';
   });
 
   const keyFor = (t, i) => `${t}-${i}`;
+  const backs = (n) => Array.from({ length: n ?? 0 });
 
   let showSide = $state(typeof window === 'undefined' || window.innerWidth >= 1100);
+  let wasWide = typeof window === 'undefined' || window.innerWidth >= 1100;
+  onMount(() => {
+    // 視窗從窄變寬時自動打開紀錄、從寬變窄時收起
+    const onResize = () => {
+      const wide = window.innerWidth >= 1100;
+      if (wide !== wasWide) showSide = wide;
+      wasWide = wide;
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  });
+
+  function askLeave() {
+    if (!isPlayer) return disconnect();
+    confirmation.ask({ message: '離開後由電腦代打，確定？', confirmLabel: '離開房局', onconfirm: leave });
+  }
+  function askEnd() {
+    confirmation.ask({ message: '結束這場遊戲並回到大廳？', confirmLabel: '結束牌局', onconfirm: () => hostCmd('reset') });
+  }
 </script>
 
-<div class="game" class:noside={!showSide}>
-  <div class="board">
-    <!-- 對家 -->
-    <div class="top"><Opponent seat={s.seats[at(2)]} pos="top" active={active(at(2))} thinking={thinking(at(2))} /></div>
-    <!-- 上家 -->
-    <div class="left"><Opponent seat={s.seats[at(3)]} pos="left" active={active(at(3))} thinking={thinking(at(3))} /></div>
-    <!-- 下家 -->
-    <div class="right"><Opponent seat={s.seats[at(1)]} pos="right" active={active(at(1))} thinking={thinking(at(1))} /></div>
+<div class="gamescreen" class:noside={!showSide} style:--table-img="url('/ui/{$artStyle}/table.png')">
+  <div class="tableboard">
+    <!-- 左右兩家的名牌在桌子外側 -->
+    <div class="seat-left"><PlayerCard seat={left} active={active(at(3))} thinking={thinking(at(3))} bubble="right" /></div>
+    <div class="seat-right"><PlayerCard seat={right} active={active(at(1))} thinking={thinking(at(1))} bubble="left" /></div>
 
-    <!-- 中央：牌河 -->
-    <div class="center">
-      {#each [['r-top', 2], ['r-left', 3], ['r-right', 1], ['r-bottom', 0]] as [cls, k]}
-        {@const seat = at(k)}
-        {@const river = s.seats[seat].discards ?? []}
-        <div class="river {cls}">
-          {#each river as t, i}
-            <Tile code={t} size="sm" hl={isLast(seat, i, river)} />
+    <div class="table-wrap">
+      <div class="table">
+        <div class="felt">
+          <!-- 對家 -->
+          <div class="seat-top"><PlayerCard seat={top} variant="top" active={active(at(2))} thinking={thinking(at(2))} /></div>
+          <div class="wall wall-top">
+            {#if top.hand}
+              {#each top.hand as t}<Tile code={t} size="xs" />{/each}
+            {:else}
+              {#each backs(top.hand_count) as _}<span class="back-up"></span>{/each}
+            {/if}
+          </div>
+          <div class="melds melds-top"><Melds melds={top.melds ?? []} flowers={top.flowers ?? []} size="sm" /></div>
+
+          <!-- 上家（左）、下家（右）：直排的手牌牆 -->
+          <div class="wall wall-left">
+            {#if left.hand}
+              {#each left.hand as t}<Tile code={t} size="xs" />{/each}
+            {:else}
+              {#each backs(left.hand_count) as _}<span class="back-side"></span>{/each}
+            {/if}
+          </div>
+          <div class="melds melds-left"><Melds melds={left.melds ?? []} flowers={left.flowers ?? []} size="sm" /></div>
+          <div class="wall wall-right">
+            {#if right.hand}
+              {#each right.hand as t}<Tile code={t} size="xs" />{/each}
+            {:else}
+              {#each backs(right.hand_count) as _}<span class="back-side"></span>{/each}
+            {/if}
+          </div>
+          <div class="melds melds-right"><Melds melds={right.melds ?? []} flowers={right.flowers ?? []} size="sm" /></div>
+
+          <!-- 自己的副露與花放在桌面右下角 -->
+          <div class="melds melds-me"><Melds melds={mine.melds ?? []} flowers={mine.flowers ?? []} size="md" /></div>
+
+          <!-- 牌河 -->
+          {#each [['r-top', 2], ['r-left', 3], ['r-right', 1], ['r-bottom', 0]] as [cls, k]}
+            {@const seat = at(k)}
+            {@const river = s.seats[seat].discards ?? []}
+            <div class="river {cls}">
+              {#each river as t, i}
+                <Tile code={t} size="md" hl={isLast(seat, i, river)} />
+              {/each}
+            </div>
           {/each}
+
+          <!-- 中央資訊 -->
+          <div class="center-panel">
+            <div class="round">{s.round_wind}風圈・第 {s.hand_no} 局{#if s.streak > 0}<span class="streak">連{s.streak}</span>{/if}</div>
+            <div class="left-count"><small>剩餘</small><b>{s.wall_count ?? '-'}</b></div>
+            <div class="timer" class:urgent={remaining != null && remaining <= 5}>
+              {remaining != null && s.phase === 'playing' ? `${remaining} 秒` : ' '}
+            </div>
+          </div>
         </div>
-      {/each}
-      <div class="info">
-        <div class="round">{s.round_wind}風圈 · 第 {s.hand_no} 局</div>
-        <div class="wall"><span>{s.wall_count ?? '-'}</span><small>剩餘</small></div>
-        {#if s.streak > 0}<div class="streak">連 {s.streak}</div>{/if}
-        {#if remaining != null && s.phase === 'playing'}
-          <div class="timer" class:urgent={remaining <= 5}>⏱ {remaining}</div>
-        {/if}
       </div>
     </div>
 
     <!-- 自己 -->
+    <div class="seat-me">
+      <PlayerCard seat={mine} variant="me" active={active(me)} thinking={thinking(me)} isMe={isPlayer} bubble="up" />
+    </div>
     <div class="bottom">
-      <div class="status-row">
-        <Nameplate seat={mine} active={active(me)} thinking={thinking(me)} isMe={isPlayer} />
-        <div class="status" class:mine={s.waiting_on.includes(s.you)}>{status}</div>
-        {#if s.my_waits?.length}
-          <div class="waits">聽：{#each s.my_waits as w}<Tile code={w} size="xs" />{/each}</div>
+      <div class="prompt-row">
+        {#if auto && s.phase === 'playing'}
+          <div class="banner auto-banner">
+            <b>託管中</b><span class="sep"></span><span>電腦正在幫你打</span>
+          </div>
+        {:else if special.length}
+          <div class="actions">
+            {#each special as a (a.id)}
+              <button class="act {btnClass[a.type]}" onclick={() => act(a.id)}>
+                <span>{btnText[a.type]}</span>
+                {#if a.type === 'chow'}
+                  <span class="mini">{#each a.tiles as t}<Tile code={t} size="xs" />{/each}</span>
+                {:else if a.tile && a.type !== 'pass'}
+                  <span class="mini"><Tile code={a.tile} size="xs" /></span>
+                {/if}
+              </button>
+            {/each}
+            {#if remaining != null}<span class="cd" class:urgent={remaining <= 5}>{remaining}s</span>{/if}
+          </div>
+        {:else if canDiscard}
+          <div class="banner turn" title="鍵盤／手把：方向鍵選牌 · Enter／A 確認 · Esc／B 取消">
+            <b>輪到你出牌</b><span class="sep"></span><span>點一下選牌，再點一下打出</span>
+          </div>
+        {:else if waitingText}
+          <div class="banner quiet"><span>{waitingText}</span></div>
+        {:else if !isPlayer}
+          <div class="banner quiet"><span>觀戰中</span></div>
         {/if}
-        <div class="spacer"></div>
+
+        {#if s.my_waits?.length && !auto}
+          <div class="waits">聽 {#each s.my_waits as w}<Tile code={w} size="xs" />{/each}</div>
+        {/if}
+
         {#if isPlayer && s.phase === 'playing'}
-          <button class="small auto-btn" class:on={auto} onclick={() => setAuto(!auto)} title="讓電腦幫你打，隨時可以取消">
-            🤖 {auto ? '取消託管' : '託管'}
+          <button class="auto-btn" class:on={auto} onclick={() => setAuto(!auto)} title="讓電腦幫你打，隨時可以取消">
+            {auto ? '我要自己打' : '託管'}
           </button>
         {/if}
-        <Melds melds={mine.melds ?? []} flowers={mine.flowers ?? []} size="md" />
       </div>
-
-      {#if auto && s.phase === 'playing'}
-        <div class="auto-bar">
-          <span>🤖 託管中，電腦正在幫你打</span>
-          <button class="small" onclick={() => setAuto(false)}>我要自己打</button>
-        </div>
-      {/if}
-
-      {#if special.length}
-        <div class="actions">
-          {#each special as a (a.id)}
-            <button class="act {btnClass[a.type]}" onclick={() => act(a.id)}>
-              <span>{btnText[a.type]}</span>
-              {#if a.type === 'chow'}
-                <span class="mini">{#each a.tiles as t}<Tile code={t} size="xs" />{/each}</span>
-              {:else if a.tile && a.type !== 'pass'}
-                <span class="mini"><Tile code={a.tile} size="xs" /></span>
-              {/if}
-            </button>
-          {/each}
-          {#if remaining != null}<span class="cd" class:urgent={remaining <= 5}>{remaining}s</span>{/if}
-        </div>
-      {/if}
 
       <div class="hand" class:turn={canDiscard}>
         {#each mine.hand ?? [] as t, i (keyFor(t, i))}
-          <Tile
-            code={t}
-            size="xl"
-            clickable={canDiscard}
-            selected={selected === keyFor(t, i)}
-            onclick={() => clickTile(t, keyFor(t, i))}
-          />
+          <Tile code={t} size="xl" clickable={canDiscard} selected={selected === keyFor(t, i)} onclick={() => clickTile(t, keyFor(t, i))} />
         {/each}
         {#if mine.drawn}
           <span class="drawn-gap"></span>
-          <Tile
-            code={mine.drawn}
-            size="xl"
-            clickable={canDiscard}
-            selected={selected === 'drawn'}
-            onclick={() => clickTile(mine.drawn, 'drawn')}
-          />
-        {/if}
-        {#if !isPlayer}
-          <div class="muted spect">觀戰中</div>
+          <span class="drawn">
+            <Tile code={mine.drawn} size="xl" clickable={canDiscard} selected={selected === 'drawn'} onclick={() => clickTile(mine.drawn, 'drawn')} />
+          </span>
         {/if}
       </div>
-      {#if canDiscard && !special.length}
-        <div class="hint">點選／方向鍵選牌 · 再點／Enter／A 確認 · Esc／B 取消{remaining != null ? ` · ${remaining}s` : ''}</div>
-      {/if}
     </div>
 
     {#if s.phase === 'hand_over' || s.phase === 'game_over'}
@@ -189,122 +235,237 @@
   </div>
 
   {#if showSide}
-    <aside class="side card">
-      <div class="side-head">
-        <b>牌桌紀錄</b>
-        <button class="small" onclick={() => (showSide = false)}>收起 ›</button>
-      </div>
-      <Chat showLog />
-      <div class="side-btns">
-        {#if net.isHost}
-          <button class="small danger" onclick={() => confirmation.ask({ message: '結束這場遊戲並回到大廳？', confirmLabel: '結束牌局', onconfirm: () => hostCmd('reset') })}>結束牌局</button>
-        {/if}
-        {#if isPlayer}
-          <button class="small" onclick={() => confirmation.ask({ message: '離開後由電腦代打，確定？', confirmLabel: '離開牌桌', onconfirm: leave })}>離開（電腦代打）</button>
-        {:else}
-          <button class="small" onclick={disconnect}>回首頁</button>
-        {/if}
-      </div>
-    </aside>
+    <SideLog onclose={() => (showSide = false)} onleave={askLeave} onend={net.isHost ? askEnd : null} />
   {:else}
-    <button class="open-side small" onclick={() => (showSide = true)}>‹ 紀錄</button>
+    <button class="open-side" onclick={() => (showSide = true)}>‹ 紀錄</button>
   {/if}
 </div>
 
 <ConfirmDialog bind:this={confirmation} />
 
 <style>
-  .game { position: relative; height: 100%; display: grid; grid-template-columns: 1fr 290px; gap: 10px; padding: 10px; }
-  .game.noside { grid-template-columns: 1fr; }
-  .board {
+  .gamescreen {
     position: relative;
+    height: 100%;
     display: grid;
-    grid-template-columns: minmax(150px, 190px) 1fr minmax(150px, 190px);
-    grid-template-rows: auto 1fr auto;
-    grid-template-areas:
-      'left top right'
-      'left center right'
-      'bottom bottom bottom';
-    min-height: 0;
-    border-radius: 22px;
-    background: radial-gradient(ellipse at 50% 45%, rgba(255, 255, 255, 0.07), transparent 65%);
-    box-shadow: inset 0 0 0 10px #4a2c17, inset 0 0 0 12px #2b190c, inset 0 0 60px rgba(0, 0, 0, 0.5);
-    padding: 16px;
+    grid-template-columns: minmax(0, 1fr) clamp(260px, 21vw, 340px);
+    gap: 12px;
+    padding: 10px 12px 12px;
+    /* 雀館背景：模糊、壓暗，讓牌桌跳出來 */
+    background:
+      radial-gradient(ellipse at 45% 50%, #0000 30%, #000a 100%),
+      linear-gradient(#0006, #0006),
+      var(--scene-parlor) center / cover;
   }
-  .top { grid-area: top; display: flex; justify-content: center; }
-  .left { grid-area: left; overflow: hidden; }
-  .right { grid-area: right; overflow: hidden; display: flex; justify-content: flex-end; }
-  .center {
-    grid-area: center;
+  .gamescreen.noside { grid-template-columns: minmax(0, 1fr); }
+
+  .tableboard {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
     display: grid;
-    grid-template-columns: 1fr minmax(120px, 160px) 1fr;
-    grid-template-rows: 1fr auto 1fr;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(0, 1fr) auto;
     grid-template-areas:
-      '. rtop .'
-      'rleft info rright'
-      '. rbottom .';
-    gap: 8px;
-    min-height: 0;
-    align-items: center;
-    justify-items: center;
+      'sl table sr'
+      'me bottom bottom';
+    column-gap: clamp(8px, 1.2vw, 20px);
+    row-gap: 6px;
   }
-  .river { display: flex; flex-wrap: wrap; gap: 1px; align-content: flex-start; }
-  .r-top { grid-area: rtop; grid-column: 1 / 4; max-width: 440px; align-self: end; justify-content: center; flex-direction: row-reverse; flex-wrap: wrap-reverse; }
-  .r-bottom { grid-area: rbottom; grid-column: 1 / 4; max-width: 440px; align-self: start; justify-content: center; }
-  .r-left { grid-area: rleft; max-width: 150px; justify-self: end; justify-content: flex-end; }
-  .r-right { grid-area: rright; max-width: 150px; justify-self: start; }
-  .info {
-    grid-area: info;
-    width: 100%;
+  .seat-left { grid-area: sl; align-self: center; }
+  .seat-right { grid-area: sr; align-self: center; }
+  .seat-me { grid-area: me; align-self: end; z-index: 3; }
+
+  /* ───── 牌桌：table.png 是 1600×1100，桌子在 (300,50) 起 1000×1000 ───── */
+  .table-wrap { grid-area: table; min-height: 0; display: grid; place-items: center; container-type: size; }
+  .table {
+    position: relative;
+    width: min(100cqw, 100cqh);
     aspect-ratio: 1;
-    max-width: 150px;
-    border-radius: 18px;
-    background: rgba(0, 0, 0, 0.38);
-    border: 1px solid var(--line);
+    background: var(--table-img) 50% 50% / 160% 110% no-repeat;
+    filter: drop-shadow(0 18px 24px #000a);
+  }
+  /* 絨布區（木框約占 4.6%） */
+  .felt { position: absolute; inset: 4.6%; container-type: size; }
+
+  .seat-top { position: absolute; top: -3%; left: 50%; transform: translateX(-50%); z-index: 4; }
+
+  .wall { position: absolute; display: flex; gap: 1px; }
+  .wall-top { top: 17%; left: 50%; transform: translateX(-50%); }
+  .wall-left { left: 3%; top: 50%; transform: translateY(-50%); flex-direction: column; }
+  .wall-right { right: 3%; top: 50%; transform: translateY(-50%); flex-direction: column; }
+  .wall :global(.tile) { --w: clamp(14px, 4.1cqw, 30px); margin-bottom: 0; }
+  .wall-left :global(.tile), .wall-right :global(.tile) { --w: clamp(12px, 2.9cqh, 20px); margin-bottom: calc(var(--w) * 0.1); }
+  /* 牌背：對家是立著的長方形，左右兩家是側面 */
+  .back-up, .back-side {
+    display: block;
+    background: var(--tile-back);
+    box-shadow: inset 0 -3px 0 var(--tile-face), 0 2px 0 var(--tile-edge), 1px 3px 4px #0006;
+    border-radius: 2px;
+  }
+  .back-up { width: clamp(14px, 4.1cqw, 30px); height: clamp(20px, 5.6cqw, 42px); }
+  .back-side { width: clamp(22px, 6cqw, 42px); height: clamp(13px, 3.9cqh, 27px); box-shadow: inset -3px 0 0 var(--tile-face), 0 2px 0 var(--tile-edge), 1px 3px 4px #0006; }
+  .wall-right .back-side { box-shadow: inset 3px 0 0 var(--tile-face), 0 2px 0 var(--tile-edge), 1px 3px 4px #0006; }
+
+  .melds { position: absolute; }
+  .melds :global(.melds) { gap: 4px; }
+  .melds-top { top: 17%; right: 2%; max-width: 22%; }
+  .melds-top :global(.melds) { justify-content: flex-end; }
+  .melds-left { left: 12%; bottom: 3%; max-width: 30%; }
+  .melds-right { right: 12%; top: 3%; max-width: 30%; }
+  .melds-right :global(.melds) { justify-content: flex-end; }
+  .melds-me { right: 2%; bottom: 2%; max-width: 46%; }
+  .melds-me :global(.melds) { justify-content: flex-end; }
+  .melds :global(.tile) { --w: clamp(16px, 4cqw, 30px); }
+
+  /* 牌河：上下兩家每排 8 張，左右兩家每列 6 張；往外長 */
+  .river { position: absolute; display: flex; gap: 2px; }
+  .river :global(.tile) { --w: clamp(20px, 5.4cqw, 42px); margin-bottom: calc(var(--w) * 0.12); }
+  .r-top {
+    bottom: 61.5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(8 * (clamp(20px, 5.4cqw, 42px) + 2px));
+    flex-direction: row-reverse;
+    flex-wrap: wrap-reverse;
+  }
+  .r-bottom {
+    top: 61.5%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: calc(8 * (clamp(20px, 5.4cqw, 42px) + 2px));
+    flex-wrap: wrap;
+  }
+  .r-left {
+    right: 63%;
+    top: 50%;
+    transform: translateY(-50%);
+    height: calc(6 * (clamp(20px, 5.4cqw, 42px) * 1.48 + 2px));
+    flex-direction: column;
+    flex-wrap: wrap-reverse;
+    align-content: flex-start;
+  }
+  .r-right {
+    left: 63%;
+    top: 50%;
+    transform: translateY(-50%);
+    height: calc(6 * (clamp(20px, 5.4cqw, 42px) * 1.48 + 2px));
+    flex-direction: column-reverse;
+    flex-wrap: wrap;
+  }
+
+  .center-panel {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 27%;
+    aspect-ratio: 1.45;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 4px;
+    gap: 2%;
+    background: color-mix(in srgb, var(--table-center) 92%, transparent);
+    border: 1px solid var(--art-line);
+    border-radius: var(--surface-radius);
+    box-shadow: inset 0 0 0 4px #0007, inset 0 0 0 5px var(--art-line), 0 8px 18px #0009;
+    font-family: var(--heading-font);
+    color: var(--text);
   }
-  .round { font-size: 12px; color: var(--muted); }
-  .wall { display: flex; flex-direction: column; align-items: center; line-height: 1; }
-  .wall span { font-size: 34px; font-weight: 700; color: var(--gold); font-variant-numeric: tabular-nums; }
-  .wall small { font-size: 11px; color: var(--muted); }
-  .streak { font-size: 12px; background: #c1121f; padding: 1px 8px; border-radius: 6px; }
-  .timer { font-size: 15px; font-variant-numeric: tabular-nums; }
-  .timer.urgent, .cd.urgent { color: var(--red); font-weight: 700; }
-  .bottom { grid-area: bottom; display: flex; flex-direction: column; gap: 8px; align-items: center; padding-top: 6px; }
-  .status-row { width: 100%; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-  .spacer { flex: 1; }
-  .status { font-size: 15px; color: var(--muted); }
-  .status.mine { color: var(--gold); font-weight: 700; }
-  .waits { display: flex; align-items: center; gap: 2px; font-size: 13px; color: var(--accent); background: rgba(0, 0, 0, 0.3); padding: 2px 8px 0; border-radius: 8px; }
-  .actions { display: flex; gap: 10px; align-items: center; animation: pop 0.2s ease; }
-  @keyframes pop { from { transform: scale(0.9); opacity: 0; } }
-  .act { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: 700; padding: 8px 18px; border-radius: 14px; }
-  .act.win { background: linear-gradient(180deg, #ff6b6b, #c1121f); border: none; box-shadow: 0 0 16px rgba(255, 80, 80, 0.6); }
-  .act.claim { background: linear-gradient(180deg, #4cc9f0, #1d4e89); border: none; }
-  .act.pass { background: rgba(255, 255, 255, 0.12); }
-  .mini { display: inline-flex; gap: 1px; }
-  .cd { font-variant-numeric: tabular-nums; color: var(--muted); }
-  .hand { display: flex; align-items: flex-end; gap: 3px; min-height: 86px; padding-top: 14px; }
-  .drawn-gap { width: 18px; }
-  .auto-btn.on { background: rgba(76, 201, 240, 0.3); border-color: #4cc9f0; }
-  .auto-bar {
+  .round { font-size: clamp(11px, 2.4cqw, 19px); letter-spacing: 0.08em; }
+  .streak { margin-left: 6px; padding: 0 6px; font-size: 0.8em; background: #b3171f; color: #fff; border-radius: var(--small-radius); }
+  .left-count { display: flex; align-items: baseline; gap: 8px; }
+  .left-count small { font-size: clamp(11px, 2.2cqw, 18px); }
+  .left-count b { font-size: clamp(26px, 7.5cqw, 60px); line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; text-shadow: 0 2px 0 #0008; }
+  .timer {
+    width: 80%;
+    text-align: center;
+    border-top: 1px solid var(--art-line);
+    padding-top: 2%;
+    font-size: clamp(11px, 2.3cqw, 18px);
+    font-variant-numeric: tabular-nums;
+  }
+  .timer.urgent { color: var(--red); font-weight: 700; }
+
+  /* ───── 下方：提示列＋手牌 ───── */
+  .bottom { grid-area: bottom; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .prompt-row { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 46px; width: 100%; flex-wrap: wrap; }
+  .banner {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: rgba(76, 201, 240, 0.18);
-    border: 1px solid #4cc9f0;
-    border-radius: 12px;
-    padding: 6px 8px 6px 14px;
-    font-size: 15px;
+    padding: 8px 26px;
+    background: var(--art-panel);
+    border: 1px solid var(--art-line);
+    border-radius: var(--surface-radius);
+    box-shadow: inset 0 0 0 3px #0008, inset 0 0 0 4px color-mix(in srgb, var(--art-line) 60%, transparent), 0 6px 14px #0008;
   }
-  .hint { font-size: 12px; color: var(--muted); }
-  .spect { align-self: center; }
-  .side { display: flex; flex-direction: column; gap: 10px; min-height: 0; padding: 14px; }
-  .side-head { display: flex; justify-content: space-between; align-items: center; }
-  .side-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+  .banner b { font-family: var(--heading-font); font-size: clamp(18px, 1.7vw, 26px); letter-spacing: 0.18em; color: var(--gold); }
+  .banner span { font-size: 14px; color: var(--text); }
+  .banner .sep { width: 1px; align-self: stretch; background: var(--art-line); }
+  .banner.quiet span { color: var(--muted); font-size: 15px; }
+  .banner.turn { border-color: var(--gold); }
+  .auto-banner b { color: var(--accent); }
+
+  .actions { display: flex; gap: 10px; align-items: center; animation: rise 0.2s ease; }
+  @keyframes rise { from { transform: translateY(8px); opacity: 0; } }
+  .act { display: flex; align-items: center; gap: 8px; font-family: var(--heading-font); font-size: 24px; font-weight: 700; padding: 6px 22px; }
+  .mini { display: inline-flex; gap: 1px; }
+  .cd { font-variant-numeric: tabular-nums; color: var(--muted); }
+  .cd.urgent { color: var(--red); font-weight: 700; }
+
+  .waits {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 10px 0;
+    font-size: 13px;
+    color: var(--accent);
+    background: var(--art-panel);
+    border: 1px solid var(--art-line);
+    border-radius: var(--surface-radius);
+  }
+  .auto-btn {
+    min-width: 128px;
+    padding: 8px 18px;
+    font-family: var(--heading-font);
+    font-size: 19px;
+    letter-spacing: 0.2em;
+    background: var(--art-panel);
+    color: var(--gold);
+    border: 1px solid var(--art-line);
+    box-shadow: inset 0 0 0 3px #0008, inset 0 0 0 4px color-mix(in srgb, var(--art-line) 60%, transparent);
+  }
+  .auto-btn.on { color: var(--accent); border-color: var(--accent); }
+
+  .hand { display: flex; align-items: flex-end; gap: 3px; max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 16px 6px 6px; }
+  .hand :global(.tile) { flex-shrink: 0; --w: clamp(34px, 3.1vw, 54px); }
+  .drawn-gap { flex: none; width: clamp(10px, 1.2vw, 20px); }
+  .drawn { display: inline-flex; border-radius: 6px; box-shadow: 0 0 0 2px var(--gold), 0 0 18px color-mix(in srgb, var(--gold) 70%, transparent); }
+
   .open-side { position: absolute; right: 12px; top: 12px; z-index: 5; }
+
+  /* ───── 窄螢幕：名牌縮小、紀錄改成浮在上面 ───── */
+  @media (max-width: 1100px) {
+    .gamescreen { grid-template-columns: minmax(0, 1fr); }
+    .gamescreen :global(.sidelog) {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      bottom: 8px;
+      width: min(330px, calc(100% - 16px));
+      z-index: 40;
+    }
+    .seat-left :global(.v-side), .seat-right :global(.v-side) { width: 110px; }
+  }
+  @media (max-width: 760px) {
+    .tableboard {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto minmax(300px, 1fr) auto auto;
+      grid-template-areas: 'sides' 'table' 'bottom' 'me';
+    }
+    .seat-left, .seat-right { display: none; }
+    .seat-me { justify-self: center; }
+  }
 </style>
