@@ -429,8 +429,8 @@
   .rule-form input { width: 100px; }
   .rule-actions { display: flex; justify-content: center; gap: 16px; margin-top: 20px; }
 
-  /* ── 窄螢幕：座位改成一般的兩欄，右側移到下面 ── */
-  @media (max-width: 1100px) {
+  /* ── 窄螢幕：座位改成一般的兩欄，右側移到下面（1024 寬的橫向螢幕仍用四角排法，不用捲動） ── */
+  @media (max-width: 900px) {
     .lobby2 { height: auto; min-height: 100%; overflow: auto; }
     .lobby-head { grid-template-columns: 1fr auto; }
     .head-brand { display: none; }

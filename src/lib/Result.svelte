@@ -123,6 +123,8 @@
     overflow: hidden;
   }
   .portrait { animation: slide 0.5s cubic-bezier(0.2, 1.3, 0.4, 1); margin-bottom: -4px; }
+  /* 視窗不高時立繪縮小，結果視窗才不用捲動 */
+  .portrait :global(.avatar) { width: clamp(110px, 21vh, 170px) !important; height: clamp(110px, 21vh, 170px) !important; }
   @keyframes slide { from { transform: translateX(-60px); opacity: 0; } }
   .say { flex: 1; padding-bottom: 26px; animation: fade 0.6s ease 0.2s both; }
   .say .who { color: var(--gold); font-weight: 700; font-size: 14px; }
@@ -131,13 +133,13 @@
   .hand { display: flex; flex-wrap: wrap; gap: 2px; align-items: flex-end; margin-bottom: 8px; }
   .gap { width: 14px; }
   .wt { display: flex; align-items: center; gap: 6px; margin: 4px 0 10px; }
-  .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; margin: 10px 0; }
+  .items { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; margin: clamp(6px, 1.2vh, 10px) 0; }
   .item { display: flex; justify-content: space-between; background: rgba(255, 255, 255, 0.06); padding: 6px 10px; border-radius: 8px; }
   .item b { color: var(--gold); }
   .item.dealer { background: rgba(193, 18, 31, 0.18); }
   .item small { color: var(--muted); font-size: 11px; }
   .pay { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
-  .deltas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 12px 0; }
+  .deltas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: clamp(6px, 1.4vh, 12px) 0; }
   .d { display: flex; flex-direction: column; align-items: center; background: rgba(0, 0, 0, 0.3); border-radius: 10px; padding: 8px; font-size: 13px; }
   .d.me { outline: 1px solid var(--gold); }
   .d b { font-size: 20px; }

@@ -262,10 +262,10 @@
   .back-link { position: relative; z-index: 1; color: var(--gold); text-decoration: none; border: 1px solid var(--line); padding: 9px 18px; background: #071c18d9; white-space: nowrap; font-family: var(--heading-font); letter-spacing: .15em; }
   .room-layout { display: grid; grid-template-columns: minmax(0, 52%) minmax(0, 1fr); gap: clamp(12px, 2vw, 30px); align-items: stretch; }
   .room-panel { padding: clamp(10px, 2.2vh, 30px) clamp(18px, 2.4vw, 40px); }
-  .field { display: grid; grid-template-columns: clamp(96px, 8vw, 132px) minmax(0, 1fr); gap: 14px; align-items: center; margin: clamp(4px, 1.1vh, 14px) 0; }
+  .field { display: grid; grid-template-columns: clamp(96px, 8vw, 132px) minmax(0, 1fr); gap: 14px; align-items: center; margin: clamp(3px, 0.8vh, 14px) 0; }
   .field > span { color: var(--text); font: 600 clamp(15px, min(1.45vw, 2.6vh), 23px) var(--heading-font); letter-spacing: .2em; }
   /* 角色格的圖片高度跟著視窗高度走 */
-  .character-field { --pic-h: clamp(52px, 10vh, 150px); }
+  .character-field { --pic-h: clamp(48px, 9vh, 150px); }
   .field input { width: 100%; min-width: 0; font-size: clamp(16px, 1.3vw, 20px); }
   .field .port-input { max-width: 220px; }
   .character-field { align-items: start; }
@@ -288,7 +288,7 @@
   .connection-status { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 18px 0; overflow-wrap: anywhere; }
   .character-stage { display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; overflow: hidden; }
   /* 立繪寬度也受視窗高度限制，不然寬螢幕時會比畫面還高 */
-  .large-portrait { width: min(100%, calc(100vh - 230px)); align-self: center; margin-bottom: -40px; filter: drop-shadow(0 6px 14px #0009); }
+  .large-portrait { width: min(100%, calc(100vh - 240px)); align-self: center; margin-bottom: -40px; filter: drop-shadow(0 6px 14px #0009); }
   .large-portrait :global(.avatar) { width: 100% !important; height: auto !important; aspect-ratio: 1; }
   .large-portrait :global(img) { object-fit: contain; }
   .portrait-caption { position: relative; padding: 18px 24px 16px; margin: 0 6% 12px 18%; }

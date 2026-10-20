@@ -60,11 +60,12 @@
   .settings-panel { padding: clamp(10px, 2.2vh, 40px) clamp(20px, 2.5vw, 40px); }
   h2 { display: flex; align-items: center; gap: 18px; color: var(--gold); font: 600 22px 'DFKai-SB', '標楷體', serif; letter-spacing: .18em; margin: 22px 0 16px; }
   h2::after { content: ''; flex: 1; height: 1px; background: var(--line); }
-  .style-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+  /* 六種畫風：寬螢幕排成一列，比較窄時三欄兩列，才不會把下面的設定擠出畫面 */
+  .style-options { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(8px, 1vw, 14px); }
   .style-option { display: flex; flex-direction: column; padding: 0; position: relative; overflow: hidden; border-radius: 2px; border: 1px solid #a98745; background: #021d18; }
   .style-option img { width: 100%; aspect-ratio: 1.7; height: clamp(52px, 8vh, 160px); object-fit: cover; }
   .style-option img.pixel { image-rendering: pixelated; }
-  .style-option span { padding: 9px 2px; font: 600 19px 'DFKai-SB', '標楷體', serif; color: var(--gold); }
+  .style-option span { padding: clamp(4px, 1vh, 9px) 2px; font: 600 clamp(15px, 1.2vw, 19px) 'DFKai-SB', '標楷體', serif; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .style-option.selected { box-shadow: 0 0 0 2px #e4be60, 0 0 14px #e8c45e77; }
   .check { position: absolute; right: 7px; top: 7px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff0bd; background: #8e681c; color: #fff0bd; font-size: 18px; }
   .audio-settings { display: grid; gap: clamp(6px, 1.6vh, 18px); }
@@ -83,6 +84,9 @@
   .settings-host :global(.avatar) { width: min(100%, calc(100vh - 260px)) !important; height: auto !important; aspect-ratio: 1; margin: 0 auto; filter: drop-shadow(0 4px 12px #000a); }
   .settings-host :global(img) { object-fit: contain; }
   .settings-host p { padding: 18px; line-height: 1.7; margin: 0 0 10px; text-align: center; }
+  @media (max-width: 900px) {
+    .style-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
   @media (max-width: 800px) {
     .settings-layout { grid-template-columns: 1fr; }
     .settings-host { display: none; }

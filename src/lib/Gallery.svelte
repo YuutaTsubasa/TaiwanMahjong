@@ -65,7 +65,8 @@
   .character-option span { display: block; padding: 6px; font: 600 19px 'DFKai-SB', '標楷體', serif; letter-spacing: .16em; color: var(--gold); }
   button.selected { border-color: #ffe995; box-shadow: 0 0 0 2px #caa344, 0 0 12px #e8c45e88; }
   .gallery-portrait { align-self: end; min-width: 0; margin: 0 -55px 0 -35px; filter: drop-shadow(0 6px 14px #0008); }
-  .gallery-portrait :global(.avatar) { width: 100% !important; height: auto !important; aspect-ratio: 1; }
+  /* 立繪寬度也受視窗高度限制，不然寬螢幕時會比畫面還高 */
+  .gallery-portrait :global(.avatar) { width: min(100%, calc(100vh - 190px)) !important; height: auto !important; aspect-ratio: 1; margin: 0 auto; }
   .gallery-portrait :global(img) { object-fit: contain; }
   .detail-panel { padding: clamp(18px, 2.2vw, 34px); position: relative; }
   .detail-panel :global(.ornate) { margin: 4px 0 6px; }
@@ -77,7 +78,7 @@
   .expressions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
   .expression-option span { font-size: 12px; padding: 6px 2px; white-space: nowrap; }
   blockquote { margin: 0; min-height: 94px; display: grid; place-items: center; border: 1px solid var(--line); background: #0005; padding: 14px; font: 20px/1.7 'DFKai-SB', '標楷體', serif; color: #ffecc5; }
-  @media (max-width: 1050px) {
+  @media (max-width: 900px) {
     .gallery-layout { grid-template-columns: minmax(220px, 32%) minmax(0, 1fr); }
     .gallery-portrait { grid-column: 2; grid-row: 1; max-width: 400px; justify-self: center; margin: 0; }
     .detail-panel { grid-column: 1 / -1; }
