@@ -134,7 +134,11 @@ html[data-ui-style] .game { background: linear-gradient(#001d1799, #001d1799), v
 html[data-ui-style] button.tile {
   padding: 0;
   min-height: 0;
-  font: inherit;
+  /* 只重設大小與粗細；字型交給 Tile 自己（楷書），可點和不可點的牌才會長得一樣 */
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  letter-spacing: normal;
   color: var(--tile-blue);
   touch-action: manipulation;
 }
