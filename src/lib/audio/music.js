@@ -8,10 +8,49 @@
 //       rhythm：一小節 8 格（八分音符）；x = 短促、W = 延長整個和弦
 //   { kind: 'drums',  k, s, h, o, hits }          一小節 16 格，x 表示打；hits 是 [種類, 拍] 的額外打擊
 // 長度（拍數）以最長的旋律音軌為準。
+// 曲子可以設 gain（0～1）調整整首的音量。
 
 import { audioContext, buses, fmNote, ssgNote, drum, parseMML, chordNotes } from './synth.js';
 
 export const SONGS = {
+  // 標題：夜晚的雀館。慢一點、帶點 city pop 的 F 大調爵士和弦
+  title: {
+    bpm: 92,
+    loop: true,
+    gain: 0.5, // 和弦層比較厚，整首壓小一點，跟其他曲子音量一致
+    tracks: [
+      {
+        kind: 'fm',
+        patch: 'lead',
+        pan: 0.12,
+        mml: `o5 l8 r c f a >c4< a g | e4. d c+4 e4 | d f a >c d4. c< | b-4 a g e4 g4 |
+              a4. g a >c e4< | d4 f a >d4 c4< | c4 e g f+4 a4 | g4. f e4 r4`,
+      },
+      {
+        kind: 'fm',
+        patch: 'bass',
+        mml: `o2 l8 f4. f >c4< a4 | e4. e a4 a4 | d4. d a4 >c4< | g4. g >c4 c4< |
+              f4. f >c4< a4 | b-4. b- >f4< b-4 | a4. a d4 d4 | g4. g >c4 c4<`,
+      },
+      {
+        kind: 'chords',
+        patch: 'epiano',
+        prog: 'Fmaj7 Em7:2 A7:2 Dm7 Gm7:2 C7:2 Fmaj7 Bbmaj7 Am7:2 D7:2 Gm7:2 C7:2',
+        rhythm: '..x..x.x',
+        pan: -0.3,
+        vel: 0.6,
+      },
+      {
+        kind: 'chords',
+        patch: 'strings',
+        prog: 'Fmaj7 Em7:2 A7:2 Dm7 Gm7:2 C7:2 Fmaj7 Bbmaj7 Am7:2 D7:2 Gm7:2 C7:2',
+        rhythm: 'W.......',
+        vel: 0.45,
+      },
+      { kind: 'drums', k: 'x.......x.....x.', s: '....x.......x...', h: 'x.x.x.x.x.x.x.x.', o: '..............x.' },
+    ],
+  },
+
   // 大廳：午後的麻將館，輕快的 F 大調
   lobby: {
     bpm: 120,
@@ -214,6 +253,7 @@ export class Player {
     const { events, length } = compiledSong(song);
     const spb = 60 / song.bpm;
     const out = ctx.createGain();
+    out.gain.value = song.gain ?? 1;
     out.connect(buses.bgm);
     this.out = out;
     let start = ctx.currentTime + 0.08;

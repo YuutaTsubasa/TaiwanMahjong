@@ -58,11 +58,8 @@ function unlock() {
 if (typeof window !== 'undefined') {
   window.addEventListener('pointerdown', unlock, { capture: true });
   window.addEventListener('keydown', unlock, { capture: true });
-  // 一般按鈕的輕微按鍵聲（牌桌上的動作按鈕另外有音效，所以略過 .act）
-  window.addEventListener('click', (e) => {
-    const b = e.target.closest?.('button');
-    if (b && !b.classList.contains('act')) sfx.click();
-  });
+  // 介面音效：游標移動、確定、返回、選角色…（見 installUiSounds）
+  installUiSounds();
 }
 const ready = () => unlocked && audioContext()?.state === 'running';
 
@@ -163,9 +160,106 @@ export const sfx = {
   /** 一般按鈕 */
   click() {
     if (!ready()) return;
-    noiseHit(out(), now(), { type: 'highpass', freq: 5000, vol: 0.08, decay: 0.02 });
+    ssgNote(out(), 81, now(), 0.03, 1.4);
+  },
+
+  // ── 介面音效（PC-98 遊戲選單的感覺：游標移動嗶一聲、確定往上、取消往下） ──
+  /** 游標移到另一個選項 */
+  cursor() {
+    if (!ready()) return;
+    ssgNote(out(), 88, now(), 0.022, 1.2);
+  },
+  /** 確定（主要按鈕、選單項目） */
+  confirm() {
+    if (!ready()) return;
+    const t = now();
+    ssgNote(out(), 84, t, 0.045, 2);
+    ssgNote(out(), 91, t + 0.055, 0.07, 2);
+  },
+  /** 返回、取消 */
+  back() {
+    if (!ready()) return;
+    const t = now();
+    ssgNote(out(), 86, t, 0.045, 1.8);
+    ssgNote(out(), 79, t + 0.055, 0.07, 1.8);
+  },
+  /** 選角色 */
+  pick() {
+    if (!ready()) return;
+    const t = now();
+    fmNote(out(), 'bell', 84, t, 0.12, 0.8);
+    fmNote(out(), 'bell', 91, t + 0.07, 0.2, 0.8);
+  },
+  /** 不能選（例如還沒解鎖的隱藏角色） */
+  deny() {
+    if (!ready()) return;
+    const t = now();
+    ssgNote(out(), 47, t, 0.06, 2);
+    ssgNote(out(), 47, t + 0.09, 0.06, 2);
+  },
+  /** 選起一張手牌 */
+  select() {
+    if (!ready()) return;
+    fmNote(out(), 'wood', 91, now(), 0.03, 0.6);
   },
 };
+
+// 依元件種類決定介面音效。用事件委派，所有頁面自動套用。
+const INTERACTIVE = 'a[href], button, [role="radio"], [role="switch"], input[type="range"]';
+const isBack = (el) =>
+  el.matches('.back-link, a[href="#title"], .fancy.red, .close, .exit, .end, .open-side') ||
+  /返回|取消|離開|回首頁|回標題|關閉/.test(el.textContent || '');
+
+function uiSoundFor(el) {
+  if (el.closest('.pgrid .cell')) return el.closest('.cell').classList.contains('locked') ? 'deny' : 'pick';
+  if (el.closest('.hand') && el.matches('.tile, .tile *')) return null; // 手牌另外處理
+  if (el.matches('.act')) return null; // 吃碰胡的音效等伺服器回應後才播
+  if (el.matches('.copy-btn, .send, .seat-btn, .small')) return 'click';
+  if (isBack(el)) return 'back';
+  if (el.matches('.fancy.gold, .menu-item, .tabs button, .subtabs button, .seg button, .style-option, .auto-btn')) return 'confirm';
+  return 'click';
+}
+
+let lastHover = null;
+let lastHoverAt = 0;
+function hoverSound(el) {
+  if (!el || el === lastHover) return;
+  lastHover = el;
+  const t = performance.now();
+  if (t - lastHoverAt < 45) return; // 滑過一排按鈕時不要連珠砲
+  lastHoverAt = t;
+  sfx.cursor();
+}
+
+function installUiSounds() {
+  window.addEventListener('pointerover', (e) => {
+    if (e.pointerType === 'touch') return;
+    const el = e.target.closest?.(`${INTERACTIVE}, .hand .tile.clickable`);
+    if (el && !el.disabled) hoverSound(el);
+    else if (!el) lastHover = null;
+  });
+  // 鍵盤／手把移動焦點也嗶一聲（滑鼠點擊造成的 focus 不算）
+  window.addEventListener('focusin', (e) => {
+    const el = e.target;
+    if (el?.matches?.(':focus-visible') && el.matches(`${INTERACTIVE}, .tile`)) hoverSound(el);
+  });
+  window.addEventListener(
+    'click',
+    (e) => {
+      const tile = e.target.closest?.('.hand .tile.clickable');
+      if (tile) {
+        // 第一下是選牌（打出去時另有打牌的聲音）
+        if (!tile.classList.contains('selected')) sfx.select();
+        return;
+      }
+      const el = e.target.closest?.(INTERACTIVE);
+      if (!el || el.disabled) return;
+      const kind = uiSoundFor(el);
+      if (kind) sfx[kind]();
+    },
+    { capture: true },
+  );
+}
 
 // ───────── 依牌局狀態決定要放什麼 ─────────
 let lastSeq = null;
@@ -178,7 +272,7 @@ export function onGameState(state) {
     lastSeq = null;
     lastDecision = null;
     lastPhase = null;
-    setBgm('lobby');
+    setBgm('title');
     return;
   }
   const me = state.you;
