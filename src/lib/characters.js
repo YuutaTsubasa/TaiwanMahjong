@@ -12,6 +12,7 @@
 //   accent    飾品顏色
 
 import { asset } from './site.js';
+import { ART_STYLES } from './art-style.js';
 
 // 90 年代賽璐璐動畫風格，五種表情均使用獨立透明 PNG。
 function characterImages(id, style = 'anime90') {
@@ -194,11 +195,7 @@ export const CHARACTERS = [
   },
 ].map((character) => ({
   ...character,
-  imageStyles: {
-    anime90: character.images,
-    pc98: characterImages(character.id, 'pc98'),
-    msdos: characterImages(character.id, 'msdos'),
-  },
+  imageStyles: Object.fromEntries(ART_STYLES.map(({ id }) => [id, characterImages(character.id, id)])),
 }));
 
 const BY_ID = Object.fromEntries(CHARACTERS.map((c) => [c.id, c]));

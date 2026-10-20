@@ -2,6 +2,9 @@ import { test, afterEach } from 'node:test';
 import assert from 'node:assert/strict';
 import { get } from 'svelte/store';
 import * as characters from '../src/lib/characters.js';
+import { readFileSync } from 'node:fs';
+
+const STYLE_IDS = ['anime90', 'pc98', 'msdos', 'taiwan-print', 'gameboy', 'modern-paint'];
 
 const originalStorage = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
 afterEach(() => {
@@ -24,7 +27,7 @@ test('each style resolves a different complete set without changing identities',
   assert.equal(typeof characters.getCharacterImage, 'function');
   const paths = new Set();
   for (const c of characters.CHARACTERS) {
-    for (const style of ['anime90', 'pc98', 'msdos']) {
+    for (const style of STYLE_IDS) {
       for (const expression of ['normal', 'happy', 'surprised', 'sad', 'win']) {
         const expected = `/characters/${c.id}/${style === 'anime90' ? '' : style + '/'}${expression}.png`;
         assert.equal(characters.getCharacterImage(c.id, expression, style), expected);
@@ -32,7 +35,7 @@ test('each style resolves a different complete set without changing identities',
       }
     }
   }
-  assert.equal(paths.size, 105);
+  assert.equal(paths.size, 210);
 });
 
 test('Ayi is hidden from new players but renderable for opponents and unlocked players', () => {
@@ -53,7 +56,7 @@ test('unknown style, expression and character have safe portrait fallbacks', () 
 test('first visit defaults to anime, switching notifies subscribers and persists', async () => {
   const data = storageWith(null);
   const { artStyle, setArtStyle, ART_STYLES } = await freshPreference();
-  assert.deepEqual(ART_STYLES.map(s => s.id), ['anime90', 'pc98', 'msdos']);
+  assert.deepEqual(ART_STYLES.map(s => s.id), STYLE_IDS);
   const seen = [];
   const stop = artStyle.subscribe(s => seen.push(s));
   setArtStyle('pc98');
@@ -64,8 +67,40 @@ test('first visit defaults to anime, switching notifies subscribers and persists
 });
 
 test('a new instance restores a valid saved style', async () => {
-  storageWith('pc98');
-  assert.equal(get((await freshPreference()).artStyle), 'pc98');
+  for (const style of STYLE_IDS) {
+    const data = storageWith(null);
+    const preference = await freshPreference();
+    preference.setArtStyle(style);
+    assert.equal(data.get('mj_art_style'), style);
+    assert.equal(get((await freshPreference()).artStyle), style);
+  }
+});
+
+test('only pixel-art styles request nearest-neighbor rendering', async () => {
+  const { isPixelStyle } = await freshPreference();
+  for (const style of STYLE_IDS) {
+    assert.equal(isPixelStyle(style), ['pc98', 'msdos', 'gameboy'].includes(style));
+  }
+  assert.equal(isPixelStyle('unknown'), false);
+});
+
+test('every selectable style has complete PNG artwork on disk', () => {
+  function png(path, dimensions) {
+    const bytes = readFileSync(new URL(`../public${path}`, import.meta.url));
+    assert.equal(bytes.subarray(1, 4).toString(), 'PNG', path);
+    if (dimensions) assert.deepEqual([bytes.readUInt32BE(16), bytes.readUInt32BE(20)], dimensions, path);
+  }
+  for (const style of STYLE_IDS) {
+    for (const c of characters.CHARACTERS) {
+      for (const expression of ['normal', 'happy', 'surprised', 'sad', 'win']) {
+        png(characters.getCharacterImage(c.id, expression, style), [512, 512]);
+      }
+    }
+    png(`/ui/${style}/logo.png`, [1400, 420]);
+    png(`/ui/${style}/table.png`, [1600, 1100]);
+    png(`/ui/${style}/title-scene.png`);
+    png(`/ui/${style}/parlor.png`);
+  }
 });
 
 test('invalid saved preference falls back; invalid updates are ignored', async () => {

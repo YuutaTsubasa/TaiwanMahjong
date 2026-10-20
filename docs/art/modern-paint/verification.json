@@ -1,0 +1,587 @@
+[
+  {
+    "file": "public/characters/xiaocui/modern-paint/normal.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      60,
+      16,
+      451,
+      495
+    ],
+    "transparentPixels": 89457,
+    "outer16Nontransparent": 0,
+    "sha256": "01869e1d2bc8772b99d66aa580b479fa9a208a4bed55ef930bb7a1c79b75e01f"
+  },
+  {
+    "file": "public/characters/xiaocui/modern-paint/happy.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      66,
+      16,
+      445,
+      495
+    ],
+    "transparentPixels": 95189,
+    "outer16Nontransparent": 0,
+    "sha256": "359bebdaa461970544bcc1c313ddb127e5f60baa787633fc15d2ca60462febe5"
+  },
+  {
+    "file": "public/characters/xiaocui/modern-paint/surprised.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      67,
+      16,
+      443,
+      495
+    ],
+    "transparentPixels": 94945,
+    "outer16Nontransparent": 0,
+    "sha256": "471c0a86f6191609f31ccdc354655561991106c062a58d7138071d83a2c558ee"
+  },
+  {
+    "file": "public/characters/xiaocui/modern-paint/sad.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      61,
+      16,
+      449,
+      495
+    ],
+    "transparentPixels": 88342,
+    "outer16Nontransparent": 0,
+    "sha256": "0f0e1b55347090ceb9de2e138f36df0239e08c5a54255215b13b8bd564c5ea1e"
+  },
+  {
+    "file": "public/characters/xiaocui/modern-paint/win.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      71,
+      16,
+      439,
+      495
+    ],
+    "transparentPixels": 103637,
+    "outer16Nontransparent": 0,
+    "sha256": "45e493c5c2ff605be0453ea4df41ad9360f6777f1e2f7c66abf42d263d64bc87"
+  },
+  {
+    "file": "public/characters/yuehua/modern-paint/normal.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      63,
+      16,
+      447,
+      495
+    ],
+    "transparentPixels": 115431,
+    "outer16Nontransparent": 0,
+    "sha256": "da1a68c2581efafef6df5981d379793d37e6364b774315d1b299c9edd063eb52"
+  },
+  {
+    "file": "public/characters/yuehua/modern-paint/happy.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      61,
+      16,
+      450,
+      495
+    ],
+    "transparentPixels": 117806,
+    "outer16Nontransparent": 0,
+    "sha256": "3da76b4c2c83ee81bdd829e3f3b3ce2132648d62ea086623d2d166140af6bef4"
+  },
+  {
+    "file": "public/characters/yuehua/modern-paint/surprised.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      66,
+      16,
+      445,
+      495
+    ],
+    "transparentPixels": 118585,
+    "outer16Nontransparent": 0,
+    "sha256": "2325b4655c7ba79e8ad7ff0d000ff134dfab8887a7e06ca896d4bb7edeb16424"
+  },
+  {
+    "file": "public/characters/yuehua/modern-paint/sad.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      59,
+      16,
+      452,
+      495
+    ],
+    "transparentPixels": 115927,
+    "outer16Nontransparent": 0,
+    "sha256": "026d64c54648edb7defe4d6a9a9a78664ad773a7958f6e0e92029d0d82908dd5"
+  },
+  {
+    "file": "public/characters/yuehua/modern-paint/win.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      64,
+      16,
+      446,
+      495
+    ],
+    "transparentPixels": 115346,
+    "outer16Nontransparent": 0,
+    "sha256": "cf13331d89d1b0e10890f7c1e609de5a5164f9e8f8cb8bae60aa2390331b9325"
+  },
+  {
+    "file": "public/characters/aming/modern-paint/normal.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      76,
+      16,
+      435,
+      495
+    ],
+    "transparentPixels": 121762,
+    "outer16Nontransparent": 0,
+    "sha256": "d88cd910c4b32c8746138f43ff6e5ac2169fdaa81425110febb3ee77255ef247"
+  },
+  {
+    "file": "public/characters/aming/modern-paint/happy.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      73,
+      16,
+      438,
+      495
+    ],
+    "transparentPixels": 120935,
+    "outer16Nontransparent": 0,
+    "sha256": "80540a098e33420f071645bc76b9f917e409711a40de01f396a6cdbcb0393673"
+  },
+  {
+    "file": "public/characters/aming/modern-paint/surprised.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      76,
+      16,
+      434,
+      495
+    ],
+    "transparentPixels": 121595,
+    "outer16Nontransparent": 0,
+    "sha256": "785f397bd13601a8a7c2b87443c278d3f600d15a22439fe60a53f42cd702c36c"
+  },
+  {
+    "file": "public/characters/aming/modern-paint/sad.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      66,
+      16,
+      444,
+      495
+    ],
+    "transparentPixels": 120136,
+    "outer16Nontransparent": 0,
+    "sha256": "4c543890d08b9e08ed47cd0263bb4062aa4ca9833f4f5347217d94b3c5aed8a6"
+  },
+  {
+    "file": "public/characters/aming/modern-paint/win.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      67,
+      16,
+      444,
+      495
+    ],
+    "transparentPixels": 120933,
+    "outer16Nontransparent": 0,
+    "sha256": "1916cf1633f2524920dd3317b3e1a607f9d86ba40be632bcc5a0cd570aed0d63"
+  },
+  {
+    "file": "public/characters/tangtang/modern-paint/normal.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      65,
+      16,
+      446,
+      495
+    ],
+    "transparentPixels": 109406,
+    "outer16Nontransparent": 0,
+    "sha256": "966b8624b64fc5f79fef7b99681b62961515d01e9a8554d74bc2851af7f56bb7"
+  },
+  {
+    "file": "public/characters/tangtang/modern-paint/happy.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      63,
+      16,
+      448,
+      495
+    ],
+    "transparentPixels": 103983,
+    "outer16Nontransparent": 0,
+    "sha256": "db667a478290ba150125bdcf2bba1f194e381b2da7c704f75dfb4feacbc62837"
+  },
+  {
+    "file": "public/characters/tangtang/modern-paint/surprised.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      62,
+      16,
+      448,
+      495
+    ],
+    "transparentPixels": 102486,
+    "outer16Nontransparent": 0,
+    "sha256": "489f3268c4e26470eaf5fa72e97f23b79a8a68cd8ee30e040385920da2cc850d"
+  },
+  {
+    "file": "public/characters/tangtang/modern-paint/sad.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      62,
+      16,
+      449,
+      495
+    ],
+    "transparentPixels": 103307,
+    "outer16Nontransparent": 0,
+    "sha256": "95c9357548f574425a37be282b95af4745a2db9f14f085552d1c68a1b0cb3969"
+  },
+  {
+    "file": "public/characters/tangtang/modern-paint/win.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      67,
+      16,
+      444,
+      495
+    ],
+    "transparentPixels": 117152,
+    "outer16Nontransparent": 0,
+    "sha256": "63994c37998e6db43cf8f717b94173e106844ebf27b26c17664e3562afb73000"
+  },
+  {
+    "file": "public/characters/xiaochun/modern-paint/normal.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      53,
+      16,
+      458,
+      495
+    ],
+    "transparentPixels": 105406,
+    "outer16Nontransparent": 0,
+    "sha256": "da353ec2395408501e13b8e0782b686236d0e587f7508ee8e01f14cc701c0627"
+  },
+  {
+    "file": "public/characters/xiaochun/modern-paint/happy.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      56,
+      16,
+      454,
+      495
+    ],
+    "transparentPixels": 103304,
+    "outer16Nontransparent": 0,
+    "sha256": "ce4701270135bc2de546a4199336ba4c93ebeb0ed8d40b9afb819660282fceff"
+  },
+  {
+    "file": "public/characters/xiaochun/modern-paint/surprised.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      63,
+      16,
+      448,
+      495
+    ],
+    "transparentPixels": 106833,
+    "outer16Nontransparent": 0,
+    "sha256": "83f6591c5f0ebc87b34e1cb354761f8c1a48256e030980ae9a8a3b9ec88de0f8"
+  },
+  {
+    "file": "public/characters/xiaochun/modern-paint/sad.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      59,
+      16,
+      451,
+      495
+    ],
+    "transparentPixels": 106770,
+    "outer16Nontransparent": 0,
+    "sha256": "b1d6c980f35c28412dcc34949ffed64f0e10b47618fcde204afd581d942bd777"
+  },
+  {
+    "file": "public/characters/xiaochun/modern-paint/win.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      59,
+      16,
+      452,
+      495
+    ],
+    "transparentPixels": 105352,
+    "outer16Nontransparent": 0,
+    "sha256": "d60290cb4dbbef6c4d6babbde1f0e9fb5f08c61bbac376d9a28ca54cd4cd773d"
+  },
+  {
+    "file": "public/characters/lanjie/modern-paint/normal.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      88,
+      16,
+      422,
+      495
+    ],
+    "transparentPixels": 140663,
+    "outer16Nontransparent": 0,
+    "sha256": "b168b9b483b0851c85ee483aced4c17df4f97f7dd06b0b9434da7db47f6a19da"
+  },
+  {
+    "file": "public/characters/lanjie/modern-paint/happy.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      83,
+      16,
+      427,
+      495
+    ],
+    "transparentPixels": 139700,
+    "outer16Nontransparent": 0,
+    "sha256": "b4ae88191dba33937d589a63fd401659afed913674bd6a67a0d669a749f215f0"
+  },
+  {
+    "file": "public/characters/lanjie/modern-paint/surprised.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      92,
+      16,
+      418,
+      495
+    ],
+    "transparentPixels": 140926,
+    "outer16Nontransparent": 0,
+    "sha256": "aa8c8e5d3d665e23e2d30b103af663f81801df4545968dbbad59ee07d48caabe"
+  },
+  {
+    "file": "public/characters/lanjie/modern-paint/sad.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      84,
+      16,
+      426,
+      495
+    ],
+    "transparentPixels": 140170,
+    "outer16Nontransparent": 0,
+    "sha256": "e149b1a5d37203d84244130b0a648275999bde60b9629ae35e4d8eb25aeb645c"
+  },
+  {
+    "file": "public/characters/lanjie/modern-paint/win.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      87,
+      16,
+      424,
+      495
+    ],
+    "transparentPixels": 137322,
+    "outer16Nontransparent": 0,
+    "sha256": "127bbc92f9a7c8fda3077761a996f013d359da06db55fae50abfffa4fe7115f2"
+  },
+  {
+    "file": "public/characters/ayi/modern-paint/normal.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      24,
+      16,
+      486,
+      495
+    ],
+    "transparentPixels": 124767,
+    "outer16Nontransparent": 0,
+    "sha256": "3b7690092df878c854fc54f7df903cc0c93c6924152ccf7e1f340c0707974f54"
+  },
+  {
+    "file": "public/characters/ayi/modern-paint/happy.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      75,
+      16,
+      435,
+      495
+    ],
+    "transparentPixels": 132489,
+    "outer16Nontransparent": 0,
+    "sha256": "448ef813462da8909f61b825b210e0bee753d904276067820a1dd2c0c1461291"
+  },
+  {
+    "file": "public/characters/ayi/modern-paint/surprised.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      71,
+      16,
+      439,
+      495
+    ],
+    "transparentPixels": 131450,
+    "outer16Nontransparent": 0,
+    "sha256": "c73d477c6be439703399127f2a79c7a28cd638bcdd62c6a5af4681b1a2414fa3"
+  },
+  {
+    "file": "public/characters/ayi/modern-paint/sad.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      69,
+      16,
+      442,
+      495
+    ],
+    "transparentPixels": 128867,
+    "outer16Nontransparent": 0,
+    "sha256": "6825e6196605387dde0ded55b8711a1ef5751a96974931c98543fb78202f35a8"
+  },
+  {
+    "file": "public/characters/ayi/modern-paint/win.png",
+    "width": 512,
+    "height": 512,
+    "channels": 4,
+    "bounds": [
+      69,
+      16,
+      441,
+      495
+    ],
+    "transparentPixels": 128523,
+    "outer16Nontransparent": 0,
+    "sha256": "8f748ea3d995f3d48897a066ed31e47c29cda06f70611f682572ee53321dad10"
+  },
+  {
+    "file": "public/ui/modern-paint/title-scene.png",
+    "width": 1920,
+    "height": 1080,
+    "channels": 4,
+    "bounds": [
+      0,
+      0,
+      1919,
+      1079
+    ],
+    "transparentPixels": 0,
+    "outer16Nontransparent": 94976,
+    "sha256": "d8782a2f35d105352aa7f273d2a29ca9fc0bdc4394a617d050a99a71d285aca8"
+  },
+  {
+    "file": "public/ui/modern-paint/parlor.png",
+    "width": 1920,
+    "height": 1080,
+    "channels": 4,
+    "bounds": [
+      0,
+      0,
+      1919,
+      1079
+    ],
+    "transparentPixels": 0,
+    "outer16Nontransparent": 94976,
+    "sha256": "d7d1236922ad0c01a7f1ccd5c5374e261701ba09ed6e1b5821cfb2eba55d9578"
+  },
+  {
+    "file": "public/ui/modern-paint/logo.png",
+    "width": 1400,
+    "height": 420,
+    "channels": 4,
+    "bounds": [
+      20,
+      39,
+      1379,
+      380
+    ],
+    "transparentPixels": 254951,
+    "outer16Nontransparent": 0,
+    "sha256": "87a73cadce6b1714682287c7ace7002d45ce7596532f25a158045d1693116eff"
+  },
+  {
+    "file": "public/ui/modern-paint/table.png",
+    "width": 1600,
+    "height": 1100,
+    "channels": 4,
+    "bounds": [
+      300,
+      50,
+      1299,
+      1049
+    ],
+    "transparentPixels": 760009,
+    "outer16Nontransparent": 0,
+    "sha256": "b8dcce5c05340bd84d56ffeb6c6292619f87ad02bae948ae6414599c13d54a96"
+  }
+]

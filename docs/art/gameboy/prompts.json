@@ -1,0 +1,120 @@
+{
+  "generator": "built-in image_gen",
+  "palette": [
+    "#0f380f",
+    "#306230",
+    "#8bac0f",
+    "#9bbc0f"
+  ],
+  "processing": "One generated horizontal five-expression sheet per character. Deterministic five-cell slicing with cut lines at minimum alpha-column occupancy near equal divisions; extract the main connected silhouette and crop its bounding rectangle to exclude neighboring portrait slivers; nearest-neighbor resize into 480x480; horizontally centered and bottom-aligned inside 16px transparent margin of 512x512. Nearest-color quantization to exact palette and alpha threshold at 128. Ayi normal and UI logo/table copied byte-for-byte from approved study. Backgrounds fit 1672x940 and quantized opaque.",
+  "approvedCopies": [
+    {
+      "from": "docs/art/style-studies/2026-10-21/gameboy/character.png",
+      "to": "public/characters/ayi/gameboy/normal.png"
+    },
+    {
+      "from": "docs/art/style-studies/2026-10-21/gameboy/logo.png",
+      "to": "public/ui/gameboy/logo.png"
+    },
+    {
+      "from": "docs/art/style-studies/2026-10-21/gameboy/table.png",
+      "to": "public/ui/gameboy/table.png"
+    }
+  ],
+  "assets": [
+    {
+      "id": "xiaocui",
+      "prompt": "Use case: style-transfer. Production sprite sheet for Virtual Taiwan Mahjong Parlor. Reference 1 is authoritative character identity, hairstyle silhouette and costume. Reference 2 is approved Game Boy pixel-art medium ONLY (do not copy its boy identity). Draw true intentional hand-designed 4-color Game Boy sprite pixel art with chunky square pixel clusters and sparse ordered dithering; no smooth gradients, no antialiasing, no grayscale/photo filtering. ONLY opaque #0f380f #306230 #8bac0f #9bbc0f and true alpha-zero transparency. Five separate equally-sized square portrait cells laid in ONE HORIZONTAL ROW, left-to-right normal,happy,surprised,sad,win. Total image aspect ratio 5:1, each cell fully separate with ample transparent gutters. Exactly five busts of the SAME character. Head-and-shoulders only, complete head and shoulders visible with margin; consistent frontal angle, size and costume throughout. Normal=gentle closed-mouth neutral smile; happy=clearly cheerful closed eyes smile; surprised=wide round eyes and small open mouth; sad=downward brows and small frown; win=confident delighted wide smile with one eye wink. Mouth/eyes/brows MUST differ clearly for all 5. No labels, text, frames, scenery, colored backgrounds or hands. Young woman, long twin ponytails with two large ribbon bows, central parted bangs, sailor school uniform with wide stripe-trimmed collar. Preserve twin-tail shape and ribbons.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/xiaocui/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/gameboy/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-fe9c1d7e-f5df-4c24-b96b-0e9c7a63271b.png",
+      "archive": "sources/xiaocui.png"
+    },
+    {
+      "id": "yuehua",
+      "prompt": "Use case: style-transfer. Production sprite sheet for Virtual Taiwan Mahjong Parlor. Reference 1 is authoritative character identity, hairstyle silhouette and costume. Reference 2 is approved Game Boy pixel-art medium ONLY (do not copy its boy identity). Draw true intentional hand-designed 4-color Game Boy sprite pixel art with chunky square pixel clusters and sparse ordered dithering; no smooth gradients, no antialiasing, no grayscale/photo filtering. ONLY opaque #0f380f #306230 #8bac0f #9bbc0f and true alpha-zero transparency. Five separate equally-sized square portrait cells laid in ONE HORIZONTAL ROW, left-to-right normal,happy,surprised,sad,win. Total image aspect ratio 5:1, each cell fully separate with ample transparent gutters. Exactly five busts of the SAME character. Head-and-shoulders only, complete head and shoulders visible with margin; consistent frontal angle, size and costume throughout. Normal=gentle closed-mouth neutral smile; happy=clearly cheerful closed eyes smile; surprised=wide round eyes and small open mouth; sad=downward brows and small frown; win=confident delighted wide smile with one eye wink. Mouth/eyes/brows MUST differ clearly for all 5. No labels, text, frames, scenery, colored backgrounds or hands. Elegant young adult woman, long flowing silver hair translated to light green, crescent-moon hair clip on viewer-right temple, collared dark blouse. Preserve flowing long hair and moon clip.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/yuehua/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/gameboy/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-1e647d65-0e8e-46fe-a41f-88d82ffe4e83.png",
+      "archive": "sources/yuehua.png"
+    },
+    {
+      "id": "aming",
+      "prompt": "Use case: style-transfer. Production sprite sheet for Virtual Taiwan Mahjong Parlor. Reference 1 is authoritative character identity, hairstyle silhouette and costume. Reference 2 is approved Game Boy pixel-art medium ONLY (do not copy its boy identity). Draw true intentional hand-designed 4-color Game Boy sprite pixel art with chunky square pixel clusters and sparse ordered dithering; no smooth gradients, no antialiasing, no grayscale/photo filtering. ONLY opaque #0f380f #306230 #8bac0f #9bbc0f and true alpha-zero transparency. Five separate equally-sized square portrait cells laid in ONE HORIZONTAL ROW, left-to-right normal,happy,surprised,sad,win. Total image aspect ratio 5:1, each cell fully separate with ample transparent gutters. Exactly five busts of the SAME character. Head-and-shoulders only, complete head and shoulders visible with margin; consistent frontal angle, size and costume throughout. Normal=gentle closed-mouth neutral smile; happy=clearly cheerful closed eyes smile; surprised=wide round eyes and small open mouth; sad=downward brows and small frown; win=confident delighted wide smile with one eye wink. Mouth/eyes/brows MUST differ clearly for all 5. No labels, text, frames, scenery, colored backgrounds or hands. Young athletic man, spiky dark hair, fabric headband with long trailing ties at viewer-left, open jacket with raised collar over light crewneck shirt. Preserve male face and bold eyebrows.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/aming/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/gameboy/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-26267c29-7628-42de-a587-fc71961cafab.png",
+      "archive": "sources/aming.png"
+    },
+    {
+      "id": "tangtang",
+      "prompt": "Use case: style-transfer. Production sprite sheet for Virtual Taiwan Mahjong Parlor. Reference 1 is authoritative character identity, hairstyle silhouette and costume. Reference 2 is approved Game Boy pixel-art medium ONLY (do not copy its boy identity). Draw true intentional hand-designed 4-color Game Boy sprite pixel art with chunky square pixel clusters and sparse ordered dithering; no smooth gradients, no antialiasing, no grayscale/photo filtering. ONLY opaque #0f380f #306230 #8bac0f #9bbc0f and true alpha-zero transparency. Five separate equally-sized square portrait cells laid in ONE HORIZONTAL ROW, left-to-right normal,happy,surprised,sad,win. Total image aspect ratio 5:1, each cell fully separate with ample transparent gutters. Exactly five busts of the SAME character. Head-and-shoulders only, complete head and shoulders visible with margin; consistent frontal angle, size and costume throughout. Normal=gentle closed-mouth neutral smile; happy=clearly cheerful closed eyes smile; surprised=wide round eyes and small open mouth; sad=downward brows and small frown; win=confident delighted wide smile with one eye wink. Mouth/eyes/brows MUST differ clearly for all 5. No labels, text, frames, scenery, colored backgrounds or hands. Young woman, twin rounded hair buns, short loose side locks, five-point star hair clip at viewer-right, puff sleeve dress with collar and neck bow with round central brooch. Preserve both buns.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/tangtang/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/gameboy/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-8a841053-1b22-4e31-87e6-bfbb86741bf2.png",
+      "archive": "sources/tangtang.png"
+    },
+    {
+      "id": "xiaochun",
+      "prompt": "Use case: style-transfer. Production sprite sheet for Virtual Taiwan Mahjong Parlor. Reference 1 is authoritative character identity, hairstyle silhouette and costume. Reference 2 is approved Game Boy pixel-art medium ONLY (do not copy its boy identity). Draw true intentional hand-designed 4-color Game Boy sprite pixel art with chunky square pixel clusters and sparse ordered dithering; no smooth gradients, no antialiasing, no grayscale/photo filtering. ONLY opaque #0f380f #306230 #8bac0f #9bbc0f and true alpha-zero transparency. Five separate equally-sized square portrait cells laid in ONE HORIZONTAL ROW, left-to-right normal,happy,surprised,sad,win. Total image aspect ratio 5:1, each cell fully separate with ample transparent gutters. Exactly five busts of the SAME character. Head-and-shoulders only, complete head and shoulders visible with margin; consistent frontal angle, size and costume throughout. Normal=gentle closed-mouth neutral smile; happy=clearly cheerful closed eyes smile; surprised=wide round eyes and small open mouth; sad=downward brows and small frown; win=confident delighted wide smile with one eye wink. Mouth/eyes/brows MUST differ clearly for all 5. No labels, text, frames, scenery, colored backgrounds or hands. Young athletic woman with high long ponytail on viewer-right, large light ribbon tied at its root, side-swept bangs, sports jersey with light turned collar, V-neck and shoulder stripes.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/xiaochun/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/gameboy/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-d47011c7-d07a-4ae0-bd0a-0dc1e7ba1eb7.png",
+      "archive": "sources/xiaochun.png"
+    },
+    {
+      "id": "lanjie",
+      "prompt": "Use case: style-transfer. Production sprite sheet for Virtual Taiwan Mahjong Parlor. Reference 1 is authoritative character identity, hairstyle silhouette and costume. Reference 2 is approved Game Boy pixel-art medium ONLY (do not copy its boy identity). Draw true intentional hand-designed 4-color Game Boy sprite pixel art with chunky square pixel clusters and sparse ordered dithering; no smooth gradients, no antialiasing, no grayscale/photo filtering. ONLY opaque #0f380f #306230 #8bac0f #9bbc0f and true alpha-zero transparency. Five separate equally-sized square portrait cells laid in ONE HORIZONTAL ROW, left-to-right normal,happy,surprised,sad,win. Total image aspect ratio 5:1, each cell fully separate with ample transparent gutters. Exactly five busts of the SAME character. Head-and-shoulders only, complete head and shoulders visible with margin; consistent frontal angle, size and costume throughout. Normal=gentle closed-mouth neutral smile; happy=clearly cheerful closed eyes smile; surprised=wide round eyes and small open mouth; sad=downward brows and small frown; win=confident delighted wide smile with one eye wink. Mouth/eyes/brows MUST differ clearly for all 5. No labels, text, frames, scenery, colored backgrounds or hands. Mature elegant woman with swept-up bun and loose long cheek curls, narrow rectangular eyeglasses, high collar qipao with light piping and frog closure. Preserve glasses, bun, mature face and high collar.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/lanjie/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/gameboy/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-2772b51d-b975-4657-8a8e-b260078654bd.png",
+      "archive": "sources/lanjie.png"
+    },
+    {
+      "id": "ayi",
+      "prompt": "Use case: style-transfer. Production sprite sheet for Virtual Taiwan Mahjong Parlor. Reference 1 is authoritative character identity, hairstyle silhouette and costume. Reference 2 is approved Game Boy pixel-art medium ONLY (do not copy its boy identity). Draw true intentional hand-designed 4-color Game Boy sprite pixel art with chunky square pixel clusters and sparse ordered dithering; no smooth gradients, no antialiasing, no grayscale/photo filtering. ONLY opaque #0f380f #306230 #8bac0f #9bbc0f and true alpha-zero transparency. Five separate equally-sized square portrait cells laid in ONE HORIZONTAL ROW, left-to-right normal,happy,surprised,sad,win. Total image aspect ratio 5:1, each cell fully separate with ample transparent gutters. Exactly five busts of the SAME character. Head-and-shoulders only, complete head and shoulders visible with margin; consistent frontal angle, size and costume throughout. Normal=gentle closed-mouth neutral smile; happy=clearly cheerful closed eyes smile; surprised=wide round eyes and small open mouth; sad=downward brows and small frown; win=confident delighted wide smile with one eye wink. Mouth/eyes/brows MUST differ clearly for all 5. No labels, text, frames, scenery, colored backgrounds or hands. Youthful male hero, short tousled hair and distinctive long upward cowlick, silver shoulder/chest armor translated to light olive, dark high-neck undersuit. Reference 2 also IS this exact boy: preserve approved pixel style and silhouette.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/ayi/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/gameboy/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-6035e759-b4f0-4bda-ae4a-fadd8e610fa6.png",
+      "archive": "sources/ayi.png"
+    },
+    {
+      "id": "title-scene",
+      "prompt": "Use case: style-transfer. Redraw the supplied scene as original Game Boy 4-color pixel art for Virtual Taiwan Mahjong Parlor, matching the approved portrait reference pixel medium. ONLY four opaque colors #0f380f #306230 #8bac0f #9bbc0f. All surfaces/materials use those four green shades, no other hue. Intentional chunky square pixel clusters, 16-bit-like detail but strict Game Boy green palette, carefully grouped values, sparse ordered dithering, no smooth gradients, no anti-aliasing, no photographic/grayscale filter. Wide 16:9 landscape, full opaque background. No title lettering, no logos, no overlaid interface, no watermark. Preserve the reference camera and furniture geometry. Keep EXACTLY FOUR characters grouped in RIGHT 60%: foreground long twin-ponytail schoolgirl with ribbon bows and sailor collar reaching out; seated long pale-haired woman with crescent hairclip to her left; spiky-haired headband man behind the table; mature bun-haired glasses woman in qipao standing with teapot tray. Preserve identities, faces, silhouettes and outfits from scene. Keep left40% quiet dark-green wall/foliage with very little detail and NO people so the game title and menu remain readable. Cozy Taiwanese mahjong parlor, tabletop with mahjong tiles, pendant lamp, wooden panels, window and plants.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/ui/anime90/title-scene.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/gameboy/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-1c144b8b-fdee-4846-a22d-b6039bb1f7d3.png",
+      "archive": "sources/title-scene.png"
+    },
+    {
+      "id": "parlor",
+      "prompt": "Use case: style-transfer. Redraw the supplied scene as original Game Boy 4-color pixel art for Virtual Taiwan Mahjong Parlor, matching the approved portrait reference pixel medium. ONLY four opaque colors #0f380f #306230 #8bac0f #9bbc0f. All surfaces/materials use those four green shades, no other hue. Intentional chunky square pixel clusters, 16-bit-like detail but strict Game Boy green palette, carefully grouped values, sparse ordered dithering, no smooth gradients, no anti-aliasing, no photographic/grayscale filter. Wide 16:9 landscape, full opaque background. No title lettering, no logos, no overlaid interface, no watermark. Preserve the reference camera and furniture geometry. EMPTY Taiwanese mahjong parlor with NO PEOPLE anywhere. Keep same eye-level oblique camera, central square mahjong table with four carved chairs, neatly arranged tile walls and teacups, large pendant lamp above, tall windows left, cabinet and tea shelves right, wall fan high right, plants and traditional wood panels. Preserve room architecture and object placement. This is an atmospheric background, no UI.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/ui/anime90/parlor.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/gameboy/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-fadea7d5-66dd-4943-8566-a1ab3ba429c7.png",
+      "archive": "sources/parlor.png"
+    }
+  ],
+  "visualReview": {
+    "portraits": "All seven identities, costumes and five distinct expressions reviewed in contact-sheet.png; neighboring-cell fragments removed by connected silhouette extraction.",
+    "backgrounds": "Exactly four title-scene characters and quiet left title area; empty parlor preserves furniture and camera."
+  }
+}

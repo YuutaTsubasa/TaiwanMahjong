@@ -1,0 +1,553 @@
+[
+  {
+    "file": "public/characters/xiaocui/taiwan-print/normal.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 29,
+      "top": 19,
+      "right": 481,
+      "bottom": 495,
+      "width": 453,
+      "height": 477,
+      "count": 174923
+    }
+  },
+  {
+    "file": "public/characters/xiaocui/taiwan-print/happy.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 27,
+      "top": 19,
+      "right": 481,
+      "bottom": 494,
+      "width": 455,
+      "height": 476,
+      "count": 175776
+    }
+  },
+  {
+    "file": "public/characters/xiaocui/taiwan-print/surprised.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 30,
+      "top": 18,
+      "right": 481,
+      "bottom": 495,
+      "width": 452,
+      "height": 478,
+      "count": 174333
+    }
+  },
+  {
+    "file": "public/characters/xiaocui/taiwan-print/sad.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 28,
+      "top": 18,
+      "right": 481,
+      "bottom": 495,
+      "width": 454,
+      "height": 478,
+      "count": 175356
+    }
+  },
+  {
+    "file": "public/characters/xiaocui/taiwan-print/win.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 27,
+      "top": 18,
+      "right": 484,
+      "bottom": 493,
+      "width": 458,
+      "height": 476,
+      "count": 175664
+    }
+  },
+  {
+    "file": "public/characters/yuehua/taiwan-print/normal.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 51,
+      "top": 16,
+      "right": 462,
+      "bottom": 495,
+      "width": 412,
+      "height": 480,
+      "count": 143389
+    }
+  },
+  {
+    "file": "public/characters/yuehua/taiwan-print/happy.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 49,
+      "top": 18,
+      "right": 461,
+      "bottom": 495,
+      "width": 413,
+      "height": 478,
+      "count": 144844
+    }
+  },
+  {
+    "file": "public/characters/yuehua/taiwan-print/surprised.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 57,
+      "top": 18,
+      "right": 454,
+      "bottom": 495,
+      "width": 398,
+      "height": 478,
+      "count": 142074
+    }
+  },
+  {
+    "file": "public/characters/yuehua/taiwan-print/sad.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 52,
+      "top": 18,
+      "right": 458,
+      "bottom": 495,
+      "width": 407,
+      "height": 478,
+      "count": 142530
+    }
+  },
+  {
+    "file": "public/characters/yuehua/taiwan-print/win.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 60,
+      "top": 19,
+      "right": 452,
+      "bottom": 495,
+      "width": 393,
+      "height": 477,
+      "count": 141336
+    }
+  },
+  {
+    "file": "public/characters/aming/taiwan-print/normal.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 59,
+      "top": 18,
+      "right": 452,
+      "bottom": 495,
+      "width": 394,
+      "height": 478,
+      "count": 143315
+    }
+  },
+  {
+    "file": "public/characters/aming/taiwan-print/happy.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 54,
+      "top": 18,
+      "right": 457,
+      "bottom": 495,
+      "width": 404,
+      "height": 478,
+      "count": 145022
+    }
+  },
+  {
+    "file": "public/characters/aming/taiwan-print/surprised.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 62,
+      "top": 18,
+      "right": 449,
+      "bottom": 495,
+      "width": 388,
+      "height": 478,
+      "count": 141118
+    }
+  },
+  {
+    "file": "public/characters/aming/taiwan-print/sad.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 59,
+      "top": 16,
+      "right": 452,
+      "bottom": 495,
+      "width": 394,
+      "height": 480,
+      "count": 142192
+    }
+  },
+  {
+    "file": "public/characters/aming/taiwan-print/win.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 59,
+      "top": 18,
+      "right": 452,
+      "bottom": 495,
+      "width": 394,
+      "height": 478,
+      "count": 141207
+    }
+  },
+  {
+    "file": "public/characters/tangtang/taiwan-print/normal.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 61,
+      "top": 16,
+      "right": 451,
+      "bottom": 495,
+      "width": 391,
+      "height": 480,
+      "count": 154012
+    }
+  },
+  {
+    "file": "public/characters/tangtang/taiwan-print/happy.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 54,
+      "top": 16,
+      "right": 455,
+      "bottom": 495,
+      "width": 402,
+      "height": 480,
+      "count": 153788
+    }
+  },
+  {
+    "file": "public/characters/tangtang/taiwan-print/surprised.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 59,
+      "top": 16,
+      "right": 451,
+      "bottom": 495,
+      "width": 393,
+      "height": 480,
+      "count": 152851
+    }
+  },
+  {
+    "file": "public/characters/tangtang/taiwan-print/sad.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 50,
+      "top": 16,
+      "right": 459,
+      "bottom": 495,
+      "width": 410,
+      "height": 480,
+      "count": 155152
+    }
+  },
+  {
+    "file": "public/characters/tangtang/taiwan-print/win.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 56,
+      "top": 16,
+      "right": 454,
+      "bottom": 495,
+      "width": 399,
+      "height": 480,
+      "count": 152997
+    }
+  },
+  {
+    "file": "public/characters/xiaochun/taiwan-print/normal.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 59,
+      "top": 18,
+      "right": 454,
+      "bottom": 495,
+      "width": 396,
+      "height": 478,
+      "count": 150348
+    }
+  },
+  {
+    "file": "public/characters/xiaochun/taiwan-print/happy.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 60,
+      "top": 19,
+      "right": 451,
+      "bottom": 495,
+      "width": 392,
+      "height": 477,
+      "count": 149449
+    }
+  },
+  {
+    "file": "public/characters/xiaochun/taiwan-print/surprised.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 62,
+      "top": 18,
+      "right": 449,
+      "bottom": 495,
+      "width": 388,
+      "height": 478,
+      "count": 145583
+    }
+  },
+  {
+    "file": "public/characters/xiaochun/taiwan-print/sad.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 57,
+      "top": 18,
+      "right": 453,
+      "bottom": 495,
+      "width": 397,
+      "height": 478,
+      "count": 150910
+    }
+  },
+  {
+    "file": "public/characters/xiaochun/taiwan-print/win.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 62,
+      "top": 16,
+      "right": 450,
+      "bottom": 495,
+      "width": 389,
+      "height": 480,
+      "count": 149322
+    }
+  },
+  {
+    "file": "public/characters/lanjie/taiwan-print/normal.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 87,
+      "top": 18,
+      "right": 424,
+      "bottom": 495,
+      "width": 338,
+      "height": 478,
+      "count": 117864
+    }
+  },
+  {
+    "file": "public/characters/lanjie/taiwan-print/happy.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 91,
+      "top": 16,
+      "right": 420,
+      "bottom": 495,
+      "width": 330,
+      "height": 480,
+      "count": 112662
+    }
+  },
+  {
+    "file": "public/characters/lanjie/taiwan-print/surprised.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 90,
+      "top": 17,
+      "right": 419,
+      "bottom": 495,
+      "width": 330,
+      "height": 479,
+      "count": 114419
+    }
+  },
+  {
+    "file": "public/characters/lanjie/taiwan-print/sad.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 92,
+      "top": 16,
+      "right": 419,
+      "bottom": 495,
+      "width": 328,
+      "height": 480,
+      "count": 110791
+    }
+  },
+  {
+    "file": "public/characters/lanjie/taiwan-print/win.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 90,
+      "top": 18,
+      "right": 420,
+      "bottom": 495,
+      "width": 331,
+      "height": 478,
+      "count": 114722
+    }
+  },
+  {
+    "file": "public/characters/ayi/taiwan-print/normal.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 21,
+      "top": 16,
+      "right": 490,
+      "bottom": 495,
+      "width": 470,
+      "height": 480,
+      "count": 138280
+    }
+  },
+  {
+    "file": "public/characters/ayi/taiwan-print/happy.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 63,
+      "top": 18,
+      "right": 449,
+      "bottom": 495,
+      "width": 387,
+      "height": 478,
+      "count": 125488
+    }
+  },
+  {
+    "file": "public/characters/ayi/taiwan-print/surprised.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 62,
+      "top": 16,
+      "right": 448,
+      "bottom": 495,
+      "width": 387,
+      "height": 480,
+      "count": 126128
+    }
+  },
+  {
+    "file": "public/characters/ayi/taiwan-print/sad.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 61,
+      "top": 16,
+      "right": 449,
+      "bottom": 495,
+      "width": 389,
+      "height": 480,
+      "count": 126434
+    }
+  },
+  {
+    "file": "public/characters/ayi/taiwan-print/win.png",
+    "width": 512,
+    "height": 512,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 66,
+      "top": 16,
+      "right": 444,
+      "bottom": 495,
+      "width": 379,
+      "height": 480,
+      "count": 122669
+    }
+  },
+  {
+    "file": "public/ui/taiwan-print/title-scene.png",
+    "width": 1920,
+    "height": 1080,
+    "hasAlpha": false
+  },
+  {
+    "file": "public/ui/taiwan-print/parlor.png",
+    "width": 1920,
+    "height": 1080,
+    "hasAlpha": false
+  },
+  {
+    "file": "public/ui/taiwan-print/logo.png",
+    "width": 1400,
+    "height": 420,
+    "hasAlpha": true,
+    "exactApprovedCopy": true
+  },
+  {
+    "file": "public/ui/taiwan-print/table.png",
+    "width": 1600,
+    "height": 1100,
+    "hasAlpha": true,
+    "exactApprovedCopy": true
+  }
+]

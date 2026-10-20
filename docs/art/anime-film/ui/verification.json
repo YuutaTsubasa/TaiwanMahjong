@@ -1,0 +1,70 @@
+[
+  {
+    "file": "public/ui/modern-paint/title-scene.png",
+    "width": 1920,
+    "height": 1080,
+    "hasAlpha": false,
+    "bounds": {
+      "left": 0,
+      "top": 0,
+      "right": 1919,
+      "bottom": 1079,
+      "width": 1920,
+      "height": 1080,
+      "opaqueOrPartialPixels": 2073600,
+      "partialAlphaPixels": 0
+    },
+    "sha256": "c98ecb6c75bdf6fb3b222c75c12b1d5858b29a139f1c62b8cf55b8e212e4b2fe"
+  },
+  {
+    "file": "public/ui/modern-paint/parlor.png",
+    "width": 1920,
+    "height": 1080,
+    "hasAlpha": false,
+    "bounds": {
+      "left": 0,
+      "top": 0,
+      "right": 1919,
+      "bottom": 1079,
+      "width": 1920,
+      "height": 1080,
+      "opaqueOrPartialPixels": 2073600,
+      "partialAlphaPixels": 0
+    },
+    "sha256": "160e2985beb8c17edbe70aeaabeba3a41e9d951f2c071e31d87384fd358f3d49"
+  },
+  {
+    "file": "public/ui/modern-paint/logo.png",
+    "width": 1400,
+    "height": 420,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 25,
+      "top": 24,
+      "right": 1373,
+      "bottom": 395,
+      "width": 1349,
+      "height": 372,
+      "opaqueOrPartialPixels": 291319,
+      "partialAlphaPixels": 88569
+    },
+    "sha256": "d949c22f0d6c556b7dac2f73926bd8218562e9021439ac43b9a608db83fc9026"
+  },
+  {
+    "file": "public/ui/modern-paint/table.png",
+    "width": 1600,
+    "height": 1100,
+    "hasAlpha": true,
+    "bounds": {
+      "left": 300,
+      "top": 50,
+      "right": 1299,
+      "bottom": 1049,
+      "width": 1000,
+      "height": 1000,
+      "opaqueOrPartialPixels": 999987,
+      "partialAlphaPixels": 5886
+    },
+    "sha256": "3d0490b1a815c86f55fbf7c3de0607f508df27178a7d9c5f7cda6d6bbb378202"
+  }
+]

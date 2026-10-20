@@ -1,0 +1,104 @@
+{
+  "generator": "built-in image_gen",
+  "style": "anime-film",
+  "activeAssetDirectory": "modern-paint",
+  "entries": [
+    {
+      "id": "xiaocui",
+      "prompt": "Use case: identity-preserve style redesign. Create a brand-new character expression sheet in a Makoto Shinkai inspired contemporary Japanese animated feature-film aesthetic. The input image provides ONLY Xiaocui's identity, exact hair color, hairstyle, clothing and accessories. DO NOT copy its 1990s drawing style or face proportions. Xiaocui retains dark emerald/teal twin-tails, bright pink ribbons, teal irises, white sailor blouse with teal collar and pink bow. Clearly redesign rendering to modern cinematic anime: slender exceptionally clean delicate contour lines; believable restrained youthful facial proportions; smaller natural almond-shaped eyes and subtle iris highlights, NOT huge glittering doll eyes; slightly longer natural nose/face proportions; luminous translucent layered hair; smooth elegant cel gradients, clear clean shadow shapes with nuanced subtle color; cool cyan/violet ambient reflection and warm sunset backlight/rim highlights. Premium hand-drawn animated film character design, tender realistic emotion, NOT photo or 3D. NO painterly brush texture, NO impasto, NO heavy black outlines, NO 90s cel look, NO chibi. EXACTLY FIVE distinct waist-up/head-and-shoulders busts in one horizontal row, equal-width cells separated by generous transparent gutters. Left to right: normal quiet closed-mouth smile, happy open smile with softened happy eyes, surprised raised brows and small open mouth, sad worried brows with downturned lips, win proud joyful grin and slight head tilt. Same scale, outfit and identity in every cell; each full hair/shoulder silhouette fits inside its own cell with space on every side. Busts only, no hands or props. ACTUAL transparent RGBA everywhere outside each isolated portrait; no background rectangle, glow cloud, landscape, scenery, labels, words, borders or watermark. Requested 2560x768.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-d052f297-9391-484f-bc41-176101d2301f.png",
+      "references": [
+        "public/characters/xiaocui/normal.png"
+      ],
+      "archivedSource": "docs/art/anime-film/portraits-a/sources/xiaocui-expressions.png",
+      "cropBoundaries": [
+        0,
+        398,
+        789,
+        1184,
+        1583,
+        1983
+      ],
+      "outputs": [
+        "public/characters/xiaocui/modern-paint/normal.png",
+        "public/characters/xiaocui/modern-paint/happy.png",
+        "public/characters/xiaocui/modern-paint/surprised.png",
+        "public/characters/xiaocui/modern-paint/sad.png",
+        "public/characters/xiaocui/modern-paint/win.png"
+      ]
+    },
+    {
+      "id": "yuehua",
+      "prompt": "Use case: identity-preserve style redesign. Create a brand-new character expression sheet in a Makoto Shinkai inspired contemporary Japanese animated feature-film aesthetic. The input image provides ONLY Yuehua's identity, exact hair color, hairstyle, clothing and accessories. DO NOT copy its 1990s drawing style or face proportions. Yuehua retains long silver-lavender hair, small gold crescent clip, violet irises, elegant mature facial identity, navy blouse with a pale lavender collar. Clearly redesign rendering to modern cinematic anime: slender exceptionally clean delicate contour lines; believable restrained youthful facial proportions; smaller natural almond-shaped eyes and subtle iris highlights, NOT huge glittering doll eyes; slightly longer natural nose/face proportions; luminous translucent layered hair; smooth elegant cel gradients, clear clean shadow shapes with nuanced subtle color; cool cyan/violet ambient reflection and warm sunset backlight/rim highlights. Premium hand-drawn animated film character design, tender realistic emotion, NOT photo or 3D. NO painterly brush texture, NO impasto, NO heavy black outlines, NO 90s cel look, NO chibi. EXACTLY FIVE distinct head-and-shoulders busts in one horizontal row, equal-width cells separated by generous transparent gutters. Left to right: normal quiet closed-mouth smile, happy open smile with softened happy eyes, surprised raised brows and small open mouth, sad worried brows with downturned lips, win proud joyful grin and slight head tilt. Same scale, outfit and identity in every cell; each full hair/shoulder silhouette fits inside its own cell with space on every side. Busts only, no hands or props. ACTUAL transparent RGBA everywhere outside each isolated portrait; no background rectangle, glow cloud, landscape, scenery, labels, words, borders or watermark. Requested 2560x768. Make busts NARROWER: each occupies at most 75% of its column width. Wide alpha-zero gutters, all hair strands and shoulders contained; never touching.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-9771c019-29b3-4465-bc1e-5d54f7b470e8.png",
+      "references": [
+        "public/characters/yuehua/normal.png"
+      ],
+      "archivedSource": "docs/art/anime-film/portraits-a/sources/yuehua-expressions.png",
+      "cropBoundaries": [
+        0,
+        406,
+        803,
+        1190,
+        1586,
+        1983
+      ],
+      "outputs": [
+        "public/characters/yuehua/modern-paint/normal.png",
+        "public/characters/yuehua/modern-paint/happy.png",
+        "public/characters/yuehua/modern-paint/surprised.png",
+        "public/characters/yuehua/modern-paint/sad.png",
+        "public/characters/yuehua/modern-paint/win.png"
+      ]
+    },
+    {
+      "id": "aming",
+      "prompt": "Use case: identity-preserve style redesign. Create a brand-new character expression sheet in a Makoto Shinkai inspired contemporary Japanese animated feature-film aesthetic. The input image provides ONLY Aming's identity, exact hair color, hairstyle, clothing and accessories. DO NOT copy its 1990s drawing style or face proportions. Aming retains spiky black hair, red forehead band with tails to viewer left, reddish brown eyes, thick brows, orange-red jacket with high mustard-yellow collar and white undershirt. Clearly redesign rendering to modern cinematic anime: slender exceptionally clean delicate contour lines; believable restrained youthful facial proportions; smaller natural almond-shaped eyes and subtle iris highlights, NOT huge glittering doll eyes; slightly longer natural nose/face proportions; luminous translucent layered hair; smooth elegant cel gradients, clear clean shadow shapes with nuanced subtle color; cool cyan/violet ambient reflection and warm sunset backlight/rim highlights. Premium hand-drawn animated film character design, tender realistic emotion, NOT photo or 3D. NO painterly brush texture, NO impasto, NO heavy black outlines, NO 90s cel look, NO chibi. EXACTLY FIVE distinct head-and-shoulders busts in one horizontal row, equal-width cells separated by generous transparent gutters. Left to right: normal quiet closed-mouth smile, happy open smile with softened happy eyes, surprised raised brows and small open mouth, sad worried brows with downturned lips, win proud joyful grin and slight head tilt. Same scale, outfit and identity in every cell; each full hair/shoulder silhouette fits inside its own cell with space on every side. Busts only, no hands or props. ACTUAL transparent RGBA everywhere outside each isolated portrait; no background rectangle, glow cloud, landscape, scenery, labels, words, borders or watermark. Requested 2560x768. Make busts NARROWER: each occupies at most 75% of its column width. Wide alpha-zero gutters, all hair strands and shoulders contained; never touching.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-55db0a47-a9be-4d30-a6a7-d4a138d55ffa.png",
+      "references": [
+        "public/characters/aming/normal.png"
+      ],
+      "archivedSource": "docs/art/anime-film/portraits-a/sources/aming-expressions.png",
+      "cropBoundaries": [
+        0,
+        426,
+        841,
+        1254,
+        1674,
+        2103
+      ],
+      "outputs": [
+        "public/characters/aming/modern-paint/normal.png",
+        "public/characters/aming/modern-paint/happy.png",
+        "public/characters/aming/modern-paint/surprised.png",
+        "public/characters/aming/modern-paint/sad.png",
+        "public/characters/aming/modern-paint/win.png"
+      ]
+    },
+    {
+      "id": "tangtang",
+      "prompt": "Use case: identity-preserve style redesign. Create a brand-new character expression sheet in a Makoto Shinkai inspired contemporary Japanese animated feature-film aesthetic. The input image provides ONLY Tangtang's identity, exact hair color, hairstyle, clothing and accessories. DO NOT copy its 1990s drawing style or face proportions. Tangtang retains pink hair in two round buns with side locks, gold star hair clip, pink-red irises, pink puff-sleeve blouse with dark rose collar and dark rose bow with central round gold button. Clearly redesign rendering to modern cinematic anime: slender exceptionally clean delicate contour lines; believable restrained youthful facial proportions; smaller natural almond-shaped eyes and subtle iris highlights, NOT huge glittering doll eyes; slightly longer natural nose/face proportions; luminous translucent layered hair; smooth elegant cel gradients, clear clean shadow shapes with nuanced subtle color; cool cyan/violet ambient reflection and warm sunset backlight/rim highlights. Premium hand-drawn animated film character design, tender realistic emotion, NOT photo or 3D. NO painterly brush texture, NO impasto, NO heavy black outlines, NO 90s cel look, NO chibi. EXACTLY FIVE distinct head-and-shoulders busts in one horizontal row, equal-width cells separated by generous transparent gutters. Left to right: normal quiet closed-mouth smile, happy open smile with softened happy eyes, surprised raised brows and small open mouth, sad worried brows with downturned lips, win proud joyful grin and slight head tilt. Same scale, outfit and identity in every cell; each full hair/shoulder silhouette fits inside its own cell with space on every side. Busts only, no hands or props. ACTUAL transparent RGBA everywhere outside each isolated portrait; no background rectangle, glow cloud, landscape, scenery, labels, words, borders or watermark. Requested 2560x768. Make busts NARROWER: each occupies at most 75% of its column width. Wide alpha-zero gutters, all hair strands and shoulders contained; never touching.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-334f5298-cfc0-47c3-bc75-d83f151841fe.png",
+      "references": [
+        "public/characters/tangtang/normal.png"
+      ],
+      "archivedSource": "docs/art/anime-film/portraits-a/sources/tangtang-expressions.png",
+      "cropBoundaries": [
+        0,
+        401,
+        798,
+        1190,
+        1586,
+        1983
+      ],
+      "outputs": [
+        "public/characters/tangtang/modern-paint/normal.png",
+        "public/characters/tangtang/modern-paint/happy.png",
+        "public/characters/tangtang/modern-paint/surprised.png",
+        "public/characters/tangtang/modern-paint/sad.png",
+        "public/characters/tangtang/modern-paint/win.png"
+      ]
+    }
+  ],
+  "processing": "Five distinct generated portrait cells split at low-alpha valleys near equal fifths; transparent trim; fit proportionally to 480x480; add 16 px transparent margin on each edge. No painting, recoloring, or facial edits by code."
+}
