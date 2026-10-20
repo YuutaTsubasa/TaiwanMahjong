@@ -1,7 +1,7 @@
 {
   "name": "taiwan-mahjong",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "scripts": {
     "build:wasm": "wasm-pack build crates/mahjong-wasm --target web --release --out-dir ../../src/lib/local/pkg --no-pack",
