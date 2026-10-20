@@ -91,7 +91,7 @@ impl LocalGame {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use mahjong_core::room::Phase;
+    use mahjong_core::room::{Action, Phase};
 
     /// 用託管讓「你」也交給電腦，確認單機版能從頭打到結束
     #[test]
@@ -101,6 +101,11 @@ mod tests {
         g.set_auto(true);
         let mut steps = 0;
         while g.room.phase != Phase::GameOver {
+            // 託管時一局結束要自己按下一局
+            if g.room.legal_actions(g.seat).contains(&Action::Next) {
+                g.room.act(g.seat, Action::Next).unwrap();
+                continue;
+            }
             assert!(g.tick(), "stuck at {:?}", g.room.phase);
             steps += 1;
             assert!(steps < 200_000);

@@ -788,7 +788,8 @@ impl Room {
         }
         if self.phase == Phase::HandOver {
             self.ready[seat] = true;
-            if (0..4).all(|s| self.ready[s] || self.auto_plays(s)) {
+            // 託管中的真人也要等他（或 tick 幫他）按下一局，才不會一胡牌就跳過結果
+            if (0..4).all(|s| self.ready[s] || self.is_bot(s)) {
                 self.next_hand();
             }
             return Ok(());
@@ -1322,6 +1323,10 @@ impl Room {
             if now.duration_since(self.decision_started) >= Duration::from_millis(self.settings.bot_delay_ms) {
                 for s in 0..4 {
                     if !self.auto_plays(s) {
+                        continue;
+                    }
+                    // 託管中的真人：一局結束要自己按「下一局」，才看得到誰胡牌（逾時仍照房間設定處理）
+                    if self.phase == Phase::HandOver && !self.is_bot(s) {
                         continue;
                     }
                     let legal = self.legal_actions(s);
@@ -1872,6 +1877,13 @@ mod tests {
         room.start_game().unwrap();
         let mut steps = 0;
         while room.phase != Phase::GameOver {
+            if room.phase == Phase::HandOver && room.legal_actions(seat).contains(&Action::Next) {
+                // 託管時一局結束要自己按下一局
+                room.tick();
+                assert_eq!(room.phase, Phase::HandOver, "託管不該自動跳過結果");
+                room.act(seat, Action::Next).unwrap();
+                continue;
+            }
             assert!(room.tick(), "stuck at {:?}", room.phase);
             steps += 1;
             assert!(steps < 200_000);
