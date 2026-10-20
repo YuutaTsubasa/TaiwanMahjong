@@ -164,6 +164,7 @@ jobs:
           "$BT/apksigner" sign --ks release.jks --ks-pass "pass:$KEYSTORE_PASSWORD" --ks-key-alias "$KEY_ALIAS" \
             --out "out/VirtualTaiwanMahjongParlor_${GITHUB_REF_NAME//\//-}_android.apk" aligned.apk
           "$BT/apksigner" verify out/*.apk
+          rm -f out/*.idsig   # v4 簽章的附檔，一般安裝用不到
           ls -la out
 
       - uses: actions/upload-artifact@v4
