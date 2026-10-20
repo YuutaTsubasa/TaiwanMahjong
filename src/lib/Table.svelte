@@ -24,6 +24,8 @@
   const top = $derived(s.seats[at(2)]);
   const left = $derived(s.seats[at(3)]);
   const right = $derived(s.seats[at(1)]);
+  // 牌河最長的那家有幾張：超過三排就把牌河的牌縮小，維持在牌桌內
+  const riverMax = $derived(Math.max(0, ...s.seats.map((p) => p.discards?.length ?? 0)));
 
   const auto = $derived(!!mine.auto);
   // 託管時由電腦出手，介面不顯示動作按鈕、手牌也不能點
@@ -145,7 +147,7 @@
 
     <div class="table-wrap">
       <div class="table">
-        <div class="felt">
+        <div class="felt" class:long={riverMax > 18} class:longer={riverMax > 24}>
           <!-- 對家 -->
           {#if !stripMode}
             <div class="seat-top"><PlayerCard seat={top} variant={compact ? 'chip' : 'top'} active={active(at(2))} thinking={thinking(at(2))} /></div>
@@ -187,14 +189,18 @@
             {@const river = s.seats[seat].discards ?? []}
             <div class="river {cls}">
               {#each river as t, i}
-                <Tile code={t} size="md" hl={isLast(seat, i, river)} />
+                {#if k === 1 || k === 3}
+                  <span class="lay"><Tile code={t} size="md" hl={isLast(seat, i, river)} /></span>
+                {:else}
+                  <Tile code={t} size="md" hl={isLast(seat, i, river)} />
+                {/if}
               {/each}
             </div>
           {/each}
 
           <!-- 中央資訊 -->
           <div class="center-panel">
-            <div class="round">{s.round_wind}風圈・第 {s.hand_no} 局{#if s.streak > 0}<span class="streak">連{s.streak}</span>{/if}</div>
+            <div class="round"><span>{s.round_wind}風圈</span><span>第 {s.hand_no} 局{#if s.streak > 0}<span class="streak">連{s.streak}</span>{/if}</span></div>
             <div class="left-count"><small>剩餘</small><b>{s.wall_count ?? '-'}</b></div>
             <div class="timer" class:urgent={remaining != null && remaining <= 5}>
               {remaining != null && s.phase === 'playing' ? `${remaining} 秒` : ' '}
@@ -355,50 +361,34 @@
   .melds-me :global(.melds) { gap: 4px; justify-content: flex-end; }
   .melds-me :global(.tile) { --w: clamp(16px, 4cqw, 30px); }
 
-  /* 牌河：上下兩家每排 8 張，左右兩家每列 6 張；往外長 */
-  .river { position: absolute; display: flex; gap: 2px; }
-  .river :global(.tile) { --w: clamp(20px, 5.4cqw, 42px); margin-bottom: calc(var(--w) * 0.12); }
-  /* 牌河依中央資訊框的大小往外推，兩者之間固定留 --river-gap，不會互相蓋到 */
-  .felt { --panel-w: 26%; --river-gap: 2%; }
-  .r-top {
-    bottom: calc(50% + var(--panel-w) / 2.9 + var(--river-gap));
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(8 * (clamp(20px, 5.4cqw, 42px) + 2px));
-    flex-direction: row-reverse;
-    flex-wrap: wrap-reverse;
-  }
-  .r-bottom {
-    top: calc(50% + var(--panel-w) / 2.9 + var(--river-gap));
-    left: 50%;
-    transform: translateX(-50%);
-    width: calc(8 * (clamp(20px, 5.4cqw, 42px) + 2px));
-    flex-wrap: wrap;
-  }
-  .r-left {
-    right: calc(50% + var(--panel-w) / 2 + var(--river-gap));
-    top: 50%;
-    transform: translateY(-50%);
-    height: calc(6 * (clamp(20px, 5.4cqw, 42px) * 1.48 + 2px));
-    flex-direction: column;
-    flex-wrap: wrap-reverse;
-    align-content: flex-start;
-  }
-  .r-right {
-    left: calc(50% + var(--panel-w) / 2 + var(--river-gap));
-    top: 50%;
-    transform: translateY(-50%);
-    height: calc(6 * (clamp(20px, 5.4cqw, 42px) * 1.48 + 2px));
-    flex-direction: column-reverse;
-    flex-wrap: wrap;
-  }
+  /* 牌河：風車式排法（跟實際牌桌一樣）。
+     中央是邊長 --sq（6 張牌寬）的正方形，四家的牌河各占正方形外側的一條：
+     上下兩家每排 6 張、往外長；左右兩家的牌橫躺、每列 6 張、往外長。
+     四條互不重疊，所以牌再多也不會疊在一起；超過三排時整體縮小牌（.long／.longer）。 */
+  .felt { --rw: clamp(10px, 4.3cqmin, 34px); --rgap: 2px; --cy: 53%; --sq: calc(6 * (var(--rw) + var(--rgap))); }
+  .felt.long { --rw: clamp(9px, 3.6cqmin, 28px); }
+  .felt.longer { --rw: clamp(8px, 3cqmin, 24px); }
+  .river { position: absolute; display: flex; gap: var(--rgap); }
+  .river :global(.tile) { --w: var(--rw); margin-bottom: calc(var(--rw) * 0.12); }
+  .r-top, .r-bottom { left: 50%; transform: translateX(-50%); width: var(--sq); }
+  .r-top { bottom: calc(100% - var(--cy) + var(--sq) / 2); flex-direction: row-reverse; flex-wrap: wrap-reverse; }
+  .r-bottom { top: calc(var(--cy) + var(--sq) / 2); flex-wrap: wrap; }
+  .r-left, .r-right { top: calc(var(--cy) - var(--sq) / 2); height: var(--sq); }
+  .r-left { right: calc(50% + var(--sq) / 2); flex-direction: column; flex-wrap: wrap-reverse; }
+  .r-right { left: calc(50% + var(--sq) / 2); flex-direction: column-reverse; flex-wrap: wrap; }
+  /* 左右兩家的牌橫躺：外框是牌轉 90 度後的大小 */
+  .lay { position: relative; flex: none; width: calc(var(--rw) * 1.36); height: var(--rw); }
+  .lay :global(.tile) { position: absolute; left: 50%; top: 50%; margin: 0 !important; transform: translate(-50%, -50%) rotate(90deg); }
+  .r-right .lay :global(.tile) { transform: translate(-50%, -50%) rotate(-90deg); }
 
   .center-panel {
     position: absolute;
     left: 50%;
-    top: 50%;
+    top: var(--cy);
     transform: translate(-50%, -50%);
-    width: var(--panel-w);
+    width: calc(var(--sq) - 10px);
+    /* 裡面的字依資訊框本身的寬度縮放（cqw = 資訊框寬的 1%） */
+    container-type: inline-size;
     aspect-ratio: 1.45;
     display: flex;
     flex-direction: column;
@@ -412,17 +402,19 @@
     font-family: var(--heading-font);
     color: var(--text);
   }
-  .round { font-size: clamp(11px, 2.4cqw, 19px); letter-spacing: 0.08em; }
+  /* 放不下一行時「○風圈」「第 N 局」自動分成兩行 */
+  .round { display: flex; flex-wrap: wrap; justify-content: center; column-gap: 0.5em; font-size: clamp(9px, 9cqw, 19px); letter-spacing: 0.04em; line-height: 1.3; }
+  .round > span { white-space: nowrap; }
   .streak { margin-left: 6px; padding: 0 6px; font-size: 0.8em; background: #b3171f; color: #fff; border-radius: var(--small-radius); }
   .left-count { display: flex; align-items: baseline; gap: 8px; }
-  .left-count small { font-size: clamp(11px, 2.2cqw, 18px); }
-  .left-count b { font-size: clamp(26px, 7.5cqw, 60px); line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; text-shadow: 0 2px 0 #0008; }
+  .left-count small { font-size: clamp(9px, 9cqw, 18px); }
+  .left-count b { font-size: clamp(18px, 30cqw, 60px); line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; text-shadow: 0 2px 0 #0008; }
   .timer {
     width: 80%;
     text-align: center;
     border-top: 1px solid var(--art-line);
     padding-top: 2%;
-    font-size: clamp(11px, 2.3cqw, 18px);
+    font-size: clamp(9px, 9cqw, 18px);
     font-variant-numeric: tabular-nums;
   }
   .timer.urgent { color: var(--red); font-weight: 700; }
@@ -505,6 +497,9 @@
   .compact .tableboard { column-gap: 6px; row-gap: 4px; }
   .compact .felt { --top-card-h: 46px; }
   .compact .seat-top :global(.v-chip) { width: max-content; height: auto; }
+  /* 手機橫向：牌桌很矮，對家名牌移到牌桌框外的右上角，讓出桌面給牌河 */
+  .compact:not(.strip) .felt { --top-card-h: 4cqh; --cy: 51%; }
+  .compact:not(.strip) .seat-top { left: calc(105% + 10px); top: -5%; transform: none; }
   .compact .seat-left :global(.v-chip), .compact .seat-right :global(.v-chip) { flex-direction: column; padding: 4px; max-width: 86px; }
   .compact .seat-left :global(.v-chip .portrait), .compact .seat-right :global(.v-chip .portrait) { width: 46px; height: 46px; }
   .compact .seat-left :global(.v-chip .meta), .compact .seat-right :global(.v-chip .meta) { align-items: center; }
@@ -518,11 +513,6 @@
   .compact .hand { padding: 10px 4px 4px; }
   .compact .hand :global(.tile) { --w: clamp(22px, min(calc((100cqw - 40px) / 18.4), 9vh), 54px); }
   .compact .open-side { top: 6px; right: 6px; padding: 4px 10px; }
-  /* 牌桌小的時候，中央資訊框放寬一點、字縮小，局數才不會斷行 */
-  .compact .felt { --panel-w: 32%; }
-  .compact .round { font-size: clamp(9px, 3.6cqw, 15px); letter-spacing: 0; white-space: nowrap; }
-  .compact .left-count small { font-size: clamp(9px, 3.2cqw, 14px); }
-  .compact .timer { font-size: clamp(9px, 3.2cqw, 14px); }
 
   /* 直向：上方三家小名牌、牌桌滿寬、下方自己＋提示列、手牌兩排 */
   .strip .tableboard {
@@ -552,6 +542,10 @@
   .strip .banner .sep, .strip .banner span:not(.sep) { display: none; }
   .strip .banner.quiet span { display: inline; font-size: 12px; }
   .strip .prompt-row { flex-wrap: nowrap; }
+  /* 要吃碰胡時按鈕比較多：先藏起託管鈕，動作按鈕縮小一點，免得擠出畫面 */
+  .strip .actions ~ .auto-btn { display: none; }
+  .strip .actions { gap: 6px; flex-wrap: wrap; min-width: 0; flex: 1; }
+  .strip .act { font-size: 16px; padding: 4px 10px; gap: 4px; }
   .strip .banner { padding: 6px 12px; }
   .strip .banner b { font-size: 16px; letter-spacing: 0.08em; white-space: nowrap; }
   .strip .auto-btn { padding: 4px 10px; letter-spacing: 0.04em; white-space: nowrap; }
