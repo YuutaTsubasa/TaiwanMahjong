@@ -63,12 +63,13 @@
     overflow: hidden;
     background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--gold) 22%, transparent), #0006 75%);
   }
+  /* 依格子「高度」決定圖的大小：格子又寬又矮時（橫向螢幕）也一定看得到頭和肩膀 */
   .pic :global(.avatar) {
     position: absolute;
     left: 50%;
-    top: -2%;
-    width: 112% !important;
-    height: auto !important;
+    top: -3%;
+    height: 152% !important;
+    width: auto !important;
     aspect-ratio: 1;
     transform: translateX(-50%);
   }
