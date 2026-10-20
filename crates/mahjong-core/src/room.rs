@@ -221,6 +221,8 @@ pub struct Room {
     pub hand: Option<Hand>,
     pub result: Option<HandResult>,
     pub ready: [bool; 4],
+    /// 房主坐在哪個座位（大廳顯示「房主」用；房主權限仍由連線時的金鑰決定）
+    pub host_seat: Option<usize>,
     /// 託管：座位仍屬於玩家，但由電腦代為出手
     pub auto: [bool; 4],
     pub decision_id: u64,
@@ -255,6 +257,7 @@ impl Room {
             hand: None,
             result: None,
             ready: [false; 4],
+            host_seat: None,
             auto: [false; 4],
             decision_id: 0,
             decision_started: Instant::now(),
@@ -452,6 +455,9 @@ impl Room {
         if self.phase == Phase::Lobby || self.phase == Phase::GameOver {
             let n = self.name(seat);
             self.seats[seat] = None;
+            if self.host_seat == Some(seat) {
+                self.host_seat = None;
+            }
             self.push_log(format!("{} 離開了座位", n));
         } else if let Some(i) = self.seats[seat].as_mut() {
             if i.kind != SeatKind::Bot {
@@ -1420,6 +1426,7 @@ impl Room {
             "seats": seats,
             "round_wind": WIND_ZH[(self.round_wind.min(3)) as usize],
             "dealer": self.dealer,
+            "host_seat": self.host_seat,
             "streak": self.streak,
             "hand_no": self.hand_no,
             "wall_count": hand.map(|h| h.drawable()),

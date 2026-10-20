@@ -226,6 +226,9 @@ fn handle_ws_msg(st: &AppState, ctx: &mut WsCtx, v: &Value) -> (Vec<Value>, bool
             if let Some(s) = room.seat_of_token(token) {
                 ctx.seat = Some(s);
                 room.connect(s);
+                if ctx.is_host {
+                    room.host_seat = Some(s);
+                }
                 return (vec![json!({"type": "welcome", "seat": s, "token": token, "is_host": ctx.is_host})], true);
             }
             if v.get("spectate").and_then(|x| x.as_bool()).unwrap_or(false) {
@@ -237,6 +240,9 @@ fn handle_ws_msg(st: &AppState, ctx: &mut WsCtx, v: &Value) -> (Vec<Value>, bool
                 Ok((s, tok)) => {
                     ctx.seat = Some(s);
                     room.connect(s);
+                    if ctx.is_host {
+                        room.host_seat = Some(s);
+                    }
                     (vec![json!({"type": "welcome", "seat": s, "token": tok, "is_host": ctx.is_host})], true)
                 }
                 Err(e) => (

@@ -2,7 +2,8 @@
    放在全域是因為 themes.css 的 html[data-ui-style] button 選擇器權重較高。 */
 
 /* ── 面板四角雲紋：用遮罩上色，顏色跟著各畫風的 --art-line ── */
-html[data-ui-style] .art-panel { position: relative; }
+/* 用 :where 降低權重，元件自己指定 position: absolute 時不會被蓋掉 */
+html[data-ui-style] :where(.art-panel) { position: relative; }
 html[data-ui-style] .art-panel::after {
   content: '';
   position: absolute;

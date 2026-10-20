@@ -1,29 +1,40 @@
 <script>
-  import { net, hostCmd, leave, disconnect, serverUrls, toast } from './net.svelte.js';
-  import { SEAT_KIND_ICON, SEAT_KIND_LABEL } from './tiles.js';
-  import Chat from './Chat.svelte';
+  // 房間大廳，依 docs/art/concepts/lobby-host-anime90.png（房主）與 lobby-guest-anime90.png（訪客）排版。
+  import { net, hostCmd, leave, disconnect, serverUrls, toast, send, setCharacter } from './net.svelte.js';
   import Avatar from './Avatar.svelte';
-  import CharacterPicker from './CharacterPicker.svelte';
-  import { setCharacter } from './net.svelte.js';
-  import { getCharacter } from './characters.js';
+  import Brand from './Brand.svelte';
+  import OrnateHeading from './ui/OrnateHeading.svelte';
+  import PortraitGrid from './ui/PortraitGrid.svelte';
+  import FancyButton from './ui/FancyButton.svelte';
+  import Modal from './ui/Modal.svelte';
 
+  const s = $derived(net.state);
+  const isHost = $derived(net.isHost);
+  const seated = $derived(s.seats.filter((x) => x.name).length);
   const myCharacter = $derived(net.seat != null ? s.seats[net.seat]?.character : null);
   const takenCharacters = $derived(s.seats.filter((x) => x.character).map((x) => x.character));
 
-  const s = $derived(net.state);
+  // 四個座位擺在桌子四角：左上、右上、左下、右下（照出牌順序繞一圈）
+  const SLOT = ['tl', 'tr', 'br', 'bl'];
+
   const urls = $derived(serverUrls());
   let urlIdx = $state(0);
   const base = $derived(urls[Math.min(urlIdx, urls.length - 1)] || 'http://localhost:7777');
+  const address = $derived(base.replace(/^https?:\/\//, ''));
 
-  let tab = $state('human');
+  let tab = $state('friends');
+  let aiTab = $state('claude');
+  let showCharacter = $state(false);
+  let showRules = $state(false);
   let settings = $state(null);
   $effect(() => {
-    if (s && !settings) settings = { ...s.settings };
+    if (showRules) settings = { ...s.settings };
   });
 
   function applySettings() {
     hostCmd('settings', { settings: Object.fromEntries(Object.entries(settings).map(([k, v]) => [k, Number(v)])) });
-    toast('設定已更新', 'info');
+    toast('規則已更新', 'info');
+    showRules = false;
   }
 
   async function copy(t) {
@@ -35,10 +46,25 @@
     }
   }
 
-  const claudeCmd = $derived(`claude mcp add --transport http mahjong ${base}/mcp`);
-  const claudePrompt = '用 mahjong MCP 工具，以「Claude」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲。之後不斷重複：呼叫 wait_for_turn，輪到你時用 take_action 選擇最好的 action_id，直到遊戲結束。打牌要快，每次決定都有時間限制。可以用 send_chat 跟大家聊天。';
-  const curlPrompt = $derived(`請讀 ${base}/llms.txt 的說明，用 curl 以「AI」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲，然後一直玩到遊戲結束。`);
-  const tunnelCmd = $derived(`cloudflared tunnel --url ${base.replace(/\/\/[^:]+:/, '//localhost:')}`);
+  function roleOf(seat, i) {
+    if (s.host_seat === i) return ['房主', 'host'];
+    if (i === net.seat) return ['你', 'me'];
+    if (seat.kind === 'bot') return ['電腦', 'bot'];
+    if (seat.kind === 'agent') return ['AI', 'ai'];
+    return ['玩家', 'human'];
+  }
+  function statusOf(seat) {
+    if (seat.kind === 'bot') return '已入席';
+    return seat.connected ? '在線' : '離線';
+  }
+
+  const roundsLabel = (n) => ({ 1: '東風圈', 2: '東南圈', 4: '一將' })[n] ?? `${n} 圈`;
+  const rules = $derived([
+    `底 ${s.settings.base}`,
+    `每台 ${s.settings.per_tai}`,
+    roundsLabel(s.settings.rounds),
+    `出牌 ${s.settings.turn_timeout ? s.settings.turn_timeout + ' 秒' : '不限'}`,
+  ]);
 
   const fields = [
     ['base', '底', 10],
@@ -49,193 +75,372 @@
     ['next_hand_delay', '下一局自動開始秒數', 5],
     ['bot_delay_ms', '電腦思考毫秒', 100],
   ];
+
+  // 聊天：系統訊息（加入、離開…）與玩家聊天混在一起，依時間順序
+  const chatLines = $derived([
+    ...s.log.slice(-6).map((t) => ({ sys: true, text: t })),
+    ...s.chat.slice(-20).map((c) => ({ sys: false, ...c })),
+  ]);
+  let chatText = $state('');
+  let chatBox;
+  $effect(() => {
+    chatLines.length;
+    if (chatBox) queueMicrotask(() => (chatBox.scrollTop = chatBox.scrollHeight));
+  });
+  function sendChat(e) {
+    e.preventDefault();
+    if (!chatText.trim()) return;
+    send({ type: 'chat', text: chatText });
+    chatText = '';
+  }
+
+  function exitRoom() {
+    if (net.seat != null) leave();
+    else disconnect();
+  }
+
+  const claudeCmd = $derived(`claude mcp add --transport http mahjong ${base}/mcp`);
+  const aiPrompt = (who) =>
+    `用 mahjong MCP 工具，以「${who}」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲。之後不斷重複：呼叫 wait_for_turn，輪到你時用 take_action 選擇最好的 action_id，直到遊戲結束。打牌要快，每次決定都有時間限制。可以用 send_chat 跟大家聊天。`;
+  const curlPrompt = $derived(`請讀 ${base}/llms.txt 的說明，用 curl 以「AI」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲，然後一直玩到遊戲結束。`);
+  const tunnelCmd = $derived(`cloudflared tunnel --url ${base.replace(/\/\/[^:]+:/, '//localhost:')}`);
 </script>
 
-<main class="concept-page lobby-page">
-  <header>
-    <div class="lobby-brand"><strong>虛擬台麻館</strong><small>Virtual Taiwan Mahjong Parlor</small></div>
-    <h1>🀄 房間大廳</h1>
-    <div class="spacer"></div>
-    {#if net.seat != null}
-      <button class="small" onclick={leave}>離開座位</button>
-    {/if}
-    <button class="small" onclick={disconnect}>回首頁</button>
+<main class="concept-page lobby2">
+  <header class="lobby-head">
+    <div class="head-brand"><Brand compact /></div>
+    <OrnateHeading text="房間大廳" size="md" />
+    <div class="head-right">
+      <FancyButton variant="red" onclick={exitRoom}>⇦ 離開房間</FancyButton>
+    </div>
   </header>
 
-  <div class="layout">
-    <section class="card seats">
-      <h2>入席玩家 <span class="seat-count">{s.seats.filter((seat) => seat.name).length} / 4 已入席</span></h2>
-      <div class="seat-grid">
-        {#each s.seats as seat, i}
-          <div class="seat" class:me={i === net.seat} class:empty={!seat.name}>
-            <div class="idx">座位 {i}</div>
+  <div class="lobby-body">
+    <!-- 左：座位 -->
+    <section class="seats-area" aria-label="入席玩家">
+      <div class="seat-count art-panel">
+        <span class="label">入席玩家</span>
+        <span class="count">{seated} / 4 已入席</span>
+      </div>
+      {#each s.seats as seat, i}
+        {@const [role, roleClass] = seat.name ? roleOf(seat, i) : ['', '']}
+        <div class="seat art-panel {SLOT[i]}" class:me={i === net.seat} class:empty={!seat.name}>
+          <div class="seat-pic">
+            {#if seat.name && seat.character}
+              <Avatar id={seat.character} expression={i === net.seat ? 'happy' : 'normal'} size={200} />
+            {:else}
+              <svg class="chair" viewBox="0 0 100 110" aria-hidden="true">
+                <path d="M24 8h52c4 0 6 3 6 7v44H18V15c0-4 2-7 6-7z" />
+                <path d="M12 60h76v12H12z" />
+                <path d="M18 72h8v34h-8zM74 72h8v34h-8zM34 22h32v28H34z" opacity=".55" />
+              </svg>
+            {/if}
+          </div>
+          <div class="seat-info">
             {#if seat.name}
-              {#if seat.character}
-                <div class="seat-av">
-                  <Avatar id={seat.character} size={64} crop expression={i === net.seat ? 'happy' : 'normal'} />
-                  <span class="muted">{getCharacter(seat.character).name}</span>
-                </div>
-              {/if}
-              <div class="who">
-                <span class="icon">{SEAT_KIND_ICON[seat.kind]}</span>
-                <span class="nm">{seat.name}</span>
-                {#if i === net.seat}<span class="badge">你</span>{/if}
-              </div>
-              <div class="meta">
-                <span class="dot" class:on={seat.connected}></span>
-                {SEAT_KIND_LABEL[seat.kind]} · {seat.connected ? '在線' : '離線'}
-              </div>
-              {#if net.isHost}
-                <button class="small" onclick={() => hostCmd('remove', { seat: i })}>移除</button>
+              <b class="seat-name" title={seat.name}>{seat.name}</b>
+              <span class="role {roleClass}">{role}</span>
+              <span class="status"><i class="dot" class:on={seat.kind === 'bot' || seat.connected}></i>{statusOf(seat)}</span>
+              {#if i === net.seat}
+                <button type="button" class="seat-btn" onclick={() => (showCharacter = true)}>更換角色</button>
+              {:else if isHost && s.host_seat !== i}
+                <button type="button" class="seat-btn" onclick={() => hostCmd('remove', { seat: i })}>移除</button>
               {/if}
             {:else}
-              <div class="who muted">空位</div>
-              {#if net.isHost}
-                <button class="small" onclick={() => hostCmd('add_bot', { seat: i })}>＋ 電腦</button>
+              <b class="seat-name wait">等待入席</b>
+              {#if isHost}
+                <button type="button" class="seat-btn" onclick={() => hostCmd('add_bot', { seat: i })}>加入電腦</button>
               {/if}
             {/if}
           </div>
-        {/each}
-      </div>
-
-      {#if net.seat != null}
-        <details class="lobby-detail"><summary>更換角色</summary>
-        <CharacterPicker value={myCharacter} onpick={setCharacter} taken={takenCharacters} size={56} />
-        </details>
-      {/if}
-
-      {#if net.isHost}
-        <div class="start">
-          <button class="primary big" onclick={() => hostCmd('start')}>開始遊戲</button>
-          <span class="muted">空位會自動補上電腦。座位隨時可讓 AI / 玩家接手電腦。</span>
         </div>
-      {:else}
-        <p class="muted wait">等待房主開始遊戲…</p>
-      {/if}
+      {/each}
+      <p class="fill-note">空位會在開始時補上電腦。</p>
+    </section>
 
-      <details class="lobby-detail">
-      <summary>本局規則 <span>底 {s.settings.base} · 每台 {s.settings.per_tai} · {s.settings.rounds} 圈 · 出牌 {s.settings.turn_timeout || '不限'} 秒</span></summary>
-      {#if settings}
-        <div class="settings">
-          {#each fields as [k, label, step]}
-            <label>
-              <span>{label}</span>
-              <input type="number" min="0" {step} bind:value={settings[k]} disabled={!net.isHost} />
-            </label>
-          {/each}
-        </div>
-        {#if net.isHost}
-          <button class="small" onclick={applySettings}>套用設定</button>
+    <!-- 右：邀請／連線資訊＋聊天 -->
+    <aside class="side">
+      <section class="art-panel invite">
+        <h2 class="panel-title">{isHost ? '邀請入席' : '連線資訊'}</h2>
+        {#if isHost}
+          <div class="tabs" role="tablist">
+            <button type="button" role="tab" class:sel={tab === 'friends'} aria-selected={tab === 'friends'} onclick={() => (tab = 'friends')}>朋友</button>
+            <button type="button" role="tab" class:sel={tab === 'ai'} aria-selected={tab === 'ai'} onclick={() => (tab = 'ai')}>AI</button>
+            <button type="button" role="tab" class:sel={tab === 'info'} aria-selected={tab === 'info'} onclick={() => (tab = 'info')}>連線資訊</button>
+          </div>
         {/if}
-      {/if}
-      </details>
-    </section>
 
-    <section class="card invite">
-      <h2>邀請玩家與 AI</h2>
-      {#if urls.length > 1}
-        <div class="urls">
-          {#each urls as u, i}
-            <button class="small" class:sel={i === urlIdx} onclick={() => (urlIdx = i)}>{u}</button>
+        {#if !isHost || tab === 'friends'}
+          {#if isHost}<p>分享房間位址，邀請朋友加入。</p>{/if}
+          <div class="copy-row">
+            <code>{address}</code>
+            <button type="button" class="copy-btn" onclick={() => copy(address)}>複製</button>
+          </div>
+          <p class="ok"><i class="dot on"></i>{isHost ? '房間已開啟' : '已連線'}</p>
+          {#if isHost}
+            <p class="muted small">沒有 App 的朋友可直接用瀏覽器打開 <code>{base}/</code></p>
+          {/if}
+        {:else if tab === 'ai'}
+          <div class="subtabs">
+            <button type="button" class:sel={aiTab === 'claude'} onclick={() => (aiTab = 'claude')}>Claude Code</button>
+            <button type="button" class:sel={aiTab === 'chatgpt'} onclick={() => (aiTab = 'chatgpt')}>ChatGPT</button>
+            <button type="button" class:sel={aiTab === 'other'} onclick={() => (aiTab = 'other')}>其他 AI</button>
+          </div>
+          <div class="ai-body">
+            {#if aiTab === 'claude'}
+              <p>1. 把麻將伺服器加成 MCP：</p>
+              <div class="copy-row"><code>{claudeCmd}</code><button type="button" class="copy-btn" onclick={() => copy(claudeCmd)}>複製</button></div>
+              <p>2. 開一個<b>新的</b> claude 工作階段，貼上：</p>
+              <div class="copy-row"><code class="wrap">{aiPrompt('Claude')}</code><button type="button" class="copy-btn" onclick={() => copy(aiPrompt('Claude'))}>複製</button></div>
+            {:else if aiTab === 'chatgpt'}
+              <p>ChatGPT 需要 https 公開網址，先開通道：</p>
+              <div class="copy-row"><code>{tunnelCmd}</code><button type="button" class="copy-btn" onclick={() => copy(tunnelCmd)}>複製</button></div>
+              <p class="small">再把 <code>https://…/mcp</code> 加成 ChatGPT 的連接器（設定 → 應用程式與連接器 → 開發者模式），或在自訂 GPT 匯入 <code>/openapi.json</code>，然後貼上：</p>
+              <div class="copy-row"><code class="wrap">{aiPrompt('ChatGPT').replace('mahjong MCP 工具', '麻將工具')}</code><button type="button" class="copy-btn" onclick={() => copy(aiPrompt('ChatGPT').replace('mahjong MCP 工具', '麻將工具'))}>複製</button></div>
+            {:else}
+              <p>任何能發 HTTP 請求的 AI 都能玩，給它這段話：</p>
+              <div class="copy-row"><code class="wrap">{curlPrompt}</code><button type="button" class="copy-btn" onclick={() => copy(curlPrompt)}>複製</button></div>
+            {/if}
+          </div>
+        {:else}
+          {#if urls.length > 1}
+            <div class="subtabs">
+              {#each urls as u, i}
+                <button type="button" class:sel={i === urlIdx} onclick={() => (urlIdx = i)}>{u.replace(/^https?:\/\//, '')}</button>
+              {/each}
+            </div>
+          {/if}
+          <dl class="info">
+            <dt>網頁</dt><dd><code>{base}/</code></dd>
+            <dt>MCP</dt><dd><code>{base}/mcp</code></dd>
+            <dt>AI 說明</dt><dd><code>{base}/llms.txt</code></dd>
+            <dt>OpenAPI</dt><dd><code>{base}/openapi.json</code></dd>
+          </dl>
+          <p class="muted small">需在同一個區網，或房主的防火牆／路由器有開放這個埠。</p>
+        {/if}
+      </section>
+
+      <section class="art-panel chat">
+        <h2 class="panel-title">牌桌聊天</h2>
+        <ol class="chat-list" bind:this={chatBox}>
+          {#each chatLines as line}
+            {#if line.sys}
+              <li><span class="sys">[系統]</span> {line.text}</li>
+            {:else}
+              <li><span class="who" class:mine={line.seat === net.seat}>{line.name}</span>：{line.text}</li>
+            {/if}
           {/each}
-        </div>
-      {/if}
-      <div class="tabs">
-        <button class:sel={tab === 'human'} onclick={() => (tab = 'human')}>👤 朋友</button>
-        <button class:sel={tab === 'claude'} onclick={() => (tab = 'claude')}>🤖 Claude Code</button>
-        <button class:sel={tab === 'chatgpt'} onclick={() => (tab = 'chatgpt')}>💬 ChatGPT</button>
-        <button class:sel={tab === 'other'} onclick={() => (tab = 'other')}>🛠 其他 AI</button>
-      </div>
+        </ol>
+        {#if net.seat != null}
+          <form onsubmit={sendChat}>
+            <input bind:value={chatText} placeholder="說點什麼…" maxlength="300" />
+            <button type="submit" class="send" disabled={!chatText.trim()} aria-label="送出">➤</button>
+          </form>
+        {/if}
+      </section>
+    </aside>
 
-      {#if tab === 'human'}
-        <p>朋友可以用本 App 選「加入房間」輸入：</p>
-        <div class="copy"><code>{base.replace('http://', '')}</code><button class="small" onclick={() => copy(base.replace('http://', ''))}>複製</button></div>
-        <p>沒有 App 的話，直接用瀏覽器打開：</p>
-        <div class="copy"><code>{base}/</code><button class="small" onclick={() => copy(base + '/')}>複製</button></div>
-        <p class="muted">需在同一個區網，或房主的防火牆 / 路由器有開放這個埠。</p>
-      {:else if tab === 'claude'}
-        <p>1. 在終端機把麻將伺服器加成 MCP：</p>
-        <div class="copy"><code>{claudeCmd}</code><button class="small" onclick={() => copy(claudeCmd)}>複製</button></div>
-        <p>2. <b>開一個新的</b> <code>claude</code> 工作階段（MCP 工具只在啟動時載入），貼上這段話：</p>
-        <div class="copy"><code class="wrap">{claudePrompt}</code><button class="small" onclick={() => copy(claudePrompt)}>複製</button></div>
-        <p class="muted">Claude 會用 join_game → wait_for_turn → take_action 自己打。就算沒載入 MCP，Claude 也會自己讀 /llms.txt 改用 HTTP API 玩。</p>
-      {:else if tab === 'chatgpt'}
-        <p>ChatGPT 在雲端，需要一個 <b>https 公開網址</b> 才連得到你的電腦。最簡單是用 Cloudflare 臨時通道：</p>
-        <div class="copy"><code>{tunnelCmd}</code><button class="small" onclick={() => copy(tunnelCmd)}>複製</button></div>
-        <p>它會給你一個 <code>https://xxxx.trycloudflare.com</code>，接著擇一：</p>
-        <ul>
-          <li><b>MCP 連接器</b>：ChatGPT 設定 → 應用程式與連接器 → 進階 → 開啟開發者模式 → 建立連接器，網址填 <code>https://xxxx.trycloudflare.com/mcp</code>，驗證選「無」。</li>
-          <li><b>自訂 GPT Actions</b>：建立 GPT → 動作 → 從網址匯入 <code>https://xxxx.trycloudflare.com/openapi.json</code>。</li>
-        </ul>
-        <p>然後對 ChatGPT 說：</p>
-        <div class="copy"><code class="wrap">{claudePrompt.replace('Claude', 'ChatGPT').replace('mahjong MCP 工具', '麻將工具')}</code><button class="small" onclick={() => copy(claudePrompt.replace('Claude', 'ChatGPT').replace('mahjong MCP 工具', '麻將工具'))}>複製</button></div>
-      {:else}
-        <p>任何能發 HTTP 請求的 AI 或程式都能玩。說明文件：</p>
-        <div class="copy"><code>{base}/llms.txt</code><button class="small" onclick={() => copy(base + '/llms.txt')}>複製</button></div>
-        <p>可以直接給 AI 這段話：</p>
-        <div class="copy"><code class="wrap">{curlPrompt}</code><button class="small" onclick={() => copy(curlPrompt)}>複製</button></div>
-        <p class="muted">MCP 端點 <code>{base}/mcp</code> · OpenAPI <code>{base}/openapi.json</code></p>
+    <!-- 下：規則＋開始 -->
+    <section class="art-panel rules-bar" aria-label="本局規則">
+      <h2 class="rules-title">本局規則</h2>
+      <ul class="rule-chips">
+        {#each rules as r}<li>{r}</li>{/each}
+      </ul>
+      {#if isHost}
+        <button type="button" class="seat-btn adjust" onclick={() => (showRules = true)}>調整規則</button>
       {/if}
-
-      <h2 class="sub">聊天</h2>
-      <div class="chatbox"><Chat /></div>
     </section>
+    <div class="start-area">
+      {#if isHost}
+        <FancyButton variant="gold" tile="F" onclick={() => hostCmd('start')} class="start-btn">開始遊戲</FancyButton>
+      {:else}
+        <div class="art-panel waiting"><span>等待房主開始遊戲…</span><span class="spinner" aria-hidden="true"></span></div>
+      {/if}
+    </div>
   </div>
 </main>
 
+<Modal bind:open={showCharacter} title="更換角色" width="760px">
+  <PortraitGrid value={myCharacter} onpick={(id) => { setCharacter(id); showCharacter = false; }} taken={takenCharacters} />
+</Modal>
+
+<Modal bind:open={showRules} title="調整規則" width="620px">
+  {#if settings}
+    <div class="rule-form">
+      {#each fields as [k, label, step]}
+        <label>
+          <span>{label}</span>
+          <input type="number" min="0" {step} bind:value={settings[k]} />
+        </label>
+      {/each}
+    </div>
+    <div class="rule-actions">
+      <FancyButton variant="red" onclick={() => (showRules = false)}>取消</FancyButton>
+      <FancyButton variant="gold" onclick={applySettings}>套用</FancyButton>
+    </div>
+  {/if}
+</Modal>
+
 <style>
-  main { height: 100%; display: flex; flex-direction: column; padding: 16px 24px; gap: 14px; overflow: auto; }
-  header { display: flex; align-items: center; gap: 10px; }
-  header h1 { margin: 0; font-size: 24px; }
-  .spacer { flex: 1; }
-  .layout { display: grid; grid-template-columns: 1.1fr 1fr; gap: 18px; min-height: 0; }
-  @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
-  h2 { margin: 0 0 12px; font-size: 18px; }
-  h2.sub { margin-top: 22px; }
-  .seat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  .seat {
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    padding: 12px 14px;
-    background: rgba(255, 255, 255, 0.04);
+  .lobby2 {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    align-items: flex-start;
+    height: 100%;
+    padding: 10px clamp(12px, 1.4vw, 24px) 14px;
+    background-image: linear-gradient(#0003, #0003), var(--scene-parlor);
+    background-size: cover;
+    background-position: center;
   }
-  .seat { position: relative; }
-  .seat-av { position: absolute; right: 12px; top: 10px; display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 11px; }
-  .seat.me { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
-  .seat.empty { border-style: dashed; }
-  .idx { font-size: 12px; color: var(--muted); }
-  .who { font-size: 17px; display: flex; gap: 6px; align-items: center; }
-  .badge { background: var(--gold); color: #3d2200; font-size: 11px; padding: 1px 6px; border-radius: 6px; font-weight: 700; }
-  .meta { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #777; }
-  .dot.on { background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-  .start { display: flex; align-items: center; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
-  .start span { font-size: 13px; }
-  .big { font-size: 18px; padding: 12px 28px; }
-  .wait { margin-top: 18px; }
-  .settings { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px 14px; margin-bottom: 10px; }
-  .settings label { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; }
-  .settings input { width: 90px; }
-  .invite p { margin: 10px 0 6px; font-size: 14px; }
-  .invite ul { margin: 6px 0; padding-left: 20px; font-size: 14px; line-height: 1.6; }
-  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
-  .tabs button, .urls button { padding: 6px 12px; font-size: 14px; }
-  .sel { background: var(--selected-bg, rgba(255, 209, 102, 0.22)); border-color: var(--gold); }
-  .urls { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
-  .copy {
+  .lobby-head {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 16px;
+    min-height: 70px;
+    margin: -10px calc(-1 * clamp(12px, 1.4vw, 24px)) 10px;
+    padding: 4px clamp(12px, 1.4vw, 24px);
+    background: linear-gradient(#021b16f2, #021b16d0);
+    border-bottom: 1px solid var(--art-line);
+  }
+  .head-right { justify-self: end; }
+  .head-right :global(.fancy) { min-height: 46px; font-size: clamp(16px, 1.3vw, 21px); padding: 6px 22px; }
+
+  .lobby-body {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(320px, 28vw, 470px);
+    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template-areas: 'seats side' 'rules start';
+    gap: 12px 16px;
+  }
+
+  /* ── 座位：四個角，中間露出背景的牌桌 ── */
+  .seats-area { grid-area: seats; position: relative; min-height: 420px; }
+  .seat-count { position: absolute; top: 0; left: 0; display: flex; align-items: center; gap: 14px; padding: 8px 20px; }
+  .seat-count .label { font: 700 clamp(22px, 2vw, 32px) var(--heading-font); letter-spacing: 0.25em; color: var(--gold); }
+  .seat-count .count { font: 600 clamp(14px, 1.2vw, 19px) var(--heading-font); letter-spacing: 0.1em; border: 1px solid var(--art-line); padding: 2px 14px; }
+  .seat {
+    position: absolute;
     display: flex;
-    gap: 8px;
-    align-items: flex-start;
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    padding: 8px 10px;
+    gap: 14px;
+    width: min(46%, 390px);
+    height: min(42%, 196px);
+    padding: 10px;
   }
-  .copy code { flex: 1; word-break: break-all; color: #d8f3dc; }
-  .copy code.wrap { white-space: pre-wrap; font-family: inherit; font-size: 13px; }
-  .chatbox { height: 180px; display: flex; flex-direction: column; }
+  .seat.tl { left: 2%; top: 14%; }
+  .seat.tr { right: 2%; top: 14%; }
+  .seat.bl { left: 0; bottom: 4%; }
+  .seat.br { right: 0; bottom: 4%; }
+  .seat.me { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .seat-pic {
+    position: relative;
+    flex: none;
+    height: 100%;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border: 1px solid var(--art-line);
+    background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--gold) 20%, transparent), #0007 75%);
+  }
+  .seat-pic :global(.avatar) { position: absolute; left: 50%; top: 0; width: 118% !important; height: auto !important; aspect-ratio: 1; transform: translateX(-50%); }
+  .chair { width: 100%; height: 100%; padding: 14%; fill: #0009; }
+  .seat-info { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 8px; min-width: 0; }
+  .seat-name { font: 700 clamp(18px, 1.65vw, 28px)/1.4 var(--heading-font); letter-spacing: 0.08em; padding-bottom: 2px; color: var(--text); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .seat-name.wait { color: var(--text); }
+  .role { font: 700 15px var(--heading-font); letter-spacing: 0.3em; padding: 2px 18px; border-radius: var(--small-radius); border: 1px solid #0006; }
+  .role.host { background: linear-gradient(#ffe7a4, #d5a34d); color: #3a2410; }
+  .role.me { background: linear-gradient(#7fe0a0, #2e9a5a); color: #062614; }
+  .role.bot { background: linear-gradient(#9ae6ff, #3a9fd0); color: #062033; }
+  .role.ai { background: linear-gradient(#d0b4ff, #7a52c9); color: #fff; }
+  .role.human { background: #ffffff22; color: var(--text); }
+  .status { display: flex; align-items: center; gap: 8px; font-size: 15px; }
+  .dot { display: inline-block; width: 11px; height: 11px; border-radius: 50%; background: #777; }
+  .dot.on { background: #3ddc84; box-shadow: 0 0 6px #3ddc84; }
+  .seat-btn { padding: 4px 16px; font-family: var(--heading-font); letter-spacing: 0.15em; }
+  .fill-note {
+    position: absolute;
+    left: 50%;
+    bottom: 1%;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 4px 16px;
+    font-size: 14px;
+    letter-spacing: 0.1em;
+    background: #000b;
+    border: 1px solid var(--art-line);
+    white-space: nowrap;
+  }
+
+  /* ── 右側 ── */
+  .side { grid-area: side; display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; min-height: 0; }
+  .panel-title { margin: 0 0 10px; font: 700 clamp(20px, 1.7vw, 28px) var(--heading-font); letter-spacing: 0.2em; color: var(--gold); }
+  .panel-title::before { content: '❖ '; font-size: 0.7em; vertical-align: 3px; }
+  .invite { padding: 14px 16px; min-height: 0; max-height: 52vh; overflow: auto; }
+  .invite p { margin: 8px 0; font-size: 14px; line-height: 1.55; }
+  .tabs { display: grid; grid-template-columns: repeat(3, 1fr); margin-bottom: 10px; border-bottom: 1px solid var(--art-line); }
+  .tabs button { border-radius: 0; font: 600 17px var(--heading-font); letter-spacing: 0.15em; padding: 8px 0; }
+  .tabs button.sel, .subtabs button.sel { background: linear-gradient(#6b2a2c, #3d1517); color: var(--gold); border-color: var(--gold); }
+  .subtabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .subtabs button { padding: 4px 10px; font-size: 13px; }
+  .copy-row { display: flex; align-items: stretch; gap: 8px; }
+  .copy-row code {
+    flex: 1;
+    min-width: 0;
+    padding: 8px 12px;
+    font-size: 15px;
+    word-break: break-all;
+    background: #0008;
+    border: 1px solid var(--art-line);
+  }
+  .copy-row code.wrap { white-space: pre-wrap; font-family: var(--ui-font); font-size: 13px; }
+  .copy-btn { flex: none; font: 700 17px var(--heading-font); letter-spacing: 0.15em; padding: 0 16px; }
+  .ok { display: flex; align-items: center; gap: 8px; }
+  .small { font-size: 12px !important; }
+  .info { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 12px; margin: 6px 0; font-size: 13px; }
+  .info dt { color: var(--gold); }
+  .info dd { margin: 0; word-break: break-all; }
+
+  .chat { display: flex; flex-direction: column; min-height: 0; padding: 14px 16px; }
+  .chat-list { flex: 1; min-height: 60px; overflow-y: auto; list-style: none; margin: 0; padding: 10px 12px; background: #0006; border: 1px solid var(--art-line); font-size: 15px; line-height: 1.7; }
+  .sys { color: #ff9b6a; }
+  .who { color: #7fd0ff; }
+  .who.mine { color: var(--gold); }
+  .chat form { display: flex; gap: 8px; margin-top: 10px; }
+  .chat input { flex: 1; min-width: 0; }
+  .send { width: 52px; padding: 0; font-size: 20px; }
+
+  /* ── 下方 ── */
+  .rules-bar { grid-area: rules; display: flex; align-items: center; gap: 18px; padding: 10px 20px; flex-wrap: wrap; }
+  .rules-title { margin: 0; font: 700 clamp(22px, 2vw, 32px) var(--heading-font); letter-spacing: 0.2em; color: var(--gold); white-space: nowrap; }
+  .rules-title::before { content: '❖ '; font-size: 0.6em; vertical-align: 4px; }
+  .rule-chips { display: flex; flex-wrap: wrap; list-style: none; margin: 0; padding: 0; flex: 1; }
+  .rule-chips li { padding: 2px clamp(10px, 1.4vw, 26px); font: 600 clamp(16px, 1.4vw, 22px) var(--heading-font); letter-spacing: 0.1em; border-left: 1px solid var(--art-line); }
+  .adjust { font-size: 18px; padding: 8px 22px; }
+  .start-area { grid-area: start; display: flex; }
+  .start-area :global(.start-btn) { flex: 1; min-height: 72px; font-size: clamp(26px, 2.5vw, 40px); }
+  .waiting { flex: 1; display: flex; align-items: center; justify-content: center; gap: 16px; font: 700 clamp(20px, 1.8vw, 28px) var(--heading-font); letter-spacing: 0.18em; color: var(--gold); }
+  .spinner { width: 26px; height: 26px; border-radius: 50%; border: 3px dotted var(--gold); animation: spin 1.6s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .rule-form { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 18px; }
+  .rule-form label { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; }
+  .rule-form input { width: 100px; }
+  .rule-actions { display: flex; justify-content: center; gap: 16px; margin-top: 20px; }
+
+  /* ── 窄螢幕：座位改成一般的兩欄，右側移到下面 ── */
+  @media (max-width: 1100px) {
+    .lobby2 { height: auto; min-height: 100%; overflow: auto; }
+    .lobby-head { grid-template-columns: 1fr auto; }
+    .head-brand { display: none; }
+    .lobby-body { grid-template-columns: 1fr; grid-template-areas: 'seats' 'rules' 'start' 'side'; }
+    .seats-area { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-height: 0; padding-top: 58px; }
+    .seat { position: static; width: auto; height: 150px; }
+    .fill-note { position: static; transform: none; grid-column: 1 / -1; justify-self: center; }
+    .invite { max-height: none; }
+    .chat { min-height: 260px; }
+  }
+  @media (max-width: 600px) {
+    .seats-area { grid-template-columns: 1fr; }
+    .rule-form { grid-template-columns: 1fr; }
+  }
 </style>
