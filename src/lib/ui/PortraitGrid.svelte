@@ -1,13 +1,15 @@
 <script>
   // 概念圖的角色選擇：大張半身立繪方格＋名牌，選中的有金框和菱形標記。
-  import { getSelectableCharacters } from '../characters.js';
+  import { CHARACTERS, getSelectableCharacters } from '../characters.js';
   import { ayiUnlocked } from '../unlocks.js';
   import Avatar from '../Avatar.svelte';
 
   let { value = $bindable(), onpick = undefined, taken = [], columns = 3, label = '選擇角色' } = $props();
 
-  const list = $derived(getSelectableCharacters($ayiUnlocked));
-  // 解鎖隱藏角色後有 7 人：多開一欄，排數維持不變，畫面才不會變長
+  // 隱藏角色一律列出：還沒解鎖時是黑色剪影、名字「???」、不能選
+  const list = CHARACTERS;
+  const unlocked = $derived(new Set(getSelectableCharacters($ayiUnlocked).map((c) => c.id)));
+  // 7 人時多開一欄，排數維持不變，畫面才不會變長
   const cols = $derived(columns + (list.length > 6 ? 1 : 0));
 
   function pick(id) {
@@ -18,6 +20,7 @@
 
 <div class="pgrid" role="radiogroup" aria-label={label} style:--cols={cols}>
   {#each list as c}
+    {@const locked = !unlocked.has(c.id)}
     {@const isTaken = taken.includes(c.id) && value !== c.id}
     <button
       type="button"
@@ -25,12 +28,15 @@
       class="cell"
       class:sel={value === c.id}
       class:taken={isTaken}
+      class:locked
       aria-checked={value === c.id}
-      title="{c.name}：{c.intro}{isTaken ? '（已有人選）' : ''}"
-      onclick={() => pick(c.id)}
+      aria-disabled={locked}
+      aria-label={locked ? '隱藏角色（尚未解鎖）' : c.name}
+      title={locked ? '隱藏角色：尚未解鎖' : `${c.name}：${c.intro}${isTaken ? '（已有人選）' : ''}`}
+      onclick={() => !locked && pick(c.id)}
     >
       <span class="pic"><Avatar id={c.id} expression={value === c.id ? 'happy' : 'normal'} size={220} /></span>
-      <span class="name">{c.name}</span>
+      <span class="name">{locked ? '???' : c.name}</span>
       {#if value === c.id}<span class="diamond" aria-hidden="true"></span>{/if}
     </button>
   {/each}
@@ -78,6 +84,10 @@
   }
   .sel .name { color: var(--gold); }
   .taken { opacity: 0.5; }
+  /* 未解鎖：整張壓成黑色剪影 */
+  .locked { cursor: not-allowed; }
+  .locked .pic :global(.avatar) { filter: brightness(0) drop-shadow(0 0 1px #fff4); opacity: 0.85; }
+  .locked .name { color: var(--muted); letter-spacing: 0.35em; }
   .diamond {
     position: absolute;
     top: -7px;
