@@ -1,0 +1,437 @@
+[
+  {
+    "style": "anime90",
+    "expression": "normal",
+    "file": "public/characters/ayi/normal.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      0,
+      0,
+      512,
+      514
+    ],
+    "padding_offset": [
+      17,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      38,
+      17,
+      495,
+      496
+    ],
+    "fully_transparent_pixels": 127048,
+    "alpha_max": 255,
+    "sha256": "b38fda4f2b81cd1dd4937fa8d9a1b370f12647b63f8c12dc7857ca9af23e45a5"
+  },
+  {
+    "style": "anime90",
+    "expression": "happy",
+    "file": "public/characters/ayi/happy.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      512,
+      0,
+      1024,
+      514
+    ],
+    "padding_offset": [
+      17,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      17,
+      19,
+      495,
+      496
+    ],
+    "fully_transparent_pixels": 127593,
+    "alpha_max": 255,
+    "sha256": "ad84b0180ebc8adee12e475d3bff3cd8fef09ab1902f9bcfbaa25f32bfdab9ff"
+  },
+  {
+    "style": "anime90",
+    "expression": "surprised",
+    "file": "public/characters/ayi/surprised.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      1024,
+      0,
+      1536,
+      514
+    ],
+    "padding_offset": [
+      17,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      30,
+      16,
+      480,
+      496
+    ],
+    "fully_transparent_pixels": 128513,
+    "alpha_max": 255,
+    "sha256": "7316c63f9e47ccf08a52b5cf9a350b6c38e963025d996988a44658b5fb70604a"
+  },
+  {
+    "style": "anime90",
+    "expression": "sad",
+    "file": "public/characters/ayi/sad.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      0,
+      520,
+      512,
+      1024
+    ],
+    "padding_offset": [
+      16,
+      20
+    ],
+    "nonzero_alpha_bbox": [
+      16,
+      20,
+      496,
+      492
+    ],
+    "fully_transparent_pixels": 123263,
+    "alpha_max": 255,
+    "sha256": "490b8a8a4847d8b9c6b20da1fed4287ac5b2a773582a74d09fb0b10a0f801fb0"
+  },
+  {
+    "style": "anime90",
+    "expression": "win",
+    "file": "public/characters/ayi/win.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      512,
+      520,
+      1024,
+      1024
+    ],
+    "padding_offset": [
+      16,
+      20
+    ],
+    "nonzero_alpha_bbox": [
+      16,
+      20,
+      496,
+      492
+    ],
+    "fully_transparent_pixels": 122413,
+    "alpha_max": 255,
+    "sha256": "bd3accf38c2f210c7bb7e3e8012b4c64f80913aed2e33f75f16739d3ce3bf64e"
+  },
+  {
+    "style": "pc98",
+    "expression": "normal",
+    "file": "public/characters/ayi/pc98/normal.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "padding_offset": [
+      16,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      30,
+      16,
+      496,
+      496
+    ],
+    "fully_transparent_pixels": 117172,
+    "alpha_max": 254,
+    "sha256": "a06ca223988dbf630081da071da1e2beff512fcd00800e2ea01279d5a1cab748"
+  },
+  {
+    "style": "pc98",
+    "expression": "happy",
+    "file": "public/characters/ayi/pc98/happy.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "padding_offset": [
+      16,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      16,
+      16,
+      496,
+      496
+    ],
+    "fully_transparent_pixels": 116546,
+    "alpha_max": 254,
+    "sha256": "f874e976f273b8ed13c13c6ad479e02e3919b72950bfb0e7ea9933d250148cff"
+  },
+  {
+    "style": "pc98",
+    "expression": "surprised",
+    "file": "public/characters/ayi/pc98/surprised.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "padding_offset": [
+      16,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      24,
+      16,
+      489,
+      496
+    ],
+    "fully_transparent_pixels": 118427,
+    "alpha_max": 254,
+    "sha256": "703035572ad449a2bfce7aa11234f123c5fea6dd3d881918297e081afc0345fe"
+  },
+  {
+    "style": "pc98",
+    "expression": "sad",
+    "file": "public/characters/ayi/pc98/sad.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "padding_offset": [
+      16,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      16,
+      16,
+      496,
+      496
+    ],
+    "fully_transparent_pixels": 115563,
+    "alpha_max": 254,
+    "sha256": "7f79412ec331bc578a2221c5d8e2e8acc9c2758ff6dec34bf74a7457c5813666"
+  },
+  {
+    "style": "pc98",
+    "expression": "win",
+    "file": "public/characters/ayi/pc98/win.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "padding_offset": [
+      16,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      16,
+      16,
+      496,
+      496
+    ],
+    "fully_transparent_pixels": 115348,
+    "alpha_max": 254,
+    "sha256": "a0759e3cf25c11835a245218329ea722b82750cdfeef51ca3b90bcb1bf329a79"
+  },
+  {
+    "style": "msdos",
+    "expression": "normal",
+    "file": "public/characters/ayi/msdos/normal.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      0,
+      0,
+      512,
+      512
+    ],
+    "padding_offset": [
+      16,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      16,
+      16,
+      496,
+      496
+    ],
+    "fully_transparent_pixels": 112010,
+    "alpha_max": 254,
+    "sha256": "4322e02ecc819e9b64b99639381f8998dbcbc8e5f03a92b2894629a215d77ad1"
+  },
+  {
+    "style": "msdos",
+    "expression": "happy",
+    "file": "public/characters/ayi/msdos/happy.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      512,
+      0,
+      1024,
+      512
+    ],
+    "padding_offset": [
+      16,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      16,
+      16,
+      496,
+      496
+    ],
+    "fully_transparent_pixels": 110296,
+    "alpha_max": 254,
+    "sha256": "39835ce88cfa862d175435af28119edc1cc1eff7d2689a7cbe6f6943f2f3f79e"
+  },
+  {
+    "style": "msdos",
+    "expression": "surprised",
+    "file": "public/characters/ayi/msdos/surprised.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      1024,
+      0,
+      1536,
+      512
+    ],
+    "padding_offset": [
+      16,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      16,
+      16,
+      496,
+      496
+    ],
+    "fully_transparent_pixels": 111486,
+    "alpha_max": 254,
+    "sha256": "7e709aa91a50bc871da752e04656d13c547c2d8def7cdbcaa1833b93177f60f0"
+  },
+  {
+    "style": "msdos",
+    "expression": "sad",
+    "file": "public/characters/ayi/msdos/sad.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      0,
+      512,
+      512,
+      1024
+    ],
+    "padding_offset": [
+      16,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      16,
+      16,
+      496,
+      496
+    ],
+    "fully_transparent_pixels": 109783,
+    "alpha_max": 254,
+    "sha256": "e5aae32768d775fe0f5767ade8418876acb03abd750aa748ff316006ffa9a4c8"
+  },
+  {
+    "style": "msdos",
+    "expression": "win",
+    "file": "public/characters/ayi/msdos/win.png",
+    "size": [
+      512,
+      512
+    ],
+    "mode": "RGBA",
+    "source_crop": [
+      512,
+      512,
+      1024,
+      1024
+    ],
+    "padding_offset": [
+      16,
+      16
+    ],
+    "nonzero_alpha_bbox": [
+      16,
+      16,
+      496,
+      496
+    ],
+    "fully_transparent_pixels": 108565,
+    "alpha_max": 254,
+    "sha256": "99158af12380d201783036e4c27c150d86e77b20810a352fe8f3fb4c55a10189"
+  }
+]

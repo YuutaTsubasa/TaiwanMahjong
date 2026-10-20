@@ -15,7 +15,7 @@
   let urlIdx = $state(0);
   const base = $derived(urls[Math.min(urlIdx, urls.length - 1)] || 'http://localhost:7777');
 
-  let tab = $state('claude');
+  let tab = $state('human');
   let settings = $state(null);
   $effect(() => {
     if (s && !settings) settings = { ...s.settings };
@@ -51,8 +51,9 @@
   ];
 </script>
 
-<main>
+<main class="concept-page lobby-page">
   <header>
+    <div class="lobby-brand"><strong>虛擬台麻館</strong><small>Virtual Taiwan Mahjong Parlor</small></div>
     <h1>🀄 房間大廳</h1>
     <div class="spacer"></div>
     {#if net.seat != null}
@@ -63,7 +64,7 @@
 
   <div class="layout">
     <section class="card seats">
-      <h2>座位</h2>
+      <h2>入席玩家 <span class="seat-count">{s.seats.filter((seat) => seat.name).length} / 4 已入席</span></h2>
       <div class="seat-grid">
         {#each s.seats as seat, i}
           <div class="seat" class:me={i === net.seat} class:empty={!seat.name}>
@@ -98,8 +99,9 @@
       </div>
 
       {#if net.seat != null}
-        <h2 class="sub">你的角色</h2>
+        <details class="lobby-detail"><summary>更換角色</summary>
         <CharacterPicker value={myCharacter} onpick={setCharacter} taken={takenCharacters} size={56} />
+        </details>
       {/if}
 
       {#if net.isHost}
@@ -111,7 +113,8 @@
         <p class="muted wait">等待房主開始遊戲…</p>
       {/if}
 
-      <h2 class="sub">規則設定</h2>
+      <details class="lobby-detail">
+      <summary>本局規則 <span>底 {s.settings.base} · 每台 {s.settings.per_tai} · {s.settings.rounds} 圈 · 出牌 {s.settings.turn_timeout || '不限'} 秒</span></summary>
       {#if settings}
         <div class="settings">
           {#each fields as [k, label, step]}
@@ -125,6 +128,7 @@
           <button class="small" onclick={applySettings}>套用設定</button>
         {/if}
       {/if}
+      </details>
     </section>
 
     <section class="card invite">

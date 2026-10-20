@@ -70,9 +70,13 @@
   const honorColor = (c) => (c === 'C' ? RED : c === 'F' ? GREEN : BLUE);
 </script>
 
-<!-- svelte-ignore a11y_click_events_have_key_events -->
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div
+<svelte:element
+  this={clickable ? 'button' : 'div'}
+  role={clickable ? 'button' : undefined}
+  type={clickable ? 'button' : undefined}
+  data-hand-tile={clickable ? '' : undefined}
+  aria-label={clickable ? tileName(code) : undefined}
+  aria-pressed={clickable ? selected : undefined}
   class="tile {size}"
   class:back={t.kind === 'back'}
   class:selected
@@ -135,7 +139,7 @@
       <span class="fno">{((t.n - 1) % 4) + 1}</span>
     </div>
   {/if}
-</div>
+</svelte:element>
 
 <style>
   .tile {

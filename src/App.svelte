@@ -1,11 +1,15 @@
 <script>
-  import { net, clock } from './lib/net.svelte.js';
+  import { onMount } from 'svelte';
+  import { net, clock, disconnect } from './lib/net.svelte.js';
   import SoundControl from './lib/SoundControl.svelte';
   import { onGameState, onCountdown } from './lib/audio/sound.svelte.js';
   import Home from './lib/Home.svelte';
   import Lobby from './lib/Lobby.svelte';
   import Table from './lib/Table.svelte';
   import Gallery from './lib/Gallery.svelte';
+  import Settings from './lib/Settings.svelte';
+  import Controls from './lib/Controls.svelte';
+  import { resolvePage } from './lib/menu.js';
   import ArtStylePicker from './lib/ArtStylePicker.svelte';
   import { artStyle } from './lib/art-style.js';
   import { processEvents, resetReactions } from './lib/reactions.svelte.js';
@@ -20,7 +24,13 @@
   });
 
   let hash = $state(location.hash);
-  window.addEventListener('hashchange', () => (hash = location.hash));
+  const page = $derived(resolvePage(hash, net.state));
+  const inGame = $derived(page === 'lobby' || page === 'table');
+  onMount(() => {
+    const syncHash = () => (hash = location.hash);
+    window.addEventListener('hashchange', syncHash);
+    return () => window.removeEventListener('hashchange', syncHash);
+  });
 
   // 音樂與音效跟著牌局走
   $effect(() => onGameState(net.state));
@@ -30,23 +40,32 @@
   });
 </script>
 
-<div class="app-shell">
+<div class="app-shell" class:menu-shell={!inGame}>
   <div class="topbar">
     <ArtStylePicker />
     <SoundControl />
   </div>
   <div class="screen">
-    {#if hash === '#gallery'}
-      <Gallery />
-    {:else if !net.state}
-      <Home />
-    {:else if net.state.phase === 'lobby'}
+    {#if page === 'lobby'}
       <Lobby />
-    {:else}
+    {:else if page === 'table'}
       <Table />
+    {:else if page === 'gallery'}
+      <Gallery />
+    {:else if page === 'settings'}
+      <Settings />
+    {:else}
+      <Home {page} />
     {/if}
   </div>
 </div>
+
+<Controls state={net.state} onback={() => {
+  if (!net.state) {
+    if (net.status === 'connecting' || net.status === 'open') disconnect();
+    location.hash = '#title';
+  }
+}} />
 
 {#if net.status === 'reconnecting'}
   <div class="banner">連線中斷，重新連線中…</div>
@@ -62,6 +81,9 @@
   .topbar { display: flex; flex-wrap: wrap; }
   .topbar > :global(.style-picker) { flex: 1; }
   .app-shell { height: 100%; display: grid; grid-template-rows: auto minmax(0, 1fr); }
+  .menu-shell { grid-template-rows: minmax(0, 1fr) auto; }
+  .menu-shell .screen { grid-row: 1; }
+  .menu-shell .topbar { grid-row: 2; }
   .screen { min-width: 0; min-height: 0; overflow: hidden; }
   .banner {
     position: fixed;

@@ -1,0 +1,26 @@
+{
+  "tool": "builtin image_gen",
+  "created": "2026-10-20",
+  "style": "MS-DOS VGA adventure-game pixel art",
+  "dimensions": {
+    "width": 1672,
+    "height": 941
+  },
+  "intendedAspectRatio": "16:9; generated output approximately 16:9, original dimensions preserved",
+  "assets": [
+    {
+      "path": "public/ui/msdos/title-scene.png",
+      "referencePath": "C:\\Users\\User\\Repo\\TaiwanMahjong\\public\\ui\\anime90\\title-scene.png",
+      "originalPath": "C:\\Users\\User\\.codex\\generated_images\\01a1574a-bb62-79c2-ad7a-258103618e04\\exec-024c7d6a-501d-45bb-8b5c-31c3b3f78729.png",
+      "prompt": "Use case: style-transfer. Asset type: production 16:9 mahjong game title background, no UI. Input image is the composition and character identity reference. Repaint the entire reference as authentic early-1990s MS-DOS VGA adventure-game pixel art, with very visible large square pixel clusters, crisp stepped silhouettes, limited indexed colors, clean bold shading in 3-5 tones per material, navy shadows, saturated cyan/teal accents and warm gold highlights. Materially coarse and bright, NOT fine PC-98 pastel dithering. Think hand-drawn 320x180 pixel artwork enlarged with nearest-neighbor to 16:9. Preserve the exact camera, scene geography and object placements of the reference. Preserve the quiet very dark left 40% as low-detail negative space for later DOM text. Preserve the four characters occupying right 60%, identical faces, poses, clothing and relationships: Xiaocui green twin tails with pink bows and sailor outfit large at front right reaching her hand, Yuehua long silver hair seated at center-left, Aming black spiky hair red headband and orange jacket seated behind right, Lanjie purple updo and glasses standing center-back in red qipao holding tea tray. Keep faces expressive and readable using deliberate pixel clusters. Keep same green mahjong table below, amber pendant lamp upper right, window and warm wooden parlor. Tile details become tiny abstract colored pixel marks, never legible words. Full bleed landscape 16:9, preferably 1672x940 matching reference. No extra people, no modern painterly brushwork, no smooth gradients, no blur, no photographic textures, no CRT/bezel, no interface, no logo, no titles, no legible text, no borders. This must be an actual pixel-art redraw, not merely a palette filter.",
+      "inspection": "Four reference characters and their poses preserved. Dark left text region retained. Visible coarse VGA pixel clusters, bright navy/cyan/gold palette. No added UI/title; tiles and distant signs use pixel motifs."
+    },
+    {
+      "path": "public/ui/msdos/parlor.png",
+      "referencePath": "C:\\Users\\User\\Repo\\TaiwanMahjong\\public\\ui\\anime90\\parlor.png",
+      "originalPath": "C:\\Users\\User\\.codex\\generated_images\\01a1574a-bb62-79c2-ad7a-258103618e04\\exec-d36c39c1-0fb4-4848-98d7-8d6411b01e66.png",
+      "prompt": "Use case: style-transfer. Asset type: production 16:9 empty mahjong parlor background beneath DOM game UI. Input image is exact scene/camera/composition reference. Repaint it as authentic early-1990s MS-DOS VGA adventure-game pixel art, visible large square pixel clusters and crisp stepped edges, bold limited indexed colors and deliberately simplified 3-5-tone light/shadow shapes. Coarse 320x180 pixel-art visual logic enlarged by nearest-neighbor, brighter and more saturated than fine pastel PC-98 dithering. Navy shadows, vivid cyan night windows, deep emerald green tabletop and warm amber/gold lamps. Preserve EXACT reference camera perspective, table geometry, horizon, object placement and negative space: large square mahjong table centered lower half, four green tile walls around an empty green center, four carved wooden red-cushion chairs, front chairs framing corners, porcelain teacups, large hanging amber lamp upper center, left wall full of tall windows showing blue night lights, wood cabinets, plants and porcelain shelves at right, wall fan upper right. Keep all props in their same positions and proportions but redraw them with confidently chunky pixels, no photographic detail. Maintain readable empty green playing surface. Landscape 16:9 matching the reference crop, full bleed. Strictly NO PEOPLE or faces, no characters, no UI, no buttons, no title, no lettering or legible text, no logo, no CRT/bezel, no borders, no blur, no smooth gradients, no modern digital painting. This is a pixel-art redraw, not just color quantization or palette filtering.",
+      "inspection": "Empty room without people or UI. Table perspective, four tile walls, chairs, central lamp, windows, shelves, plants and wall fan preserve reference arrangement. Open green center retained."
+    }
+  ]
+}

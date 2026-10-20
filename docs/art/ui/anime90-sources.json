@@ -1,0 +1,18 @@
+{
+  "generator": "built-in image_gen",
+  "note": "Production clean-plate instructions summarized below; original generated PNGs are retained in the Codex generated-image directory.",
+  "assets": [
+    {
+      "file": "public/ui/anime90/title-scene.png",
+      "generatedFile": "call_5619be6c91884d239cbe88ed32ef0dfa.png",
+      "reference": "docs/art/concepts/title-virtual-taiwan-mahjong-parlor.png",
+      "instructionsSummary": "Remove all UI, logo, text and menu frames from the approved 1990s anime title concept. Keep the four characters and mahjong table on the right, preserving identities and scene geometry. Reserve roughly the left 40 percent as quiet dark green bamboo and room scenery for live menu controls."
+    },
+    {
+      "file": "public/ui/anime90/parlor.png",
+      "generatedFile": "call_80643325cc8e4b14ba58d77e816030ba.png",
+      "reference": "docs/art/concepts/lobby-host-anime90.png",
+      "instructionsSummary": "Create an empty 1990s cel-anime mahjong parlor clean plate from the approved lobby concept. Remove all people, seat cards, controls, UI text and frames; extend the room across the whole canvas. Keep the night window left, lantern upper center, cupboard right, and mahjong table centered in the lower half. Leave the green table center empty for live game UI."
+    }
+  ]
+}

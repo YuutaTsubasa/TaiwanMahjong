@@ -160,6 +160,29 @@ export const CHARACTERS = [
       draw: ['流局，喝杯茶再來。'],
     },
   },
+  {
+    id: 'ayi',
+    hidden: true,
+    images: characterImages('ayi'),
+    name: '阿翼',
+    intro: '棕髮藍眼、穿著銀色盔甲的隱藏來客',
+    hair: '#795038',
+    hairStyle: 'short',
+    bangs: 'spiky',
+    eyes: '#4baff2',
+    clothes: '#cbd3dc',
+    collar: '#20252f',
+    accent: '#87bfff',
+    lines: {
+      pung: ['碰！這張我收下了。', '剛好，碰！'],
+      kong: ['四張到齊，槓！', '槓！再來一張。'],
+      chow: ['吃！接得正好。', '這張能接上，吃！'],
+      tsumo: ['自摸！今晚手氣不錯！', '摸到了，謝謝大家！'],
+      ron: ['胡！等的就是這張。', '這局拿下了！'],
+      deal_in: ['哎呀，被看穿了。', '這張出得太急了。'],
+      draw: ['再戰一局吧！', '先喝口茶，下一局見。'],
+    },
+  },
 ].map((character) => ({
   ...character,
   imageStyles: {
@@ -170,6 +193,10 @@ export const CHARACTERS = [
 }));
 
 const BY_ID = Object.fromEntries(CHARACTERS.map((c) => [c.id, c]));
+
+export function getSelectableCharacters(ayiUnlocked = false) {
+  return CHARACTERS.filter((character) => !character.hidden || ayiUnlocked);
+}
 
 export function getCharacter(id) {
   return BY_ID[id] ?? CHARACTERS[0];

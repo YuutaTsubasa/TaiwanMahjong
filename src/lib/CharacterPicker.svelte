@@ -1,5 +1,6 @@
 <script>
-  import { CHARACTERS } from './characters.js';
+  import { getSelectableCharacters } from './characters.js';
+  import { ayiUnlocked } from './unlocks.js';
   import Avatar from './Avatar.svelte';
 
   let { value = $bindable(), onpick = undefined, size = 72, taken = [] } = $props();
@@ -11,12 +12,14 @@
 </script>
 
 <div class="picker">
-  {#each CHARACTERS as c}
+  {#each getSelectableCharacters($ayiUnlocked) as c}
     <button
       class="opt"
       class:sel={value === c.id}
       class:taken={taken.includes(c.id) && value !== c.id}
       title="{c.name}：{c.intro}"
+      type="button"
+      aria-pressed={value === c.id}
       onclick={() => pick(c.id)}
     >
       <Avatar id={c.id} expression={value === c.id ? 'happy' : 'normal'} {size} crop />

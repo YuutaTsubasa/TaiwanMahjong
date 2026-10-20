@@ -1,4 +1,5 @@
 <script>
+  import { onMount } from 'svelte';
   import { net, act, clock, leave, hostCmd, disconnect, setAuto } from './net.svelte.js';
   import Tile from './Tile.svelte';
   import Melds from './Melds.svelte';
@@ -6,6 +7,9 @@
   import Opponent from './Opponent.svelte';
   import Result from './Result.svelte';
   import Chat from './Chat.svelte';
+  import ConfirmDialog from './ConfirmDialog.svelte';
+
+  let confirmation;
 
   const s = $derived(net.state);
   const me = $derived(s.you ?? 0);
@@ -28,24 +32,29 @@
 
   // 選牌：第一下選取、第二下打出（或雙擊）
   let selected = $state(null);
+  let submittedDecision = null;
+  onMount(() => {
+    const cancel = () => { selected = null; };
+    window.addEventListener('mahjong-cancel-selection', cancel);
+    return () => window.removeEventListener('mahjong-cancel-selection', cancel);
+  });
   $effect(() => {
     s.decision_id;
     selected = null;
   });
+  $effect(() => {
+    if (net.status !== 'open') submittedDecision = null;
+  });
 
   function clickTile(code, key) {
     const a = discardById.get(code);
-    if (!a) return;
+    if (!a || submittedDecision === s.decision_id) return;
     if (selected === key) {
-      act(a.id);
+      if (act(a.id)) submittedDecision = s.decision_id;
       selected = null;
     } else {
       selected = key;
     }
-  }
-  function dbl(code) {
-    const a = discardById.get(code);
-    if (a) act(a.id);
   }
 
   const lastDiscard = $derived(s.last_discard);
@@ -72,7 +81,7 @@
 
   const keyFor = (t, i) => `${t}-${i}`;
 
-  let showSide = $state(true);
+  let showSide = $state(typeof window === 'undefined' || window.innerWidth >= 1100);
 </script>
 
 <div class="game" class:noside={!showSide}>
@@ -153,7 +162,6 @@
             clickable={canDiscard}
             selected={selected === keyFor(t, i)}
             onclick={() => clickTile(t, keyFor(t, i))}
-            ondblclick={() => dbl(t)}
           />
         {/each}
         {#if mine.drawn}
@@ -164,7 +172,6 @@
             clickable={canDiscard}
             selected={selected === 'drawn'}
             onclick={() => clickTile(mine.drawn, 'drawn')}
-            ondblclick={() => dbl(mine.drawn)}
           />
         {/if}
         {#if !isPlayer}
@@ -172,7 +179,7 @@
         {/if}
       </div>
       {#if canDiscard && !special.length}
-        <div class="hint">點一下選牌、再點一下打出（或雙擊）{remaining != null ? ` · ${remaining}s` : ''}</div>
+        <div class="hint">點選／方向鍵選牌 · 再點／Enter／A 確認 · Esc／B 取消{remaining != null ? ` · ${remaining}s` : ''}</div>
       {/if}
     </div>
 
@@ -190,10 +197,10 @@
       <Chat showLog />
       <div class="side-btns">
         {#if net.isHost}
-          <button class="small danger" onclick={() => confirm('結束這場遊戲並回到大廳？') && hostCmd('reset')}>結束牌局</button>
+          <button class="small danger" onclick={() => confirmation.ask({ message: '結束這場遊戲並回到大廳？', confirmLabel: '結束牌局', onconfirm: () => hostCmd('reset') })}>結束牌局</button>
         {/if}
         {#if isPlayer}
-          <button class="small" onclick={() => confirm('離開後由電腦代打，確定？') && leave()}>離開（電腦代打）</button>
+          <button class="small" onclick={() => confirmation.ask({ message: '離開後由電腦代打，確定？', confirmLabel: '離開牌桌', onconfirm: leave })}>離開（電腦代打）</button>
         {:else}
           <button class="small" onclick={disconnect}>回首頁</button>
         {/if}
@@ -203,6 +210,8 @@
     <button class="open-side small" onclick={() => (showSide = true)}>‹ 紀錄</button>
   {/if}
 </div>
+
+<ConfirmDialog bind:this={confirmation} />
 
 <style>
   .game { position: relative; height: 100%; display: grid; grid-template-columns: 1fr 290px; gap: 10px; padding: 10px; }

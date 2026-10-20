@@ -39,6 +39,7 @@
   {#if net.seat != null}
     <form onsubmit={submit}>
       <input bind:value={text} placeholder="說點什麼…" maxlength="300" />
+      <button type="submit" disabled={!text.trim()}>送出</button>
     </form>
   {/if}
 </div>
@@ -49,6 +50,7 @@
   .log { color: var(--muted); }
   .msg b { color: var(--accent); font-weight: 600; }
   .msg b.me { color: var(--gold); }
-  form { margin-top: 8px; }
-  input { width: 100%; }
+  form { margin-top: 8px; display: flex; gap: 6px; }
+  input { flex: 1; min-width: 0; }
+  button { flex: none; }
 </style>

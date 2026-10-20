@@ -136,12 +136,16 @@ export function disconnect() {
 }
 
 export function send(obj) {
-  if (ws && ws.readyState === 1) ws.send(JSON.stringify(obj));
-  else toast('尚未連線');
+  if (ws && ws.readyState === 1) {
+    ws.send(JSON.stringify(obj));
+    return true;
+  }
+  toast('尚未連線');
+  return false;
 }
 
 export function act(actionId) {
-  send({ type: 'action', action_id: actionId, decision_id: net.state?.decision_id });
+  return send({ type: 'action', action_id: actionId, decision_id: net.state?.decision_id });
 }
 
 /** 換角色（並記住，下次加入沿用） */

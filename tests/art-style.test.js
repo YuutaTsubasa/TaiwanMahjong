@@ -32,7 +32,15 @@ test('each style resolves a different complete set without changing identities',
       }
     }
   }
-  assert.equal(paths.size, 90);
+  assert.equal(paths.size, 105);
+});
+
+test('Ayi is hidden from new players but renderable for opponents and unlocked players', () => {
+  assert.equal(characters.getCharacter('ayi').name, '阿翼');
+  assert.equal(characters.getCharacter('ayi').hidden, true);
+  assert.ok(!characters.getSelectableCharacters(false).some(c => c.id === 'ayi'));
+  assert.ok(characters.getSelectableCharacters(true).some(c => c.id === 'ayi'));
+  assert.equal(characters.getCharacterImage('ayi', 'win', 'pc98'), '/characters/ayi/pc98/win.png');
 });
 
 test('unknown style, expression and character have safe portrait fallbacks', () => {

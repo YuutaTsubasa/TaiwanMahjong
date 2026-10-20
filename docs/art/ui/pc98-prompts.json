@@ -1,0 +1,28 @@
+{
+  "generator": "built-in image_gen.imagegen",
+  "style": "PC-98 pixel-art repaint",
+  "assets": [
+    {
+      "path": "public/ui/pc98/title-scene.png",
+      "width": 1672,
+      "height": 941,
+      "reference": "public/ui/anime90/title-scene.png",
+      "referenceWidth": 1672,
+      "referenceHeight": 940,
+      "originalGeneratedPath": "C:/Users/User/.codex/generated_images/01a1574a-8141-7fd1-b0d0-d1323069ff52/exec-c78c53ab-0112-4032-b01f-017a314efb79.png",
+      "prompt": "Use case: style-transfer.\nAsset type: Production Taiwanese mahjong game title background, no interface.\nEdit target: the supplied anime90 title-scene image. Repaint the entire image as authentic early-1990s NEC PC-98 adventure-game pixel art. Keep the same 16:9 framing, camera, all object locations, exact character poses, relative sizes, environment, and negative space. Do not redesign the composition.\nComposition invariants: The left 40% is quiet very dark indigo/teal foliage and shadow with plenty of low-contrast space for later DOM text. The right 60% contains exactly four established characters around the mahjong table: Xiaocui largest in the right foreground, teal twin ponytails with pink bows, white sailor blouse with teal trim and pink bow, smiling and reaching toward viewer; Yuehua seated near center with long silver hair and violet eyes wearing a dark jacket, leaning head on hand; Aming behind the table at center-right, spiky black hair, red headband, orange-red jacket, holding a tile; Lanjie standing behind them in upper center, purple upswept hair and glasses, red qipao with gold trim, holding tea tray. Preserve their faces, identities, expressions, clothing and hand poses. Preserve table and mahjong tiles in lower-right, tea ware foreground, stained-glass hanging lamp upper-right, nighttime windows and wooden Taiwanese parlor.\nStyle: Draw deliberate crisp pixel clusters, clean stepped pixel contours, elegant 16-color-ish indexed palette, sophisticated period PC-98 anime pixel faces and hair, restrained ordered/checkerboard dithering for transitions. Palette emphasizes muted indigo/plum shadows, teal greens and warm cream highlights with restrained rose accents. Visible handcrafted pixel construction throughout, including faces and background. Looks like original period game artwork, not a modern painting with a filter. No soft gradients or blur. Preserve compositional geometry precisely.\nConstraints: output one complete landscape background, same 16:9 aspect ratio. No UI, text, captions, title, logo, watermark, borders, buttons, panels, fake CRT scanlines or glow. Neon outside is abstract colored light with no legible lettering. Mahjong tile markings may remain tiny abstract game marks. Do not add people or move characters.",
+      "verification": "Visually inspected generated image. Four characters retained with established identities and positions, dark left negative space, no UI, logo, captions or watermark. Generated image is one pixel taller than title reference; composition otherwise retained."
+    },
+    {
+      "path": "public/ui/pc98/parlor.png",
+      "width": 1672,
+      "height": 941,
+      "reference": "public/ui/anime90/parlor.png",
+      "referenceWidth": 1672,
+      "referenceHeight": 941,
+      "originalGeneratedPath": "C:/Users/User/.codex/generated_images/01a1574a-8141-7fd1-b0d0-d1323069ff52/exec-a3a215be-f2fe-4145-9837-b4bda7b36436.png",
+      "prompt": "Use case: style-transfer.\nAsset type: Production Taiwanese mahjong game empty parlor background, no interface.\nEdit target: the supplied anime90 parlor image. Repaint the entire image as authentic early-1990s NEC PC-98 adventure-game pixel art. Keep the same 16:9 framing, camera angle, perspective, room architecture, exact object positions and sizes, tabletop geometry, and open central tabletop. Change rendering medium only.\nComposition invariants: Completely empty Taiwanese wood-paneled mahjong parlor with zero people. Green felt mahjong table centered across lower two-thirds, four walls of green-backed ivory mahjong tiles around an open green center, porcelain tea cups at the table edges, dark carved wooden chairs with crimson cushions surrounding it. Large amber stained-glass pendant upper-center. Rainy nighttime windows with abstract neon lights at upper-left. Potted foliage, blue-white ceramic pots and tea ware along the back wall and right shelving. Old circular wall fan upper-right. Warm wood cabinets, tiled floor and dark foreground foliage at lower-left. Preserve the reference layout precisely. No characters, no faces, no silhouettes.\nStyle: Deliberate crisp pixel clusters, clean stepped pixel contours, sophisticated period PC-98 environment art, elegant 16-color-ish indexed palette and restrained ordered/checkerboard dithering for transitions. Muted indigo/plum shadows, teal green felt/plants, warm cream and amber highlights, restrained crimson accents. Every object must be drawn with visible handcrafted pixel construction. Looks like original period game art, not a modern painting with a retro filter. No smooth gradients, painterly strokes, photorealism or blur.\nConstraints: One complete landscape background, same 16:9 aspect ratio. No UI, text, captions, title, logo, watermark, borders, buttons, panels, fake CRT scanlines or glow. Any neon outside must be abstract colored pixels with no legible lettering. No people whatsoever. Do not add props, change camera or rearrange furniture.",
+      "verification": "Visually inspected generated image. Empty room with no characters; camera, furniture, tabletop, lamp, windows, fan and other scene placement retained. No UI, labels, logo or watermark."
+    }
+  ]
+}

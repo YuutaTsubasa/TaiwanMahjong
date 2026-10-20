@@ -128,7 +128,7 @@
     animation: fade 0.25s ease;
   }
   @keyframes fade { from { opacity: 0; } }
-  .box { min-width: 420px; max-width: min(860px, 94%); max-height: 92%; overflow: auto; background: rgba(10, 32, 22, 0.96); }
+  .box { min-width: min(420px, 94%); max-width: min(860px, 94%); max-height: 92%; overflow: auto; background: rgba(10, 32, 22, 0.96); }
   h2 { margin: 0 0 14px; color: var(--gold); }
   .cutin {
     display: flex;
