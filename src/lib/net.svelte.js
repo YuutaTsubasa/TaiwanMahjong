@@ -11,6 +11,7 @@ export const net = $state({
   state: null,
   receivedAt: 0,
   hostInfo: null, // 本機開房時：{ port, host_key, ips }
+  mode: 'online', // online：連到伺服器；local：單機（瀏覽器裡的 WebAssembly 引擎）
   toasts: [],
 });
 
@@ -18,6 +19,7 @@ export const clock = $state({ now: performance.now() });
 setInterval(() => (clock.now = performance.now()), 200);
 
 let ws = null;
+let worker = null; // 單機版的 Web Worker
 let wantOpen = false;
 let hello = null;
 let retryTimer = null;
@@ -122,6 +124,11 @@ function open() {
 }
 
 export function disconnect() {
+  if (worker) {
+    worker.terminate();
+    worker = null;
+  }
+  net.mode = 'online';
   wantOpen = false;
   clearTimeout(retryTimer);
   if (ws) {
@@ -136,6 +143,10 @@ export function disconnect() {
 }
 
 export function send(obj) {
+  if (worker) {
+    worker.postMessage(obj);
+    return true;
+  }
   if (ws && ws.readyState === 1) {
     ws.send(JSON.stringify(obj));
     return true;
@@ -165,11 +176,14 @@ export function setAuto(on) {
 }
 
 export function hostCmd(cmd, extra = {}) {
+  // 單機沒有大廳：「回大廳」「結束牌局」就是回到標題
+  if (worker && cmd === 'reset') return disconnect();
   send({ type: 'host', cmd, ...extra });
 }
 
 /** 離開座位並回到首頁 */
 export function leave() {
+  if (worker) return disconnect();
   send({ type: 'leave' });
   store(tokenKey(net.address), null);
   setTimeout(disconnect, 100);
@@ -201,4 +215,32 @@ export function serverUrls() {
     return net.hostInfo.ips.map((ip) => `http://${ip}:${net.hostInfo.port}`);
   }
   return net.address ? [`http://${net.address}`] : [];
+}
+
+/**
+ * 單機遊玩：在 Web Worker 裡跑牌局引擎，你加三個電腦。
+ * 畫面收到的狀態格式和連線時完全一樣。
+ */
+export function startLocal({ name, character, settings } = {}) {
+  disconnect();
+  worker = new Worker(new URL('./local/worker.js', import.meta.url), { type: 'module' });
+  net.mode = 'local';
+  net.address = '單機';
+  net.status = 'open';
+  net.isHost = true;
+  worker.onmessage = (e) => {
+    const m = e.data;
+    if (m.type === 'state') {
+      net.state = m.state;
+      net.receivedAt = performance.now();
+      net.seat = m.state.you;
+    } else if (m.type === 'error') {
+      toast(m.message);
+    }
+  };
+  worker.onerror = (e) => {
+    toast(`單機引擎載入失敗：${e.message || e}`);
+    disconnect();
+  };
+  worker.postMessage({ type: 'start', name, character, settings });
 }

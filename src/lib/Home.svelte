@@ -1,12 +1,13 @@
 <script>
   import { onMount } from 'svelte';
-  import { net, inTauri, connect, disconnect, startHost, stopHost, hostStatus, toast, setCharacter, savedCharacter } from './net.svelte.js';
+  import { net, inTauri, connect, disconnect, startHost, stopHost, hostStatus, toast, setCharacter, savedCharacter, startLocal } from './net.svelte.js';
   import Tile from './Tile.svelte';
   import OrnateHeading from './ui/OrnateHeading.svelte';
   import PortraitGrid from './ui/PortraitGrid.svelte';
   import FancyButton from './ui/FancyButton.svelte';
 
   const MENU = [
+    ['#solo', '單機遊玩'],
     ['#host', '開設牌局'],
     ['#join', '加入牌局'],
     ['#gallery', '角色圖鑑'],
@@ -20,6 +21,34 @@
 
   let { page = 'title' } = $props();
   const isHostPage = $derived(page === 'host');
+  const isSolo = $derived(page === 'solo');
+
+  // 單機的選項（記在這台電腦上）
+  const SOLO_OPTIONS = {
+    rounds: [[1, '東風圈'], [2, '東南圈'], [4, '一將']],
+    turn_timeout: [[0, '不限'], [60, '60 秒'], [30, '30 秒']],
+    bot_delay_ms: [[1200, '慢'], [700, '普通'], [300, '快']],
+  };
+  const SOLO_LABELS = { rounds: '圈數', turn_timeout: '出牌時間', bot_delay_ms: '電腦速度' };
+  let solo = $state(
+    (() => {
+      try {
+        return { rounds: 1, turn_timeout: 0, bot_delay_ms: 700, ...JSON.parse(localStorage.getItem('mj_solo') || '{}') };
+      } catch {
+        return { rounds: 1, turn_timeout: 0, bot_delay_ms: 700 };
+      }
+    })(),
+  );
+  function startSolo() {
+    save('mj_name', name);
+    save('mj_solo', JSON.stringify(solo));
+    // 單機時吃碰胡不限時、一局結束後 30 秒自動下一局
+    startLocal({
+      name: playerName(),
+      character,
+      settings: { ...solo, claim_timeout: solo.turn_timeout ? 15 : 0, next_hand_delay: 30 },
+    });
+  }
   function load(key, fallback) {
     try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
   }
@@ -57,6 +86,7 @@
   function submit(event) {
     event.preventDefault();
     if (busy || connecting) return;
+    if (isSolo) return startSolo();
     if (isHostPage && inTauri) {
       if (net.hostInfo) {
         save('mj_name', name);
@@ -96,7 +126,10 @@
     </header>
     <div class="room-layout">
       <section class="art-panel room-panel">
-        <OrnateHeading text={isHostPage ? '開設牌局' : '加入牌局'} sub={isHostPage ? '選好角色，準備入席。' : '找張好位子，今晚一起打牌。'} />
+        <OrnateHeading
+          text={isSolo ? '單機遊玩' : isHostPage ? '開設牌局' : '加入牌局'}
+          sub={isSolo ? '三位電腦陪你開一桌。' : isHostPage ? '選好角色，準備入席。' : '找張好位子，今晚一起打牌。'}
+        />
         <form id="room-entry" onsubmit={submit}>
           <label class="field name-field">
             <span>玩家名稱</span>
@@ -107,7 +140,23 @@
           <span>選擇角色</span>
           <PortraitGrid bind:value={character} onpick={setCharacter} />
         </div>
-        {#if connecting}
+        {#if isSolo}
+          {#each Object.entries(SOLO_OPTIONS) as [key, options]}
+            <div class="field">
+              <span>{SOLO_LABELS[key]}</span>
+              <div class="seg" role="radiogroup" aria-label={SOLO_LABELS[key]}>
+                {#each options as [v, label]}
+                  <button type="button" role="radio" aria-checked={solo[key] === v} class:sel={solo[key] === v} onclick={() => (solo[key] = v)}>{label}</button>
+                {/each}
+              </div>
+            </div>
+          {/each}
+          <p class="hint">不用連線，也不用開伺服器；牌局在這台電腦上跑。</p>
+          <div class="actions">
+            <FancyButton variant="red" href="#title">取消</FancyButton>
+            <FancyButton variant="gold" tile="F" type="submit" form="room-entry">開始遊戲</FancyButton>
+          </div>
+        {:else if connecting}
           <div class="connection-status" role="status">
             <span>連線到 {net.address} 中…</span>
             <button type="button" onclick={disconnect}>取消連線</button>
@@ -156,7 +205,7 @@
         <div class="large-portrait"><Avatar id={character} size={540} /></div>
         <div class="art-panel portrait-caption">
           <strong>{selected.name}</strong>
-          <p>{isHostPage ? '牌桌準備好了，一起來玩吧！' : '今晚也來摸幾圈吧。'}</p>
+          <p>{isSolo ? '一個人也能開一桌，我們陪你打！' : isHostPage ? '牌桌準備好了，一起來玩吧！' : '今晚也來摸幾圈吧。'}</p>
         </div>
       </aside>
     </div>
@@ -216,6 +265,13 @@
   .character-field > span { padding-top: 10px; }
   .hint { color: var(--muted); font-size: 13px; line-height: 1.5; margin: -2px 0 clamp(4px, 1vh, 12px) calc(clamp(96px, 8vw, 132px) + 14px); }
   .actions { display: grid; grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr); gap: clamp(12px, 2vw, 30px); margin-top: clamp(6px, 1.6vh, 18px); }
+  .seg { display: flex; gap: 8px; flex-wrap: wrap; }
+  .seg button {
+    min-width: 92px;
+    padding: clamp(3px, 0.7vh, 7px) 16px;
+    font: 600 clamp(15px, min(1.3vw, 2.4vh), 19px) var(--heading-font);
+    letter-spacing: .12em;
+  }
   .connection-status { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 18px 0; overflow-wrap: anywhere; }
   .character-stage { display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; overflow: hidden; }
   /* 立繪寬度也受視窗高度限制，不然寬螢幕時會比畫面還高 */

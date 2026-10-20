@@ -1,4 +1,4 @@
-const MENU_PAGES = new Set(['host', 'join', 'gallery', 'settings']);
+const MENU_PAGES = new Set(['solo', 'host', 'join', 'gallery', 'settings']);
 
 /** A live room owns the screen until the player disconnects. */
 export function resolvePage(hash, gameState) {

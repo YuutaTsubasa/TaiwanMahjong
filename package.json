@@ -4,6 +4,9 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "build:wasm": "wasm-pack build crates/mahjong-wasm --target web --release --out-dir ../../src/lib/local/pkg --no-pack",
+    "predev": "npm run build:wasm",
+    "prebuild": "npm run build:wasm",
     "test": "node --test tests/art-style.test.js tests/music.test.js tests/menu.test.js tests/unlocks.test.js tests/input-controls.test.js",
     "dev": "vite",
     "build": "vite build",
@@ -18,6 +21,7 @@
     "@sveltejs/vite-plugin-svelte": "^5",
     "@tauri-apps/cli": "~2.11.0",
     "svelte": "^5",
-    "vite": "^6"
+    "vite": "^6",
+    "wasm-pack": "^0.13.1"
   }
 }

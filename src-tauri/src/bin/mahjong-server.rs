@@ -19,6 +19,7 @@ fn mime_of(path: &str) -> &'static str {
         "png" => "image/png",
         "ico" => "image/x-icon",
         "json" => "application/json",
+        "wasm" => "application/wasm",
         "woff2" => "font/woff2",
         _ => "application/octet-stream",
     }
