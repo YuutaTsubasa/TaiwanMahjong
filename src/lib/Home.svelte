@@ -199,24 +199,27 @@
   .title-menu:not(:hover):not(:focus-within) .menu-item:first-child .mark { visibility: visible; }
 
   /* ── 開設／加入牌局 ── */
-  .room-page { padding: clamp(14px, 1.8vw, 30px); background-image: linear-gradient(90deg, #021c19aa, transparent 60%), var(--scene-parlor); }
-  .page-header { position: relative; display: flex; align-items: center; min-height: 64px; margin-bottom: 10px; }
+  .room-page { padding: clamp(8px, 1.6vh, 30px) clamp(14px, 1.8vw, 30px); background-image: linear-gradient(90deg, #021c19aa, transparent 60%), var(--scene-parlor); }
+  .page-header { position: relative; display: flex; align-items: center; min-height: clamp(44px, 7.5vh, 64px); margin-bottom: clamp(4px, 1vh, 10px); }
   .header-brand { position: absolute; left: 0; width: 52%; display: flex; justify-content: center; pointer-events: none; }
   .header-brand :global(.brand) { pointer-events: auto; }
   .back-link { position: relative; z-index: 1; color: var(--gold); text-decoration: none; border: 1px solid var(--line); padding: 9px 18px; background: #071c18d9; white-space: nowrap; font-family: var(--heading-font); letter-spacing: .15em; }
   .room-layout { display: grid; grid-template-columns: minmax(0, 52%) minmax(0, 1fr); gap: clamp(12px, 2vw, 30px); align-items: stretch; }
-  .room-panel { padding: clamp(16px, 2vw, 30px) clamp(18px, 2.4vw, 40px); }
-  .field { display: grid; grid-template-columns: clamp(96px, 8vw, 132px) minmax(0, 1fr); gap: 14px; align-items: center; margin: 14px 0; }
-  .field > span { color: var(--text); font: 600 clamp(17px, 1.45vw, 23px) var(--heading-font); letter-spacing: .2em; }
+  .room-panel { padding: clamp(10px, 2.2vh, 30px) clamp(18px, 2.4vw, 40px); }
+  .field { display: grid; grid-template-columns: clamp(96px, 8vw, 132px) minmax(0, 1fr); gap: 14px; align-items: center; margin: clamp(4px, 1.1vh, 14px) 0; }
+  .field > span { color: var(--text); font: 600 clamp(15px, min(1.45vw, 2.6vh), 23px) var(--heading-font); letter-spacing: .2em; }
+  /* 角色格的圖片高度跟著視窗高度走 */
+  .character-field { --pic-h: clamp(52px, 10vh, 150px); }
   .field input { width: 100%; min-width: 0; font-size: clamp(16px, 1.3vw, 20px); }
   .field .port-input { max-width: 220px; }
   .character-field { align-items: start; }
   .character-field > span { padding-top: 10px; }
-  .hint { color: var(--muted); font-size: 13px; line-height: 1.6; margin: -4px 0 12px calc(clamp(96px, 8vw, 132px) + 14px); }
-  .actions { display: grid; grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr); gap: clamp(12px, 2vw, 30px); margin-top: 18px; }
+  .hint { color: var(--muted); font-size: 13px; line-height: 1.5; margin: -2px 0 clamp(4px, 1vh, 12px) calc(clamp(96px, 8vw, 132px) + 14px); }
+  .actions { display: grid; grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr); gap: clamp(12px, 2vw, 30px); margin-top: clamp(6px, 1.6vh, 18px); }
   .connection-status { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 18px 0; overflow-wrap: anywhere; }
   .character-stage { display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; overflow: hidden; }
-  .large-portrait { width: 100%; margin-bottom: -40px; filter: drop-shadow(0 6px 14px #0009); }
+  /* 立繪寬度也受視窗高度限制，不然寬螢幕時會比畫面還高 */
+  .large-portrait { width: min(100%, calc(100vh - 230px)); align-self: center; margin-bottom: -40px; filter: drop-shadow(0 6px 14px #0009); }
   .large-portrait :global(.avatar) { width: 100% !important; height: auto !important; aspect-ratio: 1; }
   .large-portrait :global(img) { object-fit: contain; }
   .portrait-caption { position: relative; padding: 18px 24px 16px; margin: 0 6% 12px 18%; }
@@ -232,10 +235,6 @@
     border: 1px solid var(--art-line);
   }
   .portrait-caption p { margin: 8px 0 0; font: 19px/1.6 var(--heading-font); letter-spacing: .08em; }
-  @media (min-width: 1000px) and (max-height: 820px) {
-    .room-panel { padding: 12px 24px; }
-    .field { margin: 9px 0; }
-  }
   @media (max-width: 900px) {
     .title-content { width: min(460px, 100%); min-width: 0; background: #021b1894; padding: 22px 14px; align-items: center; }
     .room-layout { grid-template-columns: 1fr; }

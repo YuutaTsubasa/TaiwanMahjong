@@ -389,7 +389,7 @@
   .timer.urgent { color: var(--red); font-weight: 700; }
 
   /* ───── 下方：提示列＋手牌 ───── */
-  .bottom { grid-area: bottom; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bottom { grid-area: bottom; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; container-type: inline-size; }
   .prompt-row { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 46px; width: 100%; flex-wrap: wrap; }
   .banner {
     display: flex;
@@ -440,7 +440,8 @@
   .auto-btn.on { color: var(--accent); border-color: var(--accent); }
 
   .hand { display: flex; align-items: flex-end; gap: 3px; max-width: 100%; overflow-x: auto; overflow-y: hidden; padding: 16px 6px 6px; }
-  .hand :global(.tile) { flex-shrink: 0; --w: clamp(34px, 3.1vw, 54px); }
+  /* 17 張牌（16＋摸到的那張）要剛好塞進下方區域的寬度，也不要比畫面高度允許的大 */
+  .hand :global(.tile) { flex-shrink: 0; --w: clamp(26px, min(calc((100cqw - 48px) / 18.4), 7.2vh), 54px); }
   .drawn-gap { flex: none; width: clamp(10px, 1.2vw, 20px); }
   .drawn { display: inline-flex; border-radius: 6px; box-shadow: 0 0 0 2px var(--gold), 0 0 18px color-mix(in srgb, var(--gold) 70%, transparent); }
 

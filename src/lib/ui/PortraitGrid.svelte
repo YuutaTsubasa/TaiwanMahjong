@@ -6,14 +6,18 @@
 
   let { value = $bindable(), onpick = undefined, taken = [], columns = 3, label = '選擇角色' } = $props();
 
+  const list = $derived(getSelectableCharacters($ayiUnlocked));
+  // 解鎖隱藏角色後有 7 人：多開一欄，排數維持不變，畫面才不會變長
+  const cols = $derived(columns + (list.length > 6 ? 1 : 0));
+
   function pick(id) {
     value = id;
     onpick?.(id);
   }
 </script>
 
-<div class="pgrid" role="radiogroup" aria-label={label} style:--cols={columns}>
-  {#each getSelectableCharacters($ayiUnlocked) as c}
+<div class="pgrid" role="radiogroup" aria-label={label} style:--cols={cols}>
+  {#each list as c}
     {@const isTaken = taken.includes(c.id) && value !== c.id}
     <button
       type="button"
@@ -48,6 +52,8 @@
     position: relative;
     display: block;
     aspect-ratio: 1.22;
+    /* 外層可用 --pic-h 依視窗高度限制圖片高度（寬螢幕但不高的時候） */
+    height: var(--pic-h, auto);
     overflow: hidden;
     background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--gold) 22%, transparent), #0006 75%);
   }
@@ -64,7 +70,7 @@
     display: block;
     padding: 4px 2px 6px;
     font-family: var(--heading-font);
-    font-size: clamp(15px, 1.3vw, 20px);
+    font-size: clamp(14px, min(1.3vw, 2.4vh), 20px);
     letter-spacing: 0.2em;
     text-align: center;
     color: var(--text);

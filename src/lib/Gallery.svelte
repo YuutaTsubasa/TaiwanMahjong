@@ -52,12 +52,12 @@
 </main>
 
 <style>
-  .gallery-page { padding: clamp(16px, 2.2vw, 34px); background-image: linear-gradient(0deg, #021b1855, transparent), var(--scene-parlor); }
-  .page-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 24px; min-height: 58px; }
+  .gallery-page { padding: clamp(8px, 1.8vh, 34px) clamp(16px, 2.2vw, 34px); background-image: linear-gradient(0deg, #021b1855, transparent), var(--scene-parlor); }
+  .page-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: clamp(6px, 1.6vh, 24px); min-height: clamp(44px, 7vh, 58px); }
   .back-link { color: var(--gold); text-decoration: none; border: 1px solid var(--line); padding: 10px 18px; background: #071c18d9; white-space: nowrap; }
   .gallery-layout { display: grid; grid-template-columns: minmax(210px, 27%) minmax(0, 1fr) minmax(320px, 36%); align-items: center; gap: 14px; }
-  .selection-panel { padding: 20px; }
-  .characters { margin-top: 16px; }
+  .selection-panel { padding: clamp(10px, 2vh, 20px); }
+  .characters { margin-top: clamp(6px, 1.4vh, 16px); --pic-h: clamp(52px, 14.5vh, 170px); }
   .character-option, .expression-option { display: flex; flex-direction: column; align-items: center; overflow: hidden; padding: 0; border: 1px solid #9a7839; border-radius: 2px; background: #001f1b; min-width: 0; }
   .character-option :global(.avatar), .expression-option :global(.avatar) { width: 100% !important; height: auto !important; aspect-ratio: 1; background: #795d3c55; }
   .character-option span { display: block; padding: 6px; font: 600 19px 'DFKai-SB', '標楷體', serif; letter-spacing: .16em; color: var(--gold); }
@@ -68,7 +68,7 @@
   .detail-panel { padding: clamp(18px, 2.2vw, 34px); position: relative; }
   .detail-panel :global(.ornate) { margin: 4px 0 6px; }
   .intro { text-align: center; line-height: 1.8; font-size: 16px; }
-  h3 { display: flex; align-items: center; gap: 14px; color: var(--gold); font: 600 20px 'DFKai-SB', '標楷體', serif; letter-spacing: .16em; text-align: center; margin: 26px 0 18px; }
+  h3 { display: flex; align-items: center; gap: 14px; color: var(--gold); font: 600 20px 'DFKai-SB', '標楷體', serif; letter-spacing: .16em; text-align: center; margin: clamp(10px, 2.4vh, 26px) 0 clamp(8px, 1.8vh, 18px); }
   h3::before, h3::after { content: ''; flex: 1; height: 1px; background: var(--line); }
   .expressions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
   .expression-option span { font-size: 12px; padding: 6px 2px; white-space: nowrap; }

@@ -32,20 +32,20 @@
     text-shadow: 0 2px 0 #0009, 0 0 12px color-mix(in srgb, var(--gold) 25%, transparent);
     white-space: nowrap;
   }
-  .lg .text { font-size: clamp(30px, 3.6vw, 56px); }
-  .md .text { font-size: clamp(24px, 2.6vw, 40px); }
-  .sm .text { font-size: clamp(19px, 1.7vw, 26px); }
+  .lg .text { font-size: clamp(24px, min(3.6vw, 4.8vh), 56px); }
+  .md .text { font-size: clamp(22px, min(2.6vw, 4.2vh), 40px); }
+  .sm .text { font-size: clamp(18px, min(1.7vw, 2.8vh), 26px); }
   .orn { width: 2.6em; height: 0.9em; flex: none; fill: none; stroke: var(--gold); stroke-width: 1.6; stroke-linecap: round; }
   .orn circle { fill: var(--gold); stroke: none; }
   .orn { transform: scaleX(-1); }
   .orn.flip { transform: none; }
-  .lg .orn { font-size: clamp(30px, 3.6vw, 56px); }
-  .md .orn { font-size: clamp(24px, 2.6vw, 40px); }
-  .sm .orn { font-size: clamp(19px, 1.7vw, 26px); }
+  .lg .orn { font-size: clamp(24px, min(3.6vw, 4.8vh), 56px); }
+  .md .orn { font-size: clamp(22px, min(2.6vw, 4.2vh), 40px); }
+  .sm .orn { font-size: clamp(18px, min(1.7vw, 2.8vh), 26px); }
   .sub {
     margin: 0.3em 0 0;
     font-family: var(--heading-font);
-    font-size: clamp(15px, 1.35vw, 21px);
+    font-size: clamp(13px, min(1.35vw, 2.3vh), 21px);
     letter-spacing: 0.2em;
     color: var(--text);
   }

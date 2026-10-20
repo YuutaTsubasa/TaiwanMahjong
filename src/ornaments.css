@@ -35,10 +35,10 @@ html[data-ui-style] :is(a, button).fancy {
   align-items: center;
   justify-content: center;
   gap: 0.5em;
-  min-height: 56px;
-  padding: 8px 28px;
+  min-height: clamp(42px, 6.5vh, 58px);
+  padding: clamp(4px, 0.8vh, 8px) 28px;
   font-family: var(--heading-font);
-  font-size: clamp(20px, 1.9vw, 30px);
+  font-size: clamp(18px, min(1.9vw, 3.4vh), 30px);
   font-weight: 700;
   letter-spacing: 0.24em;
   text-decoration: none;

@@ -9,12 +9,12 @@
 </div>
 
 <style>
-  .section-banner { display: flex; align-items: center; gap: 0; margin: 20px 0 14px; }
+  .section-banner { display: flex; align-items: center; gap: 0; margin: clamp(8px, 2vh, 20px) 0 clamp(6px, 1.4vh, 14px); }
   .ribbon {
     margin: 0;
-    padding: 6px 34px;
+    padding: clamp(2px, 0.6vh, 6px) 34px;
     font-family: var(--heading-font);
-    font-size: clamp(18px, 1.6vw, 25px);
+    font-size: clamp(16px, min(1.6vw, 2.8vh), 25px);
     font-weight: 700;
     letter-spacing: 0.3em;
     color: var(--gold);
