@@ -542,7 +542,9 @@
   .strip .table-wrap { align-self: stretch; }
   .strip .seat-me { align-self: start; padding-top: 2px; }
   .strip .bottom { grid-column: 1 / -1; grid-row: 3; }
-  .strip .prompt-row { padding-left: 132px; justify-content: flex-start; }
+  /* 左邊讓出自己的名牌（名牌最寬 166px，託管、莊等標籤都在裡面） */
+  .strip .seat-me :global(.v-chip) { max-width: 166px; }
+  .strip .prompt-row { padding-left: 172px; justify-content: flex-start; gap: 8px; }
   .strip .hand { flex-wrap: wrap; justify-content: center; overflow: visible; row-gap: 6px; }
   .strip .hand :global(.tile) { --w: clamp(26px, calc((100cqw - 40px) / 9.6), 48px); }
   .strip .drawn-gap { width: 6px; }
@@ -550,6 +552,11 @@
   .strip .banner .sep, .strip .banner span:not(.sep) { display: none; }
   .strip .banner.quiet span { display: inline; font-size: 12px; }
   .strip .prompt-row { flex-wrap: nowrap; }
+  .strip .banner { padding: 6px 12px; }
+  .strip .banner b { font-size: 16px; letter-spacing: 0.08em; white-space: nowrap; }
+  .strip .auto-btn { padding: 4px 10px; letter-spacing: 0.04em; white-space: nowrap; }
+  /* 很窄的手機：名牌上已經有「託管」標籤，省略橫幅，只留「我要自己打」 */
+  @media (max-width: 379px) { .strip .auto-banner { display: none; } }
   /* 「紀錄」按鈕移到牌桌右上角，不擋到下家的名牌 */
   .strip .open-side { top: 62px; right: 10px; }
   .compact .seat-left :global(.v-chip .wind), .compact .seat-right :global(.v-chip .wind) { left: 33px; top: 31px; }
