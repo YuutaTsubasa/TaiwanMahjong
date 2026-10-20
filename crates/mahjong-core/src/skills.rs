@@ -1,0 +1,94 @@
+//! 技能模式：每個角色有一個技能（房主在規則裡開啟，預設關閉）。
+//!
+//! 主動技能在自己的回合多一個「技能」動作；被動技能條件符合時自動發動。
+//! 除了阿翼的銀之盾一場一次，其他每局一次。
+
+use serde::{Deserialize, Deserializer};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Skill {
+    /// 小翠：摸到的牌放回牌尾，重摸一張（主動）
+    Redraw,
+    /// 月華：看穿其他三家聽什麼牌，維持到自己打出第三張牌（主動）
+    SeeWaits,
+    /// 阿明：分數最低時，開局自動把配牌換好一點（被動）
+    Comeback,
+    /// 糖糖：這一回合打出的牌別人不能吃、碰、槓（胡不擋）（主動）
+    NoClaim,
+    /// 小春：可以吃任何人打的牌，不限上家（每局一次，吃的時候發動）
+    QuickChow,
+    /// 蘭姐：偷看牌牆接下來的 3 張（主動）
+    Peek,
+    /// 阿翼：放槍時不用付錢（被動，一場一次）
+    Shield,
+}
+
+impl Skill {
+    pub fn of(character: &str) -> Option<Skill> {
+        Some(match character {
+            "xiaocui" => Skill::Redraw,
+            "yuehua" => Skill::SeeWaits,
+            "aming" => Skill::Comeback,
+            "tangtang" => Skill::NoClaim,
+            "xiaochun" => Skill::QuickChow,
+            "lanjie" => Skill::Peek,
+            "ayi" => Skill::Shield,
+            _ => return None,
+        })
+    }
+
+    pub fn id(self) -> &'static str {
+        match self {
+            Skill::Redraw => "redraw",
+            Skill::SeeWaits => "see_waits",
+            Skill::Comeback => "comeback",
+            Skill::NoClaim => "no_claim",
+            Skill::QuickChow => "quick_chow",
+            Skill::Peek => "peek",
+            Skill::Shield => "shield",
+        }
+    }
+
+    pub fn name(self) -> &'static str {
+        match self {
+            Skill::Redraw => "元氣再來！",
+            Skill::SeeWaits => "看穿",
+            Skill::Comeback => "逆轉之魂",
+            Skill::NoClaim => "拜託嘛～",
+            Skill::QuickChow => "快攻",
+            Skill::Peek => "老闆娘的眼力",
+            Skill::Shield => "銀之盾",
+        }
+    }
+
+    pub fn desc(self) -> &'static str {
+        match self {
+            Skill::Redraw => "摸到不想要的牌時，放回牌尾重摸一張。每局一次。",
+            Skill::SeeWaits => "看穿其他三家聽什麼牌，維持到自己再打出三張牌。每局一次。",
+            Skill::Comeback => "分數最低時，開局自動把配牌換好一點。",
+            Skill::NoClaim => "這一回合打出的牌，別人不能吃、碰、槓（胡牌擋不住）。每局一次。",
+            Skill::QuickChow => "可以吃任何人打出的牌，不限上家。每局一次。",
+            Skill::Peek => "偷看牌牆接下來會被摸走的 3 張牌。每局一次。",
+            Skill::Shield => "放槍時不用付錢。一場一次。",
+        }
+    }
+
+    /// 要自己按「技能」才會發動的
+    pub fn is_active(self) -> bool {
+        matches!(self, Skill::Redraw | Skill::SeeWaits | Skill::NoClaim | Skill::Peek)
+    }
+}
+
+/// 設定裡的開關：介面的數字輸入會送 0／1，也接受 true／false。
+pub fn bool_or_number<'de, D: Deserializer<'de>>(d: D) -> Result<bool, D::Error> {
+    #[derive(Deserialize)]
+    #[serde(untagged)]
+    enum B {
+        Bool(bool),
+        Num(f64),
+    }
+    Ok(match B::deserialize(d)? {
+        B::Bool(b) => b,
+        B::Num(n) => n != 0.0,
+    })
+}

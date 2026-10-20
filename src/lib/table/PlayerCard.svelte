@@ -30,13 +30,14 @@
       {#if seat.is_dealer}<span class="tag dealer">莊</span>{/if}
       {#if isBot}<span class="tag bot">電腦</span>{/if}
       {#if seat.kind === 'agent'}<span class="tag ai">AI</span>{/if}
+      {#if seat.skill}<span class="tag skill" class:used={seat.skill.used} title="{seat.skill.name}：{seat.skill.desc}{seat.skill.used ? '（已用過）' : ''}">{seat.skill.name}</span>{/if}
       {#if seat.auto}<span class="tag auto">託管</span>{/if}
       {#if offline}<span class="tag off">離線</span>{/if}
     </div>
   </div>
   {#if reaction?.text}
     {#key reaction.until}
-      <div class="bubble {bubble}" class:big={reaction.kind === 'tsumo' || reaction.kind === 'ron'}>{reaction.text}</div>
+      <div class="bubble {bubble}" class:big={reaction.kind === 'tsumo' || reaction.kind === 'ron' || reaction.kind === 'skill'}>{reaction.text}</div>
     {/key}
   {/if}
 </div>
@@ -102,13 +103,17 @@
   }
   .wind.dealer { color: #7a1f00; background: var(--gold); }
   .line2 { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; border-top: 1px solid color-mix(in srgb, var(--art-line) 60%, transparent); padding-top: 4px; }
-  .score { font-size: 15px; font-variant-numeric: tabular-nums; color: var(--text); margin-right: auto; }
+  .score { white-space: nowrap; font-size: 15px; font-variant-numeric: tabular-nums; color: var(--text); margin-right: auto; }
   .score.neg { color: var(--negative); }
   .tag { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: var(--small-radius); line-height: 1.5; }
   .tag.me { background: var(--gold); color: #3d2200; }
   .tag.dealer { background: #b3171f; color: #fff; }
   .tag.ai { background: #5a3b8c; color: #fff; }
   .tag.bot { background: #2a6f97; color: #fff; }
+  .tag.skill { background: linear-gradient(#ffe7a4, #d5a34d); color: #3a2410; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* 對家名牌很矮：標籤排成一行，放不下時技能名稱用省略號（滑鼠移上去看得到完整說明） */
+  .v-top .line2 { flex-wrap: nowrap; overflow: hidden; }
+  .tag.skill.used { background: #555; color: #bbb; text-decoration: line-through; }
   .tag.auto { background: var(--claim-bg); color: var(--action-text); }
   .tag.off { background: #555; color: #ddd; }
 
@@ -161,7 +166,8 @@
   }
   .bubble.big { font-size: 18px; border: 2px solid var(--gold); }
   .bubble.down { top: calc(100% + 10px); }
-  .bubble.up { bottom: calc(100% + 10px); }
+  /* 自己的名牌在畫面左下角：泡泡從名牌左邊往右長，才不會超出畫面 */
+  .bubble.up { bottom: calc(100% + 10px); left: 0; transform: none; }
   .bubble.right { left: calc(100% + 12px); top: 30%; transform: none; }
   .bubble.left { left: auto; right: calc(100% + 12px); top: 30%; transform: none; }
   @keyframes bubble { from { opacity: 0; scale: 0.5; } }

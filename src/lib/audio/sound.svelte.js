@@ -309,6 +309,7 @@ export function onGameState(state) {
           sfx.claim();
           break;
         case 'kong':
+        case 'skill':
           sfx.kong();
           break;
         case 'tsumo':

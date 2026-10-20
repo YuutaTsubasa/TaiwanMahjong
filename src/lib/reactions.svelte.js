@@ -18,7 +18,7 @@ export function processEvents(state) {
   for (const e of events) {
     if (e.seq <= lastSeq || !(e.kind in EVENT_EXPRESSION)) continue;
     const character = state.seats[e.seat]?.character;
-    const long = e.kind === 'tsumo' || e.kind === 'ron' || e.kind === 'deal_in';
+    const long = e.kind === 'tsumo' || e.kind === 'ron' || e.kind === 'deal_in' || e.kind === 'skill';
     reactions[e.seat] = {
       expression: EVENT_EXPRESSION[e.kind] ?? 'normal',
       text: pickLine(character, e.kind),

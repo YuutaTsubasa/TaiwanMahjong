@@ -2,6 +2,7 @@
 
 use super::room::{Action, Hand, Room, Step};
 use super::rules::*;
+use super::skills::Skill;
 use super::tiles::*;
 
 fn visible_counts(h: &Hand, seat: usize) -> Counts {
@@ -74,6 +75,64 @@ pub fn best_discard(concealed: &[Tile], sets_needed: i32, visible: &Counts) -> T
     best.map(|b| b.0).unwrap_or(concealed[0])
 }
 
+/// 技能模式：電腦什麼時候發動自己的技能
+fn wants_skill(room: &Room, h: &Hand, seat: usize, n: i32, visible: &Counts) -> bool {
+    let p = &h.players[seat];
+    let c = counts(&p.concealed);
+    match room.skill_of(seat) {
+        // 小翠：摸到的牌正好是最該丟的那張，而且還沒聽牌，就重摸
+        Some(Skill::Redraw) => {
+            let Step::Turn { drawn: Some(d), .. } = h.step else { return false };
+            let out = best_discard(&p.concealed, n, visible);
+            let mut c2 = c;
+            c2[out as usize] -= 1;
+            out == d && shanten(&c2, n) > 0
+        }
+        // 月華、蘭姐：牌局過了一半再用
+        Some(Skill::SeeWaits) | Some(Skill::Peek) => h.drawable() < 45,
+        // 糖糖：快聽牌時保護自己打出的牌
+        Some(Skill::NoClaim) => shanten(&c, n) <= 1 && h.drawable() < 55,
+        _ => false,
+    }
+}
+
+/// 一般選最佳捨牌；月華看穿時避開別人聽的牌（向聽數最多差一）
+fn safe_discard(h: &Hand, seat: usize, n: i32, visible: &Counts) -> Tile {
+    let p = &h.players[seat];
+    let best = best_discard(&p.concealed, n, visible);
+    if p.see_waits_left == 0 {
+        return best;
+    }
+    let mut danger = [false; NUM_TYPES];
+    for (s, q) in h.players.iter().enumerate() {
+        if s != seat && q.concealed.len() % 3 == 1 {
+            for w in waits(&counts(&q.concealed)) {
+                danger[w as usize] = true;
+            }
+        }
+    }
+    if !danger[best as usize] {
+        return best;
+    }
+    let c = counts(&p.concealed);
+    let s_best = {
+        let mut c2 = c;
+        c2[best as usize] -= 1;
+        shanten(&c2, n)
+    };
+    (0..NUM_TYPES)
+        .filter(|&t| c[t] > 0 && !danger[t])
+        .map(|t| {
+            let mut c2 = c;
+            c2[t] -= 1;
+            (shanten(&c2, n), t as Tile)
+        })
+        .filter(|&(s, _)| s <= s_best + 1)
+        .min()
+        .map(|(_, t)| t)
+        .unwrap_or(best)
+}
+
 pub fn choose(room: &Room, seat: usize, legal: &[Action]) -> Action {
     for pref in [Action::Tsumo, Action::Ron, Action::Next] {
         if legal.contains(&pref) {
@@ -88,12 +147,15 @@ pub fn choose(room: &Room, seat: usize, legal: &[Action]) -> Action {
     let visible = visible_counts(h, seat);
 
     if legal.iter().any(|a| matches!(a, Action::Discard(_))) {
+        if legal.contains(&Action::Skill) && wants_skill(room, h, seat, n, &visible) {
+            return Action::Skill;
+        }
         for a in legal {
             if matches!(a, Action::ConcealedKong(_) | Action::AddedKong(_)) {
                 return a.clone();
             }
         }
-        return Action::Discard(best_discard(&p.concealed, n, &visible));
+        return Action::Discard(safe_discard(h, seat, n, &visible));
     }
 
     let tile = match &h.step {

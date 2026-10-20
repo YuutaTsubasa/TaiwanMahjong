@@ -45,6 +45,7 @@ export const CHARACTERS = [
       ron: ['胡啦！謝謝你的牌～', '就等這張！胡！'],
       deal_in: ['嗚…怎麼是我放槍…', '啊啊啊打錯了啦！'],
       draw: ['流局了呢～下一局加油！'],
+      skill: ['元氣再來！這張不算～', '再摸一次！嘿嘿～'],
     },
   },
   {
@@ -68,6 +69,7 @@ export const CHARACTERS = [
       ron: ['胡了。你的牌，太好讀了。', '失禮了——胡。'],
       deal_in: ['……失算了。', '真是不甘心。'],
       draw: ['流局……這也不壞。'],
+      skill: ['看穿了。你們在等什麼，我都知道。', '一切都在預料之中。'],
     },
   },
   {
@@ -91,6 +93,7 @@ export const CHARACTERS = [
       ron: ['胡！！一擊必殺！', '等的就是這一張！'],
       deal_in: ['可惡——！下次一定贏！', '我、我只是不小心！'],
       draw: ['流局？！我還沒燃燒完啊！'],
+      skill: ['逆轉之魂，燃燒吧！', '還沒結束呢！'],
     },
   },
   {
@@ -114,6 +117,7 @@ export const CHARACTERS = [
       ron: ['胡了～♡ 謝謝你送的牌！', '抓到你了～胡♡'],
       deal_in: ['嗚嗚…欺負人家…', '不算不算！再來一次嘛～'],
       draw: ['流局了～糖糖餓了…'],
+      skill: ['拜託嘛～這張不要碰啦～', '糖糖的牌，不准吃喔～'],
     },
   },
   {
@@ -137,6 +141,7 @@ export const CHARACTERS = [
       ron: ['胡！得分！', '漂亮攔截——胡！'],
       deal_in: ['唔，被逆轉了…', '失誤了！下一局扳回來！'],
       draw: ['平手！延長賽見！'],
+      skill: ['快攻！這張我接走了！', '衝啊——吃！'],
     },
   },
   {
@@ -160,6 +165,7 @@ export const CHARACTERS = [
       ron: ['胡。這張姐等很久了。', '放槍囉～胡。'],
       deal_in: ['哎呀，姐也有失手的時候。', '算你厲害。'],
       draw: ['流局，喝杯茶再來。'],
+      skill: ['老闆娘的眼力，可不是開玩笑的。', '牌牆裡有什麼，姐一看就知道。'],
     },
   },
   {
@@ -183,6 +189,7 @@ export const CHARACTERS = [
       ron: ['胡！等的就是這張。', '這局拿下了！'],
       deal_in: ['哎呀，被看穿了。', '這張出得太急了。'],
       draw: ['再戰一局吧！', '先喝口茶，下一局見。'],
+      skill: ['銀之盾！這一擊擋下了。', '盔甲可不是穿好看的。'],
     },
   },
 ].map((character) => ({
@@ -219,6 +226,18 @@ export const EVENT_EXPRESSION = {
   ron: 'win',
   deal_in: 'sad',
   draw: 'surprised',
+  skill: 'happy',
+};
+
+// 技能模式的技能（要跟 crates/mahjong-core/src/skills.rs 一致）
+export const SKILLS = {
+  xiaocui: { name: '元氣再來！', desc: '摸到不想要的牌時，放回牌尾重摸一張。每局一次。' },
+  yuehua: { name: '看穿', desc: '看穿其他三家聽什麼牌，維持到自己再打出三張牌。每局一次。' },
+  aming: { name: '逆轉之魂', desc: '分數最低時，開局自動把配牌換好一點。' },
+  tangtang: { name: '拜託嘛～', desc: '這一回合打出的牌，別人不能吃、碰、槓（胡牌擋不住）。每局一次。' },
+  xiaochun: { name: '快攻', desc: '可以吃任何人打出的牌，不限上家。每局一次。' },
+  lanjie: { name: '老闆娘的眼力', desc: '偷看牌牆接下來會被摸走的 3 張牌。每局一次。' },
+  ayi: { name: '銀之盾', desc: '放槍時不用付錢。一場一次。' },
 };
 
 export function pickLine(character, kind) {

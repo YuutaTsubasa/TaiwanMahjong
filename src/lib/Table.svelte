@@ -74,8 +74,13 @@
     return ld && ld.seat === seat && i === river.length - 1 && river[i] === ld.tile && s.phase === 'playing';
   }
 
-  const btnClass = { tsumo: 'win', ron: 'win', pung: 'claim', kong: 'claim', chow: 'claim', concealed_kong: 'claim', added_kong: 'claim', pass: 'pass' };
+  const btnClass = { tsumo: 'win', ron: 'win', pung: 'claim', kong: 'claim', chow: 'claim', concealed_kong: 'claim', added_kong: 'claim', pass: 'pass', skill: 'skill' };
   const btnText = { tsumo: '自摸', ron: '胡', pung: '碰', kong: '槓', chow: '吃', concealed_kong: '暗槓', added_kong: '加槓', pass: '過' };
+
+  // 技能模式：月華看穿的聽牌、蘭姐偷看的牌（只有自己看得到）
+  const relName = (seat) => ['', '下家', '對家', '上家'][(seat - me + 4) % 4];
+  const seen = $derived(s.skill_info?.see_waits);
+  const peek = $derived(s.skill_info?.peek);
 
   const waitingText = $derived.by(() => {
     if (s.phase !== 'playing') return '';
@@ -228,7 +233,7 @@
           <div class="actions">
             {#each special as a (a.id)}
               <button class="act {btnClass[a.type]}" onclick={() => act(a.id)}>
-                <span>{btnText[a.type]}</span>
+                <span>{a.type === 'skill' ? a.label : btnText[a.type]}</span>
                 {#if a.type === 'chow'}
                   <span class="mini">{#each a.tiles as t}<Tile code={t} size="xs" />{/each}</span>
                 {:else if a.tile && a.type !== 'pass'}
@@ -246,6 +251,23 @@
           <div class="banner quiet"><span>{waitingText}</span></div>
         {:else if !isPlayer}
           <div class="banner quiet"><span>觀戰中</span></div>
+        {/if}
+
+        {#if seen}
+          <div class="waits skill-info" title="看穿：其他三家聽的牌（還能看 {seen.left} 張）">
+            <b>看穿</b>
+            {#each seen.seats as x}
+              <span class="who">{relName(x.seat)}</span>
+              {#if x.waits == null}<span class="muted">？</span>
+              {:else if x.waits.length}{#each x.waits as w}<Tile code={w} size="xs" />{/each}
+              {:else}<span class="muted">沒聽</span>{/if}
+            {/each}
+          </div>
+        {/if}
+        {#if peek?.length}
+          <div class="waits skill-info" title="牌牆接下來會被摸走的牌">
+            <b>牌牆</b>{#each peek as t}<Tile code={t} size="xs" />{/each}
+          </div>
         {/if}
 
         {#if s.my_waits?.length && !auto}
@@ -466,6 +488,13 @@
     border: 1px solid var(--art-line);
     border-radius: var(--surface-radius);
   }
+  .skill-info { color: var(--gold); gap: 4px; }
+  .skill-info b { font-family: var(--heading-font); letter-spacing: 0.1em; margin-right: 2px; }
+  .skill-info .who { margin-left: 6px; color: var(--text); font-size: 12px; }
+  .skill-info .muted { color: var(--muted); font-size: 12px; }
+  /* 畫風主題也有 .act 的樣式，提高權重讓技能按鈕維持金色 */
+  :global(html[data-ui-style]) .act.skill,
+  :global(html[data-ui-style]) .act.skill:hover:not(:disabled) { background: linear-gradient(#ffe7a4, #d5a34d); color: #3a2410; border: 1px solid #8a5a1c; font-size: 20px; }
   .auto-btn {
     min-width: 128px;
     padding: 8px 18px;

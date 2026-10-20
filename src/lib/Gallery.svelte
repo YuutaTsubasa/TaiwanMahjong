@@ -1,5 +1,5 @@
 <script>
-  import { getSelectableCharacters, getCharacter } from './characters.js';
+  import { getSelectableCharacters, getCharacter, SKILLS } from './characters.js';
   import { ayiUnlocked } from './unlocks.js';
   import Avatar from './Avatar.svelte';
   import Brand from './Brand.svelte';
@@ -17,6 +17,7 @@
   let expression = $state('happy');
   const selected = $derived(getCharacter(character));
   const preview = $derived(EXPRESSIONS.find((item) => item.id === expression));
+  const skill = $derived(SKILLS[character]);
   const line = $derived(selected.lines[preview.line]?.[0] ?? '');
 </script>
 
@@ -36,6 +37,7 @@
     <section class="art-panel detail-panel" aria-label="角色介紹">
       <OrnateHeading text={selected.name} tag="h2" />
       <p class="intro">{selected.intro}。</p>
+      {#if skill}<p class="skill-line" title="技能模式開啟時可以使用"><b>技能「{skill.name}」</b>{skill.desc}</p>{/if}
       <h3>表情預覽</h3>
       <div class="expressions" role="group" aria-label="選擇表情">
         {#each EXPRESSIONS as item}
@@ -68,6 +70,8 @@
   .detail-panel { padding: clamp(18px, 2.2vw, 34px); position: relative; }
   .detail-panel :global(.ornate) { margin: 4px 0 6px; }
   .intro { text-align: center; line-height: 1.8; font-size: 16px; }
+  .skill-line { margin: 4px 0 0; text-align: center; font-size: 14px; line-height: 1.6; color: var(--text); }
+  .skill-line b { color: var(--gold); margin-right: 6px; }
   h3 { display: flex; align-items: center; gap: 14px; color: var(--gold); font: 600 20px 'DFKai-SB', '標楷體', serif; letter-spacing: .16em; text-align: center; margin: clamp(10px, 2.4vh, 26px) 0 clamp(8px, 1.8vh, 18px); }
   h3::before, h3::after { content: ''; flex: 1; height: 1px; background: var(--line); }
   .expressions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }

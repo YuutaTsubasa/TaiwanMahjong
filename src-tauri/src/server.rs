@@ -603,6 +603,7 @@ OpenAPI 規格：{base}/openapi.json
 ## 小提示
 - 每次決定都有時間限制，請別想太久；逾時會自動處理
 - 一局結束時要送 next（下一局）
+- 技能模式開啟時，輪到你可能多一個「技能」動作（type=skill）；文字版狀態會寫出你的技能與效果
 - 被房主換成電腦代打後，token 會失效，需要重新 join
 
 {rules}"#,
@@ -654,7 +655,7 @@ async fn openapi(headers: HeaderMap) -> Json<Value> {
                     "properties": {
                         "token": {"type": "string"},
                         "action_id": {"type": "integer", "description": "可執行動作清單中的編號"},
-                        "type": {"type": "string", "enum": ["discard", "tsumo", "ron", "pung", "kong", "chow", "pass", "next"]},
+                        "type": {"type": "string", "enum": ["discard", "tsumo", "ron", "pung", "kong", "chow", "pass", "next", "skill"]},
                         "tile": {"type": "string", "description": "例如 5m、E、C"},
                         "start": {"type": "string", "description": "吃牌時順子最小那張"},
                         "decision_id": {"type": "integer"}
@@ -708,11 +709,11 @@ fn mcp_tools() -> Value {
         },
         {
             "name": "take_action",
-            "description": "執行一個動作。最簡單是傳 action_id（wait_for_turn 列出的編號）。也可以傳 type + tile，例如 type=discard tile=5m；type=chow start=3m；type=pung / kong / ron / tsumo / pass / next。",
+            "description": "執行一個動作。最簡單是傳 action_id（wait_for_turn 列出的編號）。也可以傳 type + tile，例如 type=discard tile=5m；type=chow start=3m；type=pung / kong / ron / tsumo / pass / next / skill（技能模式發動角色技能）。",
             "inputSchema": {"type": "object", "properties": {
                 "token": token,
                 "action_id": {"type": "integer", "description": "可執行動作的編號"},
-                "type": {"type": "string", "enum": ["discard", "tsumo", "ron", "pung", "kong", "chow", "pass", "next"]},
+                "type": {"type": "string", "enum": ["discard", "tsumo", "ron", "pung", "kong", "chow", "pass", "next", "skill"]},
                 "tile": {"type": "string", "description": "牌代碼，例如 5m、9p、3s、E、C"},
                 "start": {"type": "string", "description": "吃牌時順子最小那張"},
                 "decision_id": {"type": "integer", "description": "可選；避免對過期的局面出手"}

@@ -6,4 +6,5 @@ pub mod bot;
 pub mod room;
 pub mod rules;
 pub mod scoring;
+pub mod skills;
 pub mod tiles;

@@ -28,7 +28,7 @@
   let showRules = $state(false);
   let settings = $state(null);
   $effect(() => {
-    if (showRules) settings = { ...s.settings };
+    if (showRules) settings = { ...s.settings, skills: s.settings.skills ? 1 : 0 };
   });
 
   function applySettings() {
@@ -64,6 +64,7 @@
     `每台 ${s.settings.per_tai}`,
     roundsLabel(s.settings.rounds),
     `出牌 ${s.settings.turn_timeout ? s.settings.turn_timeout + ' 秒' : '不限'}`,
+    ...(s.settings.skills ? ['技能模式'] : []),
   ]);
 
   const fields = [
@@ -74,6 +75,7 @@
     ['claim_timeout', '吃碰胡秒數（0=不限）', 5],
     ['next_hand_delay', '下一局自動開始秒數', 5],
     ['bot_delay_ms', '電腦思考毫秒', 100],
+    ['skills', '技能模式（0=關 1=開）', 1],
   ];
 
   // 聊天：系統訊息（加入、離開…）與玩家聊天混在一起，依時間順序
