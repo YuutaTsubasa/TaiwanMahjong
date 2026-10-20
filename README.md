@@ -14,6 +14,25 @@
 
 房主的 App 內建一個伺服器（預設埠 7777），所有牌局邏輯都在伺服器端判定，玩家只送出動作。
 
+## 下載 App
+
+各平台的安裝檔都由 GitHub Actions 打包（[`.github/workflows/build-apps.yml`](.github/workflows/build-apps.yml)）：
+
+| 平台 | 檔案 | 備註 |
+| --- | --- | --- |
+| Windows | `.exe`（安裝程式）、`.msi` | SmartScreen 會警告「未知的發行者」，點「其他資訊 → 仍要執行」 |
+| macOS | `.dmg`（`aarch64` = Apple Silicon、`x64` = Intel） | 沒有公證，第一次開啟要在 Finder 按右鍵 →「打開」 |
+| Linux | `.deb`、`.rpm`、`.AppImage` | |
+| Android | `.apk` | 允許「安裝不明來源的應用程式」後直接安裝 |
+| iOS | 模擬器用的 `.app` | 實機需要 Apple 開發者帳號簽章，見下方 |
+
+- 推一個 `v*` 標籤（例如 `v0.2.0`）會打包全部平台並附到同名的 Release。
+- 也可以在 Actions →「Build apps」→「Run workflow」手動打包，檔案在該次執行的 Artifacts。
+
+**Android 固定簽章**（選用）：沒設定的話每次用臨時金鑰簽章，能安裝，但升級前要先移除舊版。想要能直接覆蓋升級，就在 repo 的 Settings → Secrets 加上 `ANDROID_KEYSTORE_BASE64`（`base64 -w0 release.jks` 的結果）、`ANDROID_KEYSTORE_PASSWORD`、`ANDROID_KEY_ALIAS`。
+
+**iOS 實機**：需要 Apple Developer Program（年費 US$99）。有帳號之後，在 macOS 上執行 `npx tauri ios init`、在 Xcode 設定 Team，再 `npx tauri ios build` 就能裝到自己的 iPhone；要在 CI 上打包 `.ipa`，需要把簽章憑證與 provisioning profile 放進 Secrets。
+
 ## 開發
 
 需求：Node 18+、Rust 1.89+（Windows 需 WebView2，Win10/11 已內建）。
