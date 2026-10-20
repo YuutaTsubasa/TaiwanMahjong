@@ -3,6 +3,7 @@
   import Tile from './Tile.svelte';
   import Melds from './Melds.svelte';
   import Avatar from './Avatar.svelte';
+  import FinalRanking from './FinalRanking.svelte';
   import { reactions } from './reactions.svelte.js';
   import { getCharacter, pickLine } from './characters.js';
 
@@ -20,31 +21,11 @@
   const winLine = $derived(
     winner ? reactions[r.winner]?.text ?? pickLine(winner.character, r.self_draw ? 'tsumo' : 'ron') : '',
   );
-  const ranking = $derived([...s.seats].sort((a, b) => b.score - a.score));
-  const medals = ['🥇', '🥈', '🥉', '4'];
 </script>
 
 <div class="overlay">
   {#if s.phase === 'game_over'}
-    <div class="card box">
-      <h2>🏁 遊戲結束</h2>
-      <div class="rank">
-        {#each ranking as p, i}
-          <div class="rrow" class:me={p.seat === net.seat}>
-            <span class="medal">{medals[i]}</span>
-            <span class="nm">{p.name}</span>
-            <span class="pts" class:neg={p.score < 0}>{p.score > 0 ? '+' : ''}{p.score}</span>
-          </div>
-        {/each}
-      </div>
-      <div class="btns">
-        {#if net.isHost}
-          <button class="primary" onclick={() => hostCmd('start')}>再來一場</button>
-          <button onclick={() => hostCmd('reset')}>回大廳</button>
-        {/if}
-        <button onclick={disconnect}>回首頁</button>
-      </div>
-    </div>
+    <FinalRanking />
   {:else if r}
     <div class="card box">
       {#if r.draw}
@@ -164,10 +145,4 @@
   .neg { color: #ff8fa3; }
   .pos { color: var(--accent); }
   .btns { display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 8px; }
-  .rank { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-  .rrow { display: flex; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.06); padding: 10px 16px; border-radius: 10px; font-size: 18px; }
-  .rrow.me { outline: 1px solid var(--gold); }
-  .medal { width: 30px; text-align: center; }
-  .rrow .nm { flex: 1; }
-  .pts { font-weight: 700; color: var(--accent); }
 </style>

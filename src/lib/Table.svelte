@@ -358,8 +358,10 @@
   /* 牌河：上下兩家每排 8 張，左右兩家每列 6 張；往外長 */
   .river { position: absolute; display: flex; gap: 2px; }
   .river :global(.tile) { --w: clamp(20px, 5.4cqw, 42px); margin-bottom: calc(var(--w) * 0.12); }
+  /* 牌河依中央資訊框的大小往外推，兩者之間固定留 --river-gap，不會互相蓋到 */
+  .felt { --panel-w: 26%; --river-gap: 2%; }
   .r-top {
-    bottom: 61.5%;
+    bottom: calc(50% + var(--panel-w) / 2.9 + var(--river-gap));
     left: 50%;
     transform: translateX(-50%);
     width: calc(8 * (clamp(20px, 5.4cqw, 42px) + 2px));
@@ -367,14 +369,14 @@
     flex-wrap: wrap-reverse;
   }
   .r-bottom {
-    top: 61.5%;
+    top: calc(50% + var(--panel-w) / 2.9 + var(--river-gap));
     left: 50%;
     transform: translateX(-50%);
     width: calc(8 * (clamp(20px, 5.4cqw, 42px) + 2px));
     flex-wrap: wrap;
   }
   .r-left {
-    right: 63%;
+    right: calc(50% + var(--panel-w) / 2 + var(--river-gap));
     top: 50%;
     transform: translateY(-50%);
     height: calc(6 * (clamp(20px, 5.4cqw, 42px) * 1.48 + 2px));
@@ -383,7 +385,7 @@
     align-content: flex-start;
   }
   .r-right {
-    left: 63%;
+    left: calc(50% + var(--panel-w) / 2 + var(--river-gap));
     top: 50%;
     transform: translateY(-50%);
     height: calc(6 * (clamp(20px, 5.4cqw, 42px) * 1.48 + 2px));
@@ -396,7 +398,7 @@
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: 27%;
+    width: var(--panel-w);
     aspect-ratio: 1.45;
     display: flex;
     flex-direction: column;
@@ -517,7 +519,7 @@
   .compact .hand :global(.tile) { --w: clamp(22px, min(calc((100cqw - 40px) / 18.4), 9vh), 54px); }
   .compact .open-side { top: 6px; right: 6px; padding: 4px 10px; }
   /* 牌桌小的時候，中央資訊框放寬一點、字縮小，局數才不會斷行 */
-  .compact .center-panel { width: 36%; }
+  .compact .felt { --panel-w: 32%; }
   .compact .round { font-size: clamp(9px, 3.6cqw, 15px); letter-spacing: 0; white-space: nowrap; }
   .compact .left-count small { font-size: clamp(9px, 3.2cqw, 14px); }
   .compact .timer { font-size: clamp(9px, 3.2cqw, 14px); }
