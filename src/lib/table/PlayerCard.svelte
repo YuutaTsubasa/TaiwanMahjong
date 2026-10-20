@@ -8,6 +8,9 @@
 
   const reaction = $derived(reactionFor(seat.seat));
   const offline = $derived(!seat.connected && seat.kind !== 'bot');
+  // 電腦的名字是「角色名(電腦)」，名牌太窄會被切掉；改成只顯示角色名，再加一個「電腦」標籤
+  const isBot = $derived(seat.kind === 'bot');
+  const shownName = $derived(isBot ? seat.name?.replace(/\(電腦\)$/, '') : seat.name);
 </script>
 
 <div class="pcard v-{variant}" class:active class:thinking class:empty={!seat.name}>
@@ -18,13 +21,14 @@
   </div>
   <div class="meta">
     <div class="line1">
-      <b class="nm" title={seat.name}>{seat.name ?? '空位'}</b>
+      <b class="nm" title={seat.name}>{shownName ?? '空位'}</b>
       {#if seat.wind}<span class="wind" class:dealer={seat.is_dealer}>{seat.wind}</span>{/if}
     </div>
     <div class="line2">
       <span class="score" class:neg={seat.score < 0}>{seat.score > 0 ? '+' : ''}{seat.score} 分</span>
       {#if isMe}<span class="tag me">你</span>{/if}
       {#if seat.is_dealer}<span class="tag dealer">莊</span>{/if}
+      {#if isBot}<span class="tag bot">電腦</span>{/if}
       {#if seat.kind === 'agent'}<span class="tag ai">AI</span>{/if}
       {#if seat.auto}<span class="tag auto">託管</span>{/if}
       {#if offline}<span class="tag off">離線</span>{/if}
@@ -104,6 +108,7 @@
   .tag.me { background: var(--gold); color: #3d2200; }
   .tag.dealer { background: #b3171f; color: #fff; }
   .tag.ai { background: #5a3b8c; color: #fff; }
+  .tag.bot { background: #2a6f97; color: #fff; }
   .tag.auto { background: var(--claim-bg); color: var(--action-text); }
   .tag.off { background: #555; color: #ddd; }
 
