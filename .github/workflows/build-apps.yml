@@ -5,7 +5,7 @@
 # 產出：
 #   Windows  .exe（NSIS）、.msi
 #   Linux    .deb、.rpm、.AppImage
-#   macOS    .dmg（Apple Silicon＋Intel 通用）
+#   macOS    .dmg（Apple Silicon、Intel 各一）
 #   Android  .apk（已簽章，可直接安裝）
 #   iOS      模擬器用 .app（實機安裝需要 Apple 開發者帳號，見 README）
 #
@@ -39,10 +39,15 @@ jobs:
             os: ubuntu-22.04
             rust-targets: wasm32-unknown-unknown
             args: ''
-          - name: macOS
+          # 通用版（universal）會找不到第二個執行檔 mahjong-server，所以兩種 CPU 分開打包
+          - name: macOS-AppleSilicon
             os: macos-latest
-            rust-targets: wasm32-unknown-unknown,aarch64-apple-darwin,x86_64-apple-darwin
-            args: --target universal-apple-darwin
+            rust-targets: wasm32-unknown-unknown,aarch64-apple-darwin
+            args: --target aarch64-apple-darwin
+          - name: macOS-Intel
+            os: macos-latest
+            rust-targets: wasm32-unknown-unknown,x86_64-apple-darwin
+            args: --target x86_64-apple-darwin
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -204,7 +209,7 @@ jobs:
       - name: 收集 .app
         run: |
           mkdir -p out
-          APP=$(find src-tauri/gen/apple -name '*.app' -path '*iphonesimulator*' -type d | head -1)
+          APP=$(find src-tauri/gen/apple/build -name '*.app' -type d -prune | head -1)
           echo "app: $APP"
           ditto -c -k --keepParent "$APP" "out/VirtualTaiwanMahjongParlor_${GITHUB_REF_NAME//\//-}_ios-simulator.app.zip"
           ls -la out
