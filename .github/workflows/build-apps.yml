@@ -105,12 +105,13 @@ jobs:
           distribution: temurin
           java-version: 17
 
-      - uses: android-actions/setup-android@v3
-
-      - name: Android NDK
+      # GitHub 的 Ubuntu runner 已內建 Android SDK 與 NDK，直接拿來用
+      - name: Android SDK／NDK
         run: |
-          sdkmanager --install "ndk;27.0.12077973" "platforms;android-34" "build-tools;34.0.0"
-          echo "NDK_HOME=$ANDROID_SDK_ROOT/ndk/27.0.12077973" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "NDK_HOME=$ANDROID_NDK_LATEST_HOME" >> "$GITHUB_ENV"
+          echo "BUILD_TOOLS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)" >> "$GITHUB_ENV"
+          ls "$ANDROID_HOME/build-tools" "$ANDROID_HOME/platforms"
 
       - uses: actions/setup-node@v4
         with:
@@ -142,7 +143,7 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
         run: |
-          BT="$ANDROID_SDK_ROOT/build-tools/34.0.0"
+          BT="$BUILD_TOOLS"
           if [ -n "$KEYSTORE_B64" ]; then
             echo "$KEYSTORE_B64" | base64 -d > release.jks
           else
