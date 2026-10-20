@@ -1,4 +1,5 @@
-pub mod game;
+/// 牌局引擎在 crates/mahjong-core；沿用 `game` 這個名字，原本的 `crate::game::…` 路徑都不用改
+pub use mahjong_core as game;
 pub mod server;
 
 use game::room::Settings;
