@@ -724,9 +724,17 @@ impl Room {
                         }
                         v
                     }
-                    Step::Claims { options, responses, .. }
-                    | Step::RobKong { options, responses, .. } => {
-                        if responses[seat].is_none() {
+                    Step::Claims { discarder: origin, options, responses, .. }
+                    | Step::RobKong { seat: origin, options, responses, .. } => {
+                        // 依優先權輪流問：胡（近的先）→ 碰／槓 → 吃。
+                        // 優先權比較高、還沒決定的人先選，選「過」之後才輪到下一位，
+                        // 免得吃的人先按下去，才發現被別人碰走。
+                        let max_prio = |s: usize| options[s].iter().map(|a| Self::claim_prio(*origin, s, a)).max().unwrap_or(0);
+                        let mine = max_prio(seat);
+                        let someone_first = (0..4).any(|o| {
+                            o != seat && !options[o].is_empty() && responses[o].is_none() && max_prio(o) > mine
+                        });
+                        if responses[seat].is_none() && !someone_first {
                             options[seat].clone()
                         } else {
                             vec![]
@@ -769,6 +777,10 @@ impl Room {
                     _ => {}
                 }
                 self.try_resolve();
+                // 還沒結束：輪到下一位（優先權較低）的人選，重新計時
+                if matches!(self.hand.as_ref().map(|h| &h.step), Some(Step::Claims { .. } | Step::RobKong { .. })) {
+                    self.new_decision(self.settings.claim_timeout);
+                }
             }
             Action::Next => {}
         }
@@ -845,6 +857,16 @@ impl Room {
         }
     }
 
+    /// 搶牌的優先權：胡（離打牌的人越近越優先）> 碰／槓 > 吃；過是 0。
+    fn claim_prio(origin: usize, s: usize, a: &Action) -> i32 {
+        match a {
+            Action::Ron => 100 - ((s + 4 - origin) % 4) as i32,
+            Action::Kong | Action::Pung => 50,
+            Action::Chow(_) => 10,
+            _ => 0,
+        }
+    }
+
     fn try_resolve(&mut self) {
         let h = self.hand.as_ref().unwrap();
         let (is_rob, origin, tile, options, responses) = match &h.step {
@@ -856,14 +878,7 @@ impl Room {
             }
             _ => return,
         };
-        let prio = |s: usize, a: &Action| -> i32 {
-            match a {
-                Action::Ron => 100 - ((s + 4 - origin) % 4) as i32,
-                Action::Kong | Action::Pung => 50,
-                Action::Chow(_) => 10,
-                _ => 0,
-            }
-        };
+        let prio = |s: usize, a: &Action| Self::claim_prio(origin, s, a);
         let mut best: Option<(usize, Action, i32)> = None;
         let mut undecided_max = -1;
         for s in 0..4 {
@@ -1647,6 +1662,51 @@ mod tests {
         assert_eq!(room.seats[seat].as_ref().unwrap().kind, SeatKind::Human);
         room.set_auto(seat, false);
         assert!(!room.auto[seat]);
+    }
+
+    /// 牌局設定成：座位 0 打出三萬（tile 2），下家（座位 1）可以吃、對家（座位 2）可以碰。
+    fn claim_room() -> Room {
+        let mut room = Room::new(Settings { bot_delay_ms: 0, turn_timeout: 0, claim_timeout: 0, next_hand_delay: 0, ..Default::default() });
+        room.start_game().unwrap();
+        let h = room.hand.as_mut().unwrap();
+        h.players[0].concealed = vec![2, 30, 31, 32];
+        h.players[1].concealed = vec![3, 4, 20];
+        h.players[2].concealed = vec![2, 2, 25];
+        h.players[3].concealed = vec![27, 28, 29];
+        for p in h.players.iter_mut() {
+            p.melds.clear();
+        }
+        h.step = Step::Turn { seat: 0, drawn: None, after_kong: false, claimed: false };
+        room.do_discard(0, 2);
+        room
+    }
+
+    /// 同時能碰和吃時，先問碰的人；他選「過」之後才輪到吃的人。
+    #[test]
+    fn pung_is_asked_before_chow() {
+        let mut room = claim_room();
+        assert!(room.legal_actions(1).is_empty(), "吃的人要等碰的人先決定");
+        assert!(room.legal_actions(2).contains(&Action::Pung));
+        assert_eq!(room.waiting_on(), vec![2]);
+        let before = room.decision_id;
+        room.act(2, Action::Pass).unwrap();
+        assert!(room.legal_actions(1).contains(&Action::Chow(2)));
+        assert!(room.decision_id > before, "輪到下一位時要重新計時");
+        room.act(1, Action::Chow(2)).unwrap();
+        let h = room.hand.as_ref().unwrap();
+        assert!(matches!(h.step, Step::Turn { seat: 1, .. }));
+        assert_eq!(h.players[1].melds[0].kind, MeldKind::Chow);
+    }
+
+    /// 碰的人碰下去，吃的人根本不會被問到。
+    #[test]
+    fn pung_wins_without_asking_chow() {
+        let mut room = claim_room();
+        room.act(2, Action::Pung).unwrap();
+        let h = room.hand.as_ref().unwrap();
+        assert!(matches!(h.step, Step::Turn { seat: 2, .. }));
+        assert_eq!(h.players[2].melds[0].kind, MeldKind::Pung);
+        assert!(h.players[1].melds.is_empty());
     }
 
     #[test]
