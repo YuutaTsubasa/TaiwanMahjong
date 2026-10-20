@@ -18,6 +18,10 @@
     {#if seat.character}
       <Avatar id={seat.character} expression={reaction?.expression ?? 'normal'} size={240} />
     {/if}
+    {#if seat.skill}
+      <!-- 技能：名牌小的時候只放一個「技」字，滑鼠移上去看說明；用過變灰 -->
+      <span class="skill-badge" class:used={seat.skill.used} title="技能「{seat.skill.name}」：{seat.skill.desc}{seat.skill.used ? '（已用過）' : ''}">技</span>
+    {/if}
   </div>
   <div class="meta">
     <div class="line1">
@@ -105,12 +109,33 @@
   .line2 { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; border-top: 1px solid color-mix(in srgb, var(--art-line) 60%, transparent); padding-top: 4px; }
   .score { white-space: nowrap; font-size: 15px; font-variant-numeric: tabular-nums; color: var(--text); margin-right: auto; }
   .score.neg { color: var(--negative); }
-  .tag { font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: var(--small-radius); line-height: 1.5; }
+  .tag { flex: none; font-size: 11px; font-weight: 700; padding: 1px 6px; border-radius: var(--small-radius); line-height: 1.5; }
   .tag.me { background: var(--gold); color: #3d2200; }
   .tag.dealer { background: #b3171f; color: #fff; }
   .tag.ai { background: #5a3b8c; color: #fff; }
   .tag.bot { background: #2a6f97; color: #fff; }
-  .tag.skill { background: linear-gradient(#ffe7a4, #d5a34d); color: #3a2410; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tag.skill { flex: 0 1 auto; background: linear-gradient(#ffe7a4, #d5a34d); color: #3a2410; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* 技能名稱只在直式（左右兩家）名牌顯示；橫式與手機小名牌改用頭像上的「技」 */
+  .pcard:not(.v-side) .tag.skill { display: none; }
+  .skill-badge {
+    position: absolute;
+    left: 3px;
+    bottom: 3px;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    font: 700 12px/1 var(--heading-font);
+    color: #3a2410;
+    background: linear-gradient(#ffe7a4, #d5a34d);
+    border: 1px solid #8a5a1c;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px #000a;
+  }
+  .skill-badge.used { color: #bbb; background: #555; border-color: #333; }
+  .v-side .skill-badge { display: none; }
+  .v-chip .skill-badge { width: 15px; height: 15px; font-size: 9px; left: 1px; bottom: 1px; }
   /* 對家名牌很矮：標籤排成一行，放不下時技能名稱用省略號（滑鼠移上去看得到完整說明） */
   .v-top .line2 { flex-wrap: nowrap; overflow: hidden; }
   .tag.skill.used { background: #555; color: #bbb; text-decoration: line-through; }

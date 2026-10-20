@@ -44,11 +44,11 @@
   function startSolo() {
     save('mj_name', name);
     save('mj_solo', JSON.stringify(solo));
-    // 單機時吃碰胡不限時、一局結束後 30 秒自動下一局
+    // 單機時吃碰胡不限時；一局結束後等玩家自己按「下一局」（託管時也一樣）
     startLocal({
       name: playerName(),
       character,
-      settings: { ...solo, claim_timeout: solo.turn_timeout ? 15 : 0, next_hand_delay: 30 },
+      settings: { ...solo, claim_timeout: solo.turn_timeout ? 15 : 0, next_hand_delay: 0 },
     });
   }
   function load(key, fallback) {
@@ -142,6 +142,8 @@
           <span>選擇角色</span>
           <PortraitGrid bind:value={character} onpick={setCharacter} />
         </div>
+        <!-- 手機橫向時這一塊放在右欄 -->
+        <div class="room-options">
         {#if isSolo}
           <!-- 四個選項排成兩欄，加了技能模式也不會把按鈕擠出畫面 -->
           <div class="solo-grid">
@@ -207,6 +209,7 @@
             </FancyButton>
           </div>
         {/if}
+        </div>
       </section>
       <aside class="character-stage" aria-label="所選角色">
         <div class="large-portrait"><Avatar id={character} size={540} /></div>
@@ -312,6 +315,53 @@
   }
   @media (max-width: 640px) {
     .solo-grid { grid-template-columns: 1fr; }
+  }
+  /* ── 手機橫向（畫面很矮）：標題縮小；選角色頁改成左右兩欄，整頁不用捲動 ── */
+  @media (max-height: 620px) and (orientation: landscape) {
+    .title-page { padding: 8px 16px; }
+    .title-content { gap: 4px; padding: 8px 14px; }
+    .title-logo :global(.logo) { width: clamp(200px, 80vh, 420px); }
+    .title-menu { gap: 0; }
+    .menu-item { width: auto; min-width: 220px; gap: 10px; padding: 1px 14px; font-size: clamp(17px, 5.6vh, 26px); }
+    .menu-item .mark :global(.tile) { --w: 22px; margin-bottom: 2px; }
+
+    .room-page { padding: 4px 10px; }
+    .page-header { min-height: 34px; margin-bottom: 4px; }
+    .back-link { padding: 3px 12px; font-size: 13px; }
+    .header-brand :global(.logo) { max-height: 30px; width: auto; }
+    .room-panel { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 16px; align-content: start; padding: 6px 12px; }
+    .room-panel > :global(.ornate) { grid-column: 1 / -1; }
+    .room-panel :global(.ornate .sub) { display: none; }
+    .room-panel :global(.ornate .text) { font-size: 20px; }
+    .room-panel > form { grid-column: 1; grid-row: 2; }
+    .room-panel > .character-field { grid-column: 1; grid-row: 3; }
+    .room-options { grid-column: 2; grid-row: 2 / span 2; }
+    .field { margin: 2px 0; grid-template-columns: 76px minmax(0, 1fr); gap: 8px; }
+    .field > span { font-size: 14px; letter-spacing: .04em; }
+    .character-field { grid-template-columns: 1fr; --pic-h: clamp(36px, 15vh, 70px); }
+    .character-field > span { display: none; }
+    .field input { min-height: 32px !important; padding-block: 2px; font-size: 15px; }
+    .solo-grid { grid-template-columns: 1fr; }
+    .solo-grid .field { grid-template-columns: 70px minmax(0, 1fr); }
+    .seg button { min-height: 30px !important; font-size: 14px; padding-block: 2px; }
+    .hint { margin: 0; font-size: 11px; line-height: 1.4; }
+    .actions { margin-top: 6px; gap: 10px; }
+    .actions :global(.fancy) { min-height: 38px; font-size: 17px; padding: 2px 12px; letter-spacing: .12em; }
+  }
+  /* 更矮的手機橫向（高度 400 以下）再縮一點 */
+  @media (max-height: 400px) and (orientation: landscape) {
+    .title-logo :global(.logo) { width: clamp(180px, 70vh, 300px); }
+    .menu-item { font-size: clamp(15px, 5vh, 20px); }
+    .page-header { min-height: 28px; margin-bottom: 2px; }
+    .room-panel { padding: 4px 10px; }
+    .room-panel :global(.ornate .text) { font-size: 17px; }
+    .character-field { --pic-h: clamp(30px, 12vh, 48px); }
+    .field { margin: 1px 0; }
+    .field input { min-height: 28px !important; }
+    .seg button { min-height: 26px !important; font-size: 13px; }
+    .hint { display: none; }
+    .actions { margin-top: 4px; }
+    .actions :global(.fancy) { min-height: 32px; font-size: 15px; }
   }
   @media (max-width: 480px) {
     .title-page { padding: 14px; }

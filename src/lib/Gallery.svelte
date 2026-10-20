@@ -84,6 +84,33 @@
     .detail-panel { grid-column: 1 / -1; }
     .expressions { max-width: 480px; margin: auto; }
   }
+  /* 手機橫向（畫面很矮）：角色格、立繪、介紹排成三欄，整頁不用捲動 */
+  @media (max-height: 620px) and (orientation: landscape) {
+    .gallery-page { padding: 4px 10px; }
+    .page-header { min-height: 34px; margin-bottom: 4px; }
+    .page-header :global(.logo) { max-height: 30px; width: auto; }
+    .back-link { padding: 3px 12px; font-size: 13px; }
+    .gallery-layout { grid-template-columns: minmax(0, 30%) minmax(0, 1fr) minmax(0, 40%); align-items: end; gap: 8px; }
+    .gallery-portrait { grid-column: auto; grid-row: auto; max-width: none; justify-self: stretch; margin: 0; }
+    .gallery-portrait :global(.avatar) { width: min(100%, calc(100vh - 100px)) !important; }
+    .detail-panel { grid-column: auto; padding: 6px 12px; }
+    .detail-panel :global(.ornate) { margin: 0; }
+    .detail-panel :global(.ornate .text), .selection-panel :global(.ornate .text) { font-size: 18px; }
+    .selection-panel { padding: 6px 8px; }
+    .characters { margin-top: 4px; --pic-h: clamp(30px, 10vh, 56px); }
+    .characters :global(.pgrid) { --cols: 4 !important; gap: 4px; }
+    .characters :global(.name) { font-size: 11px; padding: 1px; letter-spacing: 0; }
+    .intro { font-size: 13px; line-height: 1.45; margin: 0; }
+    .skill-line { font-size: 11px; line-height: 1.4; }
+    h3 { margin: 4px 0; font-size: 14px; }
+    .expressions { gap: 4px; max-width: none; }
+    .expression-option span { font-size: 10px; padding: 1px; }
+    blockquote { min-height: 0; padding: 4px 8px; font-size: 14px; line-height: 1.5; }
+  }
+  @media (max-height: 400px) and (orientation: landscape) {
+    .page-header { min-height: 28px; margin-bottom: 2px; }
+    blockquote { font-size: 13px; }
+  }
   @media (max-width: 550px) {
     .page-header { flex-wrap: wrap; margin-bottom: 18px; }
     .gallery-layout { grid-template-columns: 1fr; }

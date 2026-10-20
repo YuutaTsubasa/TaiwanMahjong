@@ -27,7 +27,7 @@
   {#if s.phase === 'game_over'}
     <FinalRanking />
   {:else if r}
-    <div class="card box">
+    <div class="card box hand-result">
       {#if r.draw}
         <h2>🌊 流局</h2>
         <p class="muted">牌摸完了，莊家連莊。</p>
@@ -147,4 +147,26 @@
   .neg { color: #ff8fa3; }
   .pos { color: var(--accent); }
   .btns { display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 8px; }
+
+  /* 手機橫向（畫面很矮）：左邊贏家與手牌、右邊台數與分數，不用捲動 */
+  @media (max-height: 620px) and (orientation: landscape) {
+    .box { max-height: 96%; padding: 10px 14px; }
+    .hand-result { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); grid-auto-flow: dense; column-gap: 14px; align-items: start; width: min(900px, 96%); max-width: 96%; }
+    .hand-result > * { grid-column: 2; }
+    .hand-result > :is(.cutin, h2, .hand, .wt) { grid-column: 1; }
+    .hand-result > .cutin { margin: -10px 0 6px -14px; padding: 0 12px; }
+    .portrait :global(.avatar) { width: clamp(64px, 24vh, 110px) !important; height: clamp(64px, 24vh, 110px) !important; }
+    .say { padding-bottom: 10px; }
+    .say .line { font-size: 16px; }
+    h2 { font-size: 16px; margin: 0 0 6px; }
+    .hand :global(.tile) { --w: clamp(16px, 3vw, 28px); }
+    .wt { margin: 2px 0; }
+    .items { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin: 0 0 4px; }
+    .item { padding: 3px 8px; font-size: 13px; }
+    .pay { font-size: 12px; margin-bottom: 4px; }
+    .deltas { gap: 4px; margin: 4px 0; }
+    .d { padding: 4px; font-size: 12px; }
+    .d b { font-size: 16px; }
+    .btns { margin-top: 4px; }
+  }
 </style>

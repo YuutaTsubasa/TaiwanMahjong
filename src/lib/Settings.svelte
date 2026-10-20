@@ -60,8 +60,8 @@
   .settings-panel { padding: clamp(10px, 2.2vh, 40px) clamp(20px, 2.5vw, 40px); }
   h2 { display: flex; align-items: center; gap: 18px; color: var(--gold); font: 600 22px 'DFKai-SB', '標楷體', serif; letter-spacing: .18em; margin: 22px 0 16px; }
   h2::after { content: ''; flex: 1; height: 1px; background: var(--line); }
-  /* 六種畫風：寬螢幕排成一列，比較窄時三欄兩列，才不會把下面的設定擠出畫面 */
-  .style-options { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: clamp(8px, 1vw, 14px); }
+  /* 畫風：桌面版固定排成一列（畫風變多時每格自動變窄），才不會把下面的設定擠出畫面 */
+  .style-options { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: clamp(6px, 1vw, 14px); }
   .style-option { display: flex; flex-direction: column; padding: 0; position: relative; overflow: hidden; border-radius: 2px; border: 1px solid #a98745; background: #021d18; }
   .style-option img { width: 100%; aspect-ratio: 1.7; height: clamp(52px, 8vh, 160px); object-fit: cover; }
   .style-option img.pixel { image-rendering: pixelated; }
@@ -85,15 +85,48 @@
   .settings-host :global(img) { object-fit: contain; }
   .settings-host p { padding: 18px; line-height: 1.7; margin: 0 0 10px; text-align: center; }
   @media (max-width: 900px) {
-    .style-options { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .style-options { grid-auto-flow: row; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   }
   @media (max-width: 800px) {
     .settings-layout { grid-template-columns: 1fr; }
     .settings-host { display: none; }
   }
+  /* 手機橫向（畫面很矮）：畫風在左、聲音與完成在右，整頁不用捲動 */
+  @media (max-height: 620px) and (orientation: landscape) {
+    .settings-page { padding: 4px 10px; }
+    .page-header { min-height: 34px; margin-bottom: 4px; }
+    .page-header :global(.logo) { max-height: 30px; width: auto; }
+    .back-link { padding: 3px 12px; font-size: 13px; }
+    .settings-layout { grid-template-columns: 1fr; }
+    .settings-host { display: none; }
+    .settings-panel { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); grid-template-rows: auto auto auto auto 1fr; column-gap: 18px; align-items: start; padding: 6px 14px; }
+    .settings-panel > :global(.ornate) { grid-column: 1 / -1; margin: 0; }
+    .settings-panel > :global(.ornate .text) { font-size: 20px; }
+    .settings-panel > :global(.section-banner:nth-child(2)) { grid-column: 1; grid-row: 2; }
+    .style-options { grid-column: 1; grid-row: 3 / span 3; grid-auto-flow: row; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+    .settings-panel > :global(.section-banner:nth-child(4)) { grid-column: 2; grid-row: 2; }
+    .audio-settings { grid-column: 2; grid-row: 3; gap: 2px; }
+    .save-note { grid-column: 2; grid-row: 4; margin: 2px 0; font-size: 11px; }
+    .volume-row input { min-height: 24px; }
+    .settings-panel :global(.section-banner) { margin-block: 2px; }
+    .done { grid-column: 2; grid-row: 5; }
+    .style-option img { height: clamp(26px, 10vh, 56px); }
+    .style-option span { padding: 2px; font-size: 13px; }
+    .volume-row { grid-template-columns: 64px minmax(0, 1fr) 40px; gap: 8px; }
+    .mute-row { grid-template-columns: 64px 1fr; gap: 8px; }
+    .volume-row > span, .mute-row > span { font-size: 14px; }
+    .done :global(.fancy) { min-height: 32px; min-width: 0; font-size: 16px; padding: 2px 18px; }
+  }
+  @media (max-height: 400px) and (orientation: landscape) {
+    .page-header { min-height: 28px; margin-bottom: 2px; }
+    .settings-panel { padding: 4px 12px; }
+    .settings-panel > :global(.ornate .text) { font-size: 17px; }
+    .style-option img { height: clamp(22px, 8vh, 40px); }
+    .save-note { display: none; }
+  }
   @media (max-width: 500px) {
     .page-header { flex-wrap: wrap; }
-    .style-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .style-options { grid-auto-flow: row; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
     .style-option span { font-size: 15px; }
     .volume-row { grid-template-columns: 74px minmax(0, 1fr) 38px; gap: 10px; }
     .volume-row > span, .mute-row > span { font-size: 14px; }

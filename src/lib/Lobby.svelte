@@ -445,4 +445,41 @@
     .seats-area { grid-template-columns: 1fr; }
     .rule-form { grid-template-columns: 1fr; }
   }
+  /* ── 手機橫向（畫面很矮）：座位 2×2、右側邀請與聊天、下方規則與開始，整頁不用捲動 ── */
+  @media (max-height: 620px) and (orientation: landscape) {
+    .lobby2 { height: 100%; min-height: 0; overflow: hidden; padding: 6px 10px 8px; }
+    .lobby-head { min-height: 40px; margin: -6px -10px 6px; padding: 2px 10px; grid-template-columns: 1fr auto 1fr; }
+    .head-brand { display: flex; }
+    .head-brand :global(.logo) { max-height: 30px; width: auto; }
+    .lobby-head :global(.ornate .text) { font-size: 18px; }
+    .head-right :global(.fancy) { min-height: 32px; font-size: 14px; padding: 2px 12px; }
+    .lobby-body { grid-template-columns: minmax(0, 1fr) clamp(220px, 34vw, 340px); grid-template-rows: minmax(0, 1fr) auto; grid-template-areas: 'seats side' 'rules start'; gap: 6px 8px; }
+    .seats-area { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 6px; padding-top: 0; min-height: 0; }
+    .seat-count, .fill-note { display: none; }
+    .seat { position: static; width: auto; height: auto; min-height: 0; padding: 5px; gap: 8px; }
+    .seat-info { gap: 3px; }
+    .seat-name { font-size: 15px; }
+    .role { font-size: 11px; padding: 0 8px; letter-spacing: .1em; }
+    .status { font-size: 12px; gap: 4px; }
+    .seat-btn { min-height: 26px !important; padding: 1px 8px; font-size: 12px; }
+    .side { gap: 6px; grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); min-height: 0; min-width: 0; }
+    .invite, .chat { min-width: 0; }
+    .invite { max-height: none; min-height: 0; padding: 6px 10px; overflow: auto; }
+    .tabs button { letter-spacing: 0; }
+    .copy-btn { padding: 0 8px; font-size: 13px; letter-spacing: 0; }
+    .panel-title { font-size: 15px; margin: 0 0 4px; }
+    .tabs button { font-size: 13px; padding: 2px 0; min-height: 28px !important; }
+    .chat { min-height: 0; padding: 6px 10px; }
+    .chat-list { min-height: 30px; font-size: 12px; padding: 4px 8px; line-height: 1.5; }
+    .chat form { margin-top: 4px; }
+    .chat input { min-height: 30px !important; }
+    .rules-bar { padding: 4px 10px; gap: 8px; flex-wrap: nowrap; min-width: 0; }
+    .rules-title { display: none; }
+    .rule-chips { flex-wrap: nowrap; min-width: 0; overflow: hidden; }
+    .rule-chips li { font-size: 13px; padding: 0 8px; white-space: nowrap; }
+    .rule-chips li:first-child { border-left: 0; padding-left: 0; }
+    .adjust { font-size: 13px; padding: 2px 10px; min-height: 28px !important; }
+    .start-area :global(.start-btn) { min-height: 40px; font-size: 20px; }
+    .waiting { font-size: 15px; gap: 8px; }
+  }
 </style>

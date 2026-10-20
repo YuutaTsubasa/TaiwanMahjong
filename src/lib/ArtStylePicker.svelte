@@ -33,7 +33,8 @@
   button { padding: 5px 12px; font-size: 12px; border-radius: 7px; }
   button.selected { color: var(--gold); border-color: var(--gold); background: rgba(255, 209, 102, 0.15); }
   button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-  @media (max-width: 800px) {
+  /* 按鈕放不下一行（或畫面很矮）時改成下拉選單；之後畫風變多也預留了空間 */
+  @media (max-width: 1100px), (max-height: 620px) {
     .style-picker { flex-wrap: nowrap; padding: 5px 12px; }
     .label { white-space: nowrap; }
     button { display: none; }
