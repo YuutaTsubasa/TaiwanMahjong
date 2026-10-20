@@ -2,6 +2,7 @@
   import { onMount } from 'svelte';
   import { net, inTauri, connect, disconnect, startHost, stopHost, hostStatus, toast, setCharacter, savedCharacter, startLocal } from './net.svelte.js';
   import Tile from './Tile.svelte';
+  import { staticSite } from './site.js';
   import OrnateHeading from './ui/OrnateHeading.svelte';
   import PortraitGrid from './ui/PortraitGrid.svelte';
   import FancyButton from './ui/FancyButton.svelte';
@@ -12,7 +13,7 @@
     ['#join', '加入牌局'],
     ['#gallery', '角色圖鑑'],
     ['#settings', '遊戲設定'],
-  ];
+  ].filter(([href]) => !(staticSite && href === '#host')); // 網頁版沒辦法自己開房
   import Avatar from './Avatar.svelte';
   import Brand from './Brand.svelte';
   import { getSelectableCharacters, getCharacter } from './characters.js';
@@ -55,7 +56,7 @@
   function save(key, value) {
     try { localStorage.setItem(key, value); } catch {}
   }
-  const servedByServer = !inTauri && location.port !== '1420' && location.protocol.startsWith('http');
+  const servedByServer = !inTauri && !staticSite && location.port !== '1420' && location.protocol.startsWith('http');
   let name = $state(load('mj_name', ''));
   let port = $state(load('mj_port', '7777'));
   let address = $state(servedByServer ? location.host : load('mj_address', ''));
@@ -183,6 +184,8 @@
                 <input form="room-entry" bind:value={hostKey} type="password" placeholder="伺服器終端機顯示的金鑰" required autocomplete="off" />
               </label>
               <p class="hint">瀏覽器可管理已啟動的伺服器；在桌面版可直接建立房間。</p>
+            {:else if staticSite}
+              <p class="hint">網頁版只能連到 https 通道位址（例如 xxx.trycloudflare.com）；區網 IP 請改用桌面版。</p>
             {:else}
               <p class="hint">輸入房主提供的 IP 與通訊埠。</p>
             {/if}

@@ -53,7 +53,9 @@ export function toast(message, kind = 'error') {
 export function normalizeAddress(a) {
   a = (a || '').trim().replace(/^(https?|wss?):\/\//, '').replace(/\/.*$/, '');
   if (a && !a.includes(':') && !a.includes('.')) a = `localhost:${a}`;
-  if (a && !/:\d+$/.test(a) && !a.endsWith(']')) a = `${a}:7777`;
+  // https 頁面連的是 Cloudflare 之類的通道網址（wss 走 443），不要補通訊埠
+  const tunnel = typeof location !== 'undefined' && location.protocol === 'https:' && !inTauri && /\.[a-z][a-z0-9-]*$/i.test(a);
+  if (a && !tunnel && !/:\d+$/.test(a) && !a.endsWith(']')) a = `${a}:7777`;
   return a;
 }
 

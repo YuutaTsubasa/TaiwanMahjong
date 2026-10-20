@@ -1,0 +1,58 @@
+# 把單機版（WebAssembly 引擎）部署到 GitHub Pages：
+# https://yuutatsubasa.github.io/TaiwanMahjong/
+name: Deploy web version to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates/mahjong-wasm
+
+      - run: npm ci
+
+      # prebuild 會先跑 npm run build:wasm（wasm-pack）
+      - run: npm run build
+        env:
+          PAGES_BASE: /${{ github.event.repository.name }}/
+          VITE_STATIC_SITE: '1'
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

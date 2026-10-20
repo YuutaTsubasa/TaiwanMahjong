@@ -1,5 +1,6 @@
 <script>
   import { ART_STYLES, artStyle, setArtStyle } from './art-style.js';
+  import { asset } from './site.js';
   import { soundSettings, setVolume, toggleMute } from './audio/sound.svelte.js';
   import Avatar from './Avatar.svelte';
   import Brand from './Brand.svelte';
@@ -21,7 +22,7 @@
       <div class="style-options" role="group" aria-label="畫面風格">
         {#each ART_STYLES as style}
           <button type="button" class="style-option" class:selected={$artStyle === style.id} aria-pressed={$artStyle === style.id} onclick={() => setArtStyle(style.id)}>
-            <img src="/ui/{style.id}/parlor.png" alt="{style.name}麻將館預覽" class:pixel={style.id !== 'anime90'} />
+            <img src={asset(`/ui/${style.id}/parlor.png`)} alt="{style.name}麻將館預覽" class:pixel={style.id !== 'anime90'} />
             <span>{style.name}</span>
             {#if $artStyle === style.id}<b class="check" aria-hidden="true">✓</b>{/if}
           </button>

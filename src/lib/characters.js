@@ -11,9 +11,11 @@
 //   accessory ribbons | ribbon | moon | headband | star | glasses | flower
 //   accent    飾品顏色
 
+import { asset } from './site.js';
+
 // 90 年代賽璐璐動畫風格，五種表情均使用獨立透明 PNG。
 function characterImages(id, style = 'anime90') {
-  const directory = `/characters/${id}${style === 'anime90' ? '' : `/${style}`}`;
+  const directory = asset(`/characters/${id}${style === 'anime90' ? '' : `/${style}`}`);
   return Object.fromEntries(
     ['normal', 'happy', 'surprised', 'sad', 'win'].map((expression) => [
       expression, `${directory}/${expression}.png`,

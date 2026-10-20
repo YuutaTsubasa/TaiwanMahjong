@@ -6,6 +6,7 @@
   import { onMount } from 'svelte';
   import { net, act, clock, leave, hostCmd, disconnect, setAuto } from './net.svelte.js';
   import { artStyle } from './art-style.js';
+  import { asset } from './site.js';
   import Tile from './Tile.svelte';
   import Melds from './Melds.svelte';
   import Result from './Result.svelte';
@@ -107,7 +108,7 @@
   }
 </script>
 
-<div class="gamescreen" class:noside={!showSide} style:--table-img="url('/ui/{$artStyle}/table.png')">
+<div class="gamescreen" class:noside={!showSide} style:--table-img={`url('${asset(`/ui/${$artStyle}/table.png`)}')`}>
   <div class="tableboard">
     <!-- 左右兩家的名牌在桌子外側 -->
     <div class="seat-left"><PlayerCard seat={left} active={active(at(3))} thinking={thinking(at(3))} bubble="right" /></div>

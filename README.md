@@ -2,6 +2,8 @@
 
 一間線上的台灣十六張麻將館（Tauri v2 + Svelte）。「虛擬」有三層意思：坐在對面的可能是 AI、館裡有二次元的虛擬角色、而且整間館開在線上。
 
+🎮 **馬上玩**：<https://yuutatsubasa.github.io/TaiwanMahjong/> ——網頁版免安裝，單機跟電腦打（牌局引擎以 WebAssembly 在瀏覽器裡跑）。網頁版不能開房，只能用「加入牌局」連到 https 通道網址（例如 cloudflared）；要開房請用桌面 App。
+
 同一張牌桌可以坐：
 
 - 👤 **人類**：用桌面 App，或直接用瀏覽器打開房主的網址
