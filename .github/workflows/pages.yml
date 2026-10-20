@@ -1,5 +1,5 @@
 # 把單機版（WebAssembly 引擎）部署到 GitHub Pages：
-# https://yuutatsubasa.github.io/TaiwanMahjong/
+# https://yuuta-tsubasa.studio/TaiwanMahjong/
 name: Deploy web version to GitHub Pages
 
 on:
