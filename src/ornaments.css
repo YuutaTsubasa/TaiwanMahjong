@@ -1,0 +1,90 @@
+/* 概念圖的共用裝飾：面板四角的金色雲紋、金色／酒紅按鈕、角色格的外框。
+   放在全域是因為 themes.css 的 html[data-ui-style] button 選擇器權重較高。 */
+
+/* ── 面板四角雲紋：用遮罩上色，顏色跟著各畫風的 --art-line ── */
+html[data-ui-style] .art-panel { position: relative; }
+html[data-ui-style] .art-panel::after {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  pointer-events: none;
+  background: var(--art-line);
+  /* 左上角的雲紋；另外三個角是同一張圖翻轉（遮罩不能翻轉，所以各存一份） */
+  --corner: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath d='M2 30V12C2 6 6 2 12 2h18' fill='none' stroke='black' stroke-width='2.2'/%3E%3Cpath d='M7 30V15c0-5 3-8 8-8h15' fill='none' stroke='black' stroke-width='1.2'/%3E%3Cpath d='M12 12c3-3 7-1 6 2s-5 2-4 0' fill='none' stroke='black' stroke-width='1.6'/%3E%3Ccircle cx='4' cy='4' r='2.4'/%3E%3C/svg%3E");
+  -webkit-mask:
+    var(--corner) top left / 30px no-repeat,
+    var(--corner-tr) top right / 30px no-repeat,
+    var(--corner-bl) bottom left / 30px no-repeat,
+    var(--corner-br) bottom right / 30px no-repeat;
+  mask:
+    var(--corner) top left / 30px no-repeat,
+    var(--corner-tr) top right / 30px no-repeat,
+    var(--corner-bl) bottom left / 30px no-repeat,
+    var(--corner-br) bottom right / 30px no-repeat;
+  --corner-tr: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg transform='matrix(-1 0 0 1 32 0)'%3E%3Cpath d='M2 30V12C2 6 6 2 12 2h18' fill='none' stroke='black' stroke-width='2.2'/%3E%3Cpath d='M7 30V15c0-5 3-8 8-8h15' fill='none' stroke='black' stroke-width='1.2'/%3E%3Cpath d='M12 12c3-3 7-1 6 2s-5 2-4 0' fill='none' stroke='black' stroke-width='1.6'/%3E%3Ccircle cx='4' cy='4' r='2.4'/%3E%3C/g%3E%3C/svg%3E");
+  --corner-bl: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg transform='matrix(1 0 0 -1 0 32)'%3E%3Cpath d='M2 30V12C2 6 6 2 12 2h18' fill='none' stroke='black' stroke-width='2.2'/%3E%3Cpath d='M7 30V15c0-5 3-8 8-8h15' fill='none' stroke='black' stroke-width='1.2'/%3E%3Cpath d='M12 12c3-3 7-1 6 2s-5 2-4 0' fill='none' stroke='black' stroke-width='1.6'/%3E%3Ccircle cx='4' cy='4' r='2.4'/%3E%3C/g%3E%3C/svg%3E");
+  --corner-br: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg transform='matrix(-1 0 0 -1 32 32)'%3E%3Cpath d='M2 30V12C2 6 6 2 12 2h18' fill='none' stroke='black' stroke-width='2.2'/%3E%3Cpath d='M7 30V15c0-5 3-8 8-8h15' fill='none' stroke='black' stroke-width='1.2'/%3E%3Cpath d='M12 12c3-3 7-1 6 2s-5 2-4 0' fill='none' stroke='black' stroke-width='1.6'/%3E%3Ccircle cx='4' cy='4' r='2.4'/%3E%3C/g%3E%3C/svg%3E");
+}
+/* 像素畫風不用曲線雲紋 */
+html[data-ui-style='msdos'] .art-panel::after { display: none; }
+
+/* ── 按鈕 ── */
+html[data-ui-style] :is(a, button).fancy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+  min-height: 56px;
+  padding: 8px 28px;
+  font-family: var(--heading-font);
+  font-size: clamp(20px, 1.9vw, 30px);
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-decoration: none;
+  border-radius: var(--small-radius);
+  cursor: pointer;
+  transition: filter 0.15s, transform 0.1s;
+}
+html[data-ui-style] :is(a, button).fancy.gold {
+  color: #3a2410;
+  background: linear-gradient(180deg, #fff3c4 0%, #f0cf7a 45%, #c9953e 100%);
+  border: 1px solid #fff0bf;
+  box-shadow: inset 0 0 0 3px #b98a3b, inset 0 0 0 5px #fff1c4, 0 4px 0 #6d4a1c, 0 8px 18px #000a;
+}
+html[data-ui-style] :is(a, button).fancy.red {
+  color: #ffe9c7;
+  background: linear-gradient(180deg, #7d2027, #4a0f14);
+  border: 1px solid var(--art-line);
+  box-shadow: inset 0 0 0 3px #2a080b, inset 0 0 0 4px color-mix(in srgb, var(--art-line) 70%, transparent), 0 6px 14px #0009;
+}
+html[data-ui-style] :is(a, button).fancy:hover:not(:disabled) { filter: brightness(1.1); }
+html[data-ui-style] :is(a, button).fancy.gold:hover:not(:disabled) { background: linear-gradient(180deg, #fff3c4 0%, #f0cf7a 45%, #c9953e 100%); }
+html[data-ui-style] :is(a, button).fancy.red:hover:not(:disabled) { background: linear-gradient(180deg, #7d2027, #4a0f14); }
+html[data-ui-style] :is(a, button).fancy:active:not(:disabled) { transform: translateY(2px); }
+html[data-ui-style] :is(a, button).fancy:disabled { filter: grayscale(0.6) brightness(0.7); cursor: default; }
+html[data-ui-style] .fancy .tile-ico { display: inline-flex; transform: rotate(-8deg); }
+html[data-ui-style] .fancy .tile-ico .tile { --w: 1.05em; margin-bottom: 0.1em; }
+html[data-ui-style] .fancy .chev { font-size: 1.1em; letter-spacing: 0; }
+
+/* PC-98／MS-DOS：按鈕改成方正的像素樣式 */
+html[data-ui-style='pc98'] :is(a, button).fancy.gold { color: #12283a; background: #9ce0cc; box-shadow: inset 0 0 0 2px #e6fff7, 3px 3px 0 #080b1b; border-color: #e6fff7; }
+html[data-ui-style='pc98'] :is(a, button).fancy.gold:hover:not(:disabled) { background: #9ce0cc; }
+html[data-ui-style='pc98'] :is(a, button).fancy.red { background: #6b3e65; box-shadow: inset 0 0 0 2px #b4a3c9, 3px 3px 0 #080b1b; }
+html[data-ui-style='pc98'] :is(a, button).fancy.red:hover:not(:disabled) { background: #6b3e65; }
+html[data-ui-style='msdos'] :is(a, button).fancy.gold { color: #000044; background: #55ffff; box-shadow: inset 2px 2px 0 #fff, inset -2px -2px 0 #008888, 4px 4px 0 #000; border-color: #fff; }
+html[data-ui-style='msdos'] :is(a, button).fancy.gold:hover:not(:disabled) { background: #55ffff; }
+html[data-ui-style='msdos'] :is(a, button).fancy.red { color: #fff; background: #aa0000; box-shadow: inset 2px 2px 0 #ff5555, inset -2px -2px 0 #550000, 4px 4px 0 #000; }
+html[data-ui-style='msdos'] :is(a, button).fancy.red:hover:not(:disabled) { background: #aa0000; }
+
+/* ── 角色格的外框 ── */
+html[data-ui-style] .pgrid button.cell,
+html[data-ui-style] .pgrid button.cell:hover:not(:disabled) {
+  background: #0007;
+  border: 1px solid var(--art-line);
+  box-shadow: inset 0 0 0 2px #0008, 0 4px 10px #0007;
+}
+html[data-ui-style] .pgrid button.cell.sel,
+html[data-ui-style] .pgrid button.cell.sel:hover:not(:disabled) {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--gold), 0 0 16px color-mix(in srgb, var(--gold) 55%, transparent);
+}

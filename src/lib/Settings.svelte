@@ -3,6 +3,10 @@
   import { soundSettings, setVolume, toggleMute } from './audio/sound.svelte.js';
   import Avatar from './Avatar.svelte';
   import Brand from './Brand.svelte';
+  import OrnateHeading from './ui/OrnateHeading.svelte';
+  import SectionBanner from './ui/SectionBanner.svelte';
+  import ToggleSwitch from './ui/ToggleSwitch.svelte';
+  import FancyButton from './ui/FancyButton.svelte';
 </script>
 
 <main class="concept-page settings-page">
@@ -12,8 +16,8 @@
   </header>
   <div class="settings-layout">
     <section class="art-panel settings-panel" aria-labelledby="settings-heading">
-      <h1 class="concept-heading" id="settings-heading">遊戲設定</h1>
-      <h2>畫面風格</h2>
+      <OrnateHeading text="遊戲設定" id="settings-heading" />
+      <SectionBanner text="畫面風格" />
       <div class="style-options" role="group" aria-label="畫面風格">
         {#each ART_STYLES as style}
           <button type="button" class="style-option" class:selected={$artStyle === style.id} aria-pressed={$artStyle === style.id} onclick={() => setArtStyle(style.id)}>
@@ -23,7 +27,7 @@
           </button>
         {/each}
       </div>
-      <h2>聲音設定</h2>
+      <SectionBanner text="聲音設定" />
       <div class="audio-settings">
         <label class="volume-row">
           <span>音樂音量</span>
@@ -35,10 +39,10 @@
           <input type="range" min="0" max="1" step="0.05" value={soundSettings.sfx} oninput={(event) => setVolume('sfx', Number(event.currentTarget.value))} />
           <output>{Math.round(soundSettings.sfx * 100)}%</output>
         </label>
-        <div class="mute-row"><span>靜音</span><button type="button" class="mute-toggle" aria-pressed={soundSettings.muted} onclick={toggleMute}>{soundSettings.muted ? '已靜音' : '聲音開啟'}</button></div>
+        <div class="mute-row"><span>靜音</span><ToggleSwitch label="靜音" checked={soundSettings.muted} onchange={toggleMute} /></div>
       </div>
-      <p class="save-note">設定會自動儲存。</p>
-      <a href="#title" class="done-link">完成</a>
+      <p class="save-note">— 設定會自動儲存。—</p>
+      <div class="done"><FancyButton variant="red" href="#title">完　成</FancyButton></div>
     </section>
     <aside class="settings-host" aria-label="麻將館老闆娘蘭姐">
       <Avatar id="lanjie" size={540} />
@@ -71,6 +75,8 @@
   .mute-toggle { width: fit-content; min-width: 110px; }
   .mute-toggle[aria-pressed='true'] { background: #68412e; border-color: var(--gold); }
   .save-note { text-align: center; color: var(--muted); font-size: 13px; margin: 20px 0 16px; }
+  .done { display: flex; justify-content: center; }
+  .done :global(.fancy) { min-width: min(320px, 100%); }
   .done-link { display: block; width: min(280px, 100%); margin: auto; border: 1px solid #c6a256; outline: 1px solid #785d2e; outline-offset: 3px; padding: 12px 30px; background: #5f3529; color: #ffe6b2; text-decoration: none; text-align: center; font: 600 25px 'DFKai-SB', '標楷體', serif; letter-spacing: .3em; }
   .settings-host { min-width: 0; }
   .settings-host :global(.avatar) { width: 100% !important; height: auto !important; aspect-ratio: 1; filter: drop-shadow(0 4px 12px #000a); }

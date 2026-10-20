@@ -1,16 +1,24 @@
 <script>
   import { onMount } from 'svelte';
   import { net, inTauri, connect, disconnect, startHost, stopHost, hostStatus, toast, setCharacter, savedCharacter } from './net.svelte.js';
-  import CharacterPicker from './CharacterPicker.svelte';
+  import Tile from './Tile.svelte';
+  import OrnateHeading from './ui/OrnateHeading.svelte';
+  import PortraitGrid from './ui/PortraitGrid.svelte';
+  import FancyButton from './ui/FancyButton.svelte';
+
+  const MENU = [
+    ['#host', '開設牌局'],
+    ['#join', '加入牌局'],
+    ['#gallery', '角色圖鑑'],
+    ['#settings', '遊戲設定'],
+  ];
   import Avatar from './Avatar.svelte';
   import Brand from './Brand.svelte';
   import { getSelectableCharacters, getCharacter } from './characters.js';
   import { get } from 'svelte/store';
   import { ayiUnlocked } from './unlocks.js';
-  import { ART_STYLES, artStyle } from './art-style.js';
 
   let { page = 'title' } = $props();
-  const theme = $derived(ART_STYLES.find((style) => style.id === $artStyle));
   const isHostPage = $derived(page === 'host');
   function load(key, fallback) {
     try { return localStorage.getItem(key) ?? fallback; } catch { return fallback; }
@@ -69,38 +77,36 @@
 {#if page === 'title'}
   <main class="concept-page title-page">
     <section class="title-content" aria-label="虛擬台麻館主選單">
-      <div class="edition">{theme.edition}</div>
-      <h1><Brand /></h1>
-      <p class="mood">{theme.mood}</p>
+      <h1 class="title-logo"><Brand /></h1>
       <nav class="title-menu" aria-label="主選單">
-        <a class="menu-link" href="#host"><span aria-hidden="true">◆</span>開設牌局<span aria-hidden="true">›</span></a>
-        <a class="menu-link" href="#join"><span aria-hidden="true">◆</span>加入牌局<span aria-hidden="true">›</span></a>
-        <a class="menu-link" href="#gallery"><span aria-hidden="true">◆</span>角色圖鑑<span aria-hidden="true">›</span></a>
-        <a class="menu-link" href="#settings"><span aria-hidden="true">◆</span>遊戲設定<span aria-hidden="true">›</span></a>
+        {#each MENU as [href, label]}
+          <a class="menu-item" {href}>
+            <span class="mark" aria-hidden="true"><Tile code="C" size="sm" /></span>
+            <span class="label">{label}</span>
+          </a>
+        {/each}
       </nav>
-      <p class="welcome">台灣十六張麻將 · 今晚，一起入席。</p>
     </section>
   </main>
 {:else}
   <main class="concept-page room-page">
     <header class="page-header">
       <a class="back-link" href="#title" onclick={back}>← 返回標題</a>
-      <Brand compact />
+      <div class="header-brand"><Brand compact /></div>
     </header>
     <div class="room-layout">
       <section class="art-panel room-panel">
-        <h1 class="concept-heading">{isHostPage ? '開設牌局' : '加入牌局'}</h1>
-        <p class="panel-subtitle">{isHostPage ? '選好角色，準備入席。' : '找張好位子，今晚一起打牌。'}</p>
+        <OrnateHeading text={isHostPage ? '開設牌局' : '加入牌局'} sub={isHostPage ? '選好角色，準備入席。' : '找張好位子，今晚一起打牌。'} />
         <form id="room-entry" onsubmit={submit}>
           <label class="field name-field">
             <span>玩家名稱</span>
             <input bind:value={name} placeholder="玩家" maxlength="16" autocomplete="nickname" />
           </label>
         </form>
-        <fieldset class="character-field">
-          <legend>選擇角色</legend>
-          <CharacterPicker bind:value={character} onpick={setCharacter} size={68} />
-        </fieldset>
+        <div class="field character-field">
+          <span>選擇角色</span>
+          <PortraitGrid bind:value={character} onpick={setCharacter} />
+        </div>
         {#if connecting}
           <div class="connection-status" role="status">
             <span>連線到 {net.address} 中…</span>
@@ -115,11 +121,11 @@
                 <span>通訊埠</span>
                 <input form="room-entry" class="port-input" bind:value={port} type="number" min="1" max="65535" required />
               </label>
-              <p class="hint">建立後可在大廳邀請朋友與電腦，並調整規則。</p>
+              <p class="hint">建立後可在大廳邀請朋友與 AI。</p>
             {/if}
           {:else}
             <label class="field">
-              <span>{isHostPage ? '伺服器位址' : '房間位址'}</span>
+              <span>{isHostPage ? '伺服器位址' : '房間地址'}</span>
               <input form="room-entry" bind:value={address} placeholder="192.168.1.5:7777" required spellcheck="false" autocapitalize="none" />
             </label>
             {#if isHostPage}
@@ -129,20 +135,20 @@
               </label>
               <p class="hint">瀏覽器可管理已啟動的伺服器；在桌面版可直接建立房間。</p>
             {:else}
-              <p class="hint">輸入房主提供的 IP 與通訊埠，或完整房間網址。</p>
+              <p class="hint">輸入房主提供的 IP 與通訊埠。</p>
             {/if}
           {/if}
           <div class="actions">
-            <a href="#title" class="cancel-link">取消</a>
             {#if isHostPage && inTauri && net.hostInfo}
-              <button type="button" class="danger" disabled={busy} onclick={closeRoom}>關閉房間</button>
-            {:else if !isHostPage}
-              <button type="button" onclick={() => join(true)}>觀戰</button>
+              <FancyButton variant="red" disabled={busy} onclick={closeRoom}>關閉房間</FancyButton>
+            {:else if isHostPage}
+              <FancyButton variant="red" href="#title">取消</FancyButton>
+            {:else}
+              <FancyButton variant="red" onclick={() => join(true)}>觀戰</FancyButton>
             {/if}
-            <button form="room-entry" type="submit" class="primary" disabled={busy}>
-              {busy ? '處理中…' : isHostPage ? (inTauri ? (net.hostInfo ? '回到我的房間' : '開設牌局') : '以房主身分連線') : '加入牌局'}
-              <span aria-hidden="true"> ›</span>
-            </button>
+            <FancyButton variant="gold" tile="C" type="submit" form="room-entry" disabled={busy}>
+              {busy ? '處理中…' : isHostPage ? (inTauri ? (net.hostInfo ? '回到房間' : '開設牌局') : '以房主連線') : '加入牌局'}
+            </FancyButton>
           </div>
         {/if}
       </section>
@@ -150,7 +156,7 @@
         <div class="large-portrait"><Avatar id={character} size={540} /></div>
         <div class="art-panel portrait-caption">
           <strong>{selected.name}</strong>
-          <p>{selected.intro}，等你入席。</p>
+          <p>{isHostPage ? '牌桌準備好了，一起來玩吧！' : '今晚也來摸幾圈吧。'}</p>
         </div>
       </aside>
     </div>
@@ -158,63 +164,88 @@
 {/if}
 
 <style>
-  .title-page { background-image: linear-gradient(90deg, rgba(0, 21, 17, .38), transparent 65%), var(--scene-title); display: flex; align-items: center; padding: clamp(24px, 4vw, 68px); }
-  .title-content { width: 43%; min-width: 340px; text-align: center; padding-bottom: 12px; }
+  /* ── 標題 ── */
+  .title-page { background-image: linear-gradient(90deg, rgba(0, 21, 17, .55), transparent 55%), var(--scene-title); display: flex; align-items: center; padding: clamp(24px, 4vw, 68px); }
+  .title-content { width: min(40%, 620px); min-width: 340px; display: flex; flex-direction: column; align-items: flex-start; gap: clamp(18px, 3.5vh, 44px); }
   h1 { margin: 0; }
-  .edition { color: var(--gold); font-size: 10px; letter-spacing: .3em; margin-bottom: 14px; }
-  .mood { color: #ffe9bc; font-size: clamp(14px, 1.4vw, 20px); letter-spacing: .12em; text-shadow: 0 2px 6px #000; margin: 16px 0 28px; }
-  .title-menu { display: flex; flex-direction: column; gap: 12px; max-width: 360px; margin: auto; }
-  .menu-link { display: flex; align-items: center; justify-content: space-between; padding: 13px 28px; color: #ffe7ac; background: linear-gradient(100deg, rgba(2, 31, 24, .96), rgba(4, 45, 31, .9)); border: 1px solid #c39b50; outline: 1px solid #7b5e28; outline-offset: 3px; font: 600 clamp(21px, 2vw, 30px)/1.3 'DFKai-SB', '標楷體', serif; letter-spacing: .2em; text-decoration: none; box-shadow: 0 5px 14px #0008, inset 0 0 16px #a9842b1a; transition: background .15s, transform .15s; }
-  .menu-link:hover, .menu-link:focus-visible { background: #745229; color: #fff4d4; transform: translateX(4px); }
-  .menu-link span { font-size: 15px; letter-spacing: 0; }
-  .welcome { color: #e1cda6; font-size: 12px; letter-spacing: .06em; margin-top: 28px; text-shadow: 0 1px 4px #000; }
-  .room-page { padding: clamp(16px, 2vw, 32px); background-image: linear-gradient(90deg, #021c1999, transparent), var(--scene-parlor); }
-  .page-header { display: flex; align-items: center; gap: 28px; min-height: 62px; margin-bottom: 16px; }
-  .back-link, .cancel-link { color: var(--gold); text-decoration: none; border: 1px solid var(--line); padding: 10px 18px; background: #071c18d9; white-space: nowrap; }
-  .room-layout { display: grid; grid-template-columns: minmax(0, 56%) minmax(0, 1fr); gap: clamp(12px, 2vw, 30px); align-items: stretch; }
-  .room-panel { padding: clamp(18px, 2.2vw, 34px); }
-  .panel-subtitle { text-align: center; margin: 6px 0 20px; color: var(--muted); letter-spacing: .1em; }
-  .field { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 12px; align-items: center; margin: 14px 0; }
-  .field > span, legend { color: var(--gold); font-weight: 600; letter-spacing: .08em; }
-  .field input { width: 100%; min-width: 0; }
-  .field .port-input { max-width: 180px; }
-  .character-field { border: 0; padding: 0; margin: 18px 0; min-width: 0; }
-  legend { margin-bottom: 12px; padding: 0; }
-  .character-field :global(.picker) { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-  .character-field :global(.opt) { border-radius: 2px; padding: 8px 6px; gap: 4px; }
-  .character-field :global(.avatar.crop) { width: 100% !important; max-width: 104px; height: auto !important; aspect-ratio: 1.45; border-radius: 1px; box-shadow: none; }
-  .character-field :global(.opt.sel) { box-shadow: 0 0 10px #eaca5970, inset 0 0 0 1px var(--gold); }
-  .character-field :global(.opt span) { font-size: 15px; letter-spacing: .15em; }
-  .hint { color: var(--muted); font-size: 12px; line-height: 1.6; margin: 10px 0 18px; }
-  .actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 18px; }
-  .actions .primary { flex: 1; font-size: 19px; white-space: nowrap; }
+  .title-logo :global(.logo) { width: clamp(340px, 34vw, 640px); }
+  .title-menu { display: flex; flex-direction: column; gap: clamp(4px, 1vh, 12px); padding-left: clamp(0px, 1vw, 18px); }
+  .menu-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    width: clamp(280px, 22vw, 380px);
+    padding: 8px 18px;
+    color: #ffe9bc;
+    text-decoration: none;
+    font: 600 clamp(26px, 2.5vw, 40px)/1.35 var(--heading-font);
+    letter-spacing: .3em;
+    text-shadow: 0 2px 6px #000, 0 0 2px #000;
+    border: 1px solid transparent;
+  }
+  .menu-item .mark { display: inline-flex; visibility: hidden; transform: rotate(-6deg); }
+  .menu-item .mark :global(.tile) { --w: 34px; margin-bottom: 4px; }
+  /* 選中的那一項（滑鼠、鍵盤，或預設第一項）有框和「中」 */
+  .menu-item:hover, .menu-item:focus-visible,
+  .title-menu:not(:hover):not(:focus-within) .menu-item:first-child {
+    background: linear-gradient(90deg, #031f19f2, #042d1fd9);
+    border-color: #d2ad5f;
+    outline: 1px solid #7b5e28;
+    outline-offset: 4px;
+    box-shadow: 0 5px 14px #0008;
+  }
+  .menu-item:hover .mark, .menu-item:focus-visible .mark,
+  .title-menu:not(:hover):not(:focus-within) .menu-item:first-child .mark { visibility: visible; }
+
+  /* ── 開設／加入牌局 ── */
+  .room-page { padding: clamp(14px, 1.8vw, 30px); background-image: linear-gradient(90deg, #021c19aa, transparent 60%), var(--scene-parlor); }
+  .page-header { position: relative; display: flex; align-items: center; min-height: 64px; margin-bottom: 10px; }
+  .header-brand { position: absolute; left: 0; width: 52%; display: flex; justify-content: center; pointer-events: none; }
+  .header-brand :global(.brand) { pointer-events: auto; }
+  .back-link { position: relative; z-index: 1; color: var(--gold); text-decoration: none; border: 1px solid var(--line); padding: 9px 18px; background: #071c18d9; white-space: nowrap; font-family: var(--heading-font); letter-spacing: .15em; }
+  .room-layout { display: grid; grid-template-columns: minmax(0, 52%) minmax(0, 1fr); gap: clamp(12px, 2vw, 30px); align-items: stretch; }
+  .room-panel { padding: clamp(16px, 2vw, 30px) clamp(18px, 2.4vw, 40px); }
+  .field { display: grid; grid-template-columns: clamp(96px, 8vw, 132px) minmax(0, 1fr); gap: 14px; align-items: center; margin: 14px 0; }
+  .field > span { color: var(--text); font: 600 clamp(17px, 1.45vw, 23px) var(--heading-font); letter-spacing: .2em; }
+  .field input { width: 100%; min-width: 0; font-size: clamp(16px, 1.3vw, 20px); }
+  .field .port-input { max-width: 220px; }
+  .character-field { align-items: start; }
+  .character-field > span { padding-top: 10px; }
+  .hint { color: var(--muted); font-size: 13px; line-height: 1.6; margin: -4px 0 12px calc(clamp(96px, 8vw, 132px) + 14px); }
+  .actions { display: grid; grid-template-columns: minmax(0, 0.55fr) minmax(0, 1fr); gap: clamp(12px, 2vw, 30px); margin-top: 18px; }
   .connection-status { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 18px 0; overflow-wrap: anywhere; }
   .character-stage { display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; overflow: hidden; }
-  .large-portrait { width: 100%; margin-bottom: -20px; filter: drop-shadow(0 6px 14px #0009); }
+  .large-portrait { width: 100%; margin-bottom: -40px; filter: drop-shadow(0 6px 14px #0009); }
   .large-portrait :global(.avatar) { width: 100% !important; height: auto !important; aspect-ratio: 1; }
   .large-portrait :global(img) { object-fit: contain; }
-  .portrait-caption { position: relative; padding: 16px 20px; margin: 0 16px 12px; }
-  .portrait-caption strong { color: var(--gold); font: 600 25px 'DFKai-SB', '標楷體', serif; letter-spacing: .15em; }
-  .portrait-caption p { margin: 8px 0 0; line-height: 1.5; }
-  @media (min-width: 1000px) and (max-height: 800px) {
-    .room-panel { padding: 16px 24px; }
-    .panel-subtitle { margin-bottom: 12px; }
-    .character-field { margin: 12px 0; }
-    .character-field :global(.avatar.crop) { max-width: 90px; }
-    .field { margin: 10px 0; }
+  .portrait-caption { position: relative; padding: 18px 24px 16px; margin: 0 6% 12px 18%; }
+  .portrait-caption strong {
+    position: absolute;
+    top: -20px;
+    left: 18px;
+    padding: 2px 18px;
+    color: var(--gold);
+    font: 600 24px var(--heading-font);
+    letter-spacing: .2em;
+    background: var(--art-panel);
+    border: 1px solid var(--art-line);
   }
-  @media (max-width: 800px) {
-    .title-page { background-position: 60% center; }
-    .title-content { width: min(440px, 100%); min-width: 0; background: #021b1894; padding: 25px 14px; }
+  .portrait-caption p { margin: 8px 0 0; font: 19px/1.6 var(--heading-font); letter-spacing: .08em; }
+  @media (min-width: 1000px) and (max-height: 820px) {
+    .room-panel { padding: 12px 24px; }
+    .field { margin: 9px 0; }
+  }
+  @media (max-width: 900px) {
+    .title-content { width: min(460px, 100%); min-width: 0; background: #021b1894; padding: 22px 14px; align-items: center; }
     .room-layout { grid-template-columns: 1fr; }
     .character-stage { display: none; }
-    .page-header { justify-content: space-between; gap: 10px; }
-    .back-link { padding: 8px; font-size: 13px; }
+    .header-brand { position: static; width: auto; margin-left: auto; }
   }
-  @media (max-width: 420px) {
+  @media (max-width: 480px) {
     .title-page { padding: 14px; }
     .field { grid-template-columns: 1fr; gap: 6px; }
-    .room-panel { padding: 16px; }
-    .page-header { flex-wrap: wrap; }
+    .hint { margin-left: 0; }
+    .actions { grid-template-columns: 1fr; }
   }
 </style>
