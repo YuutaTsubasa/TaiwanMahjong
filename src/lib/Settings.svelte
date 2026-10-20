@@ -1,5 +1,5 @@
 <script>
-  import { ART_STYLES, artStyle, setArtStyle } from './art-style.js';
+  import { ART_STYLES, artStyle, setArtStyle, isPixelStyle } from './art-style.js';
   import { asset } from './site.js';
   import { soundSettings, setVolume, toggleMute } from './audio/sound.svelte.js';
   import Avatar from './Avatar.svelte';
@@ -22,7 +22,7 @@
       <div class="style-options" role="group" aria-label="畫面風格">
         {#each ART_STYLES as style}
           <button type="button" class="style-option" class:selected={$artStyle === style.id} aria-pressed={$artStyle === style.id} onclick={() => setArtStyle(style.id)}>
-            <img src={asset(`/ui/${style.id}/parlor.png`)} alt="{style.name}麻將館預覽" class:pixel={style.id !== 'anime90'} />
+            <img src={asset(`/ui/${style.id}/parlor.png`)} alt="{style.name}麻將館預覽" class:pixel={isPixelStyle(style.id)} />
             <span>{style.name}</span>
             {#if $artStyle === style.id}<b class="check" aria-hidden="true">✓</b>{/if}
           </button>
@@ -62,7 +62,7 @@
   h2::after { content: ''; flex: 1; height: 1px; background: var(--line); }
   .style-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
   .style-option { display: flex; flex-direction: column; padding: 0; position: relative; overflow: hidden; border-radius: 2px; border: 1px solid #a98745; background: #021d18; }
-  .style-option img { width: 100%; aspect-ratio: 1.7; height: clamp(52px, 10.5vh, 210px); object-fit: cover; }
+  .style-option img { width: 100%; aspect-ratio: 1.7; height: clamp(52px, 8vh, 160px); object-fit: cover; }
   .style-option img.pixel { image-rendering: pixelated; }
   .style-option span { padding: 9px 2px; font: 600 19px 'DFKai-SB', '標楷體', serif; color: var(--gold); }
   .style-option.selected { box-shadow: 0 0 0 2px #e4be60, 0 0 14px #e8c45e77; }
@@ -89,7 +89,7 @@
   }
   @media (max-width: 500px) {
     .page-header { flex-wrap: wrap; }
-    .style-options { gap: 8px; }
+    .style-options { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
     .style-option span { font-size: 15px; }
     .volume-row { grid-template-columns: 74px minmax(0, 1fr) 38px; gap: 10px; }
     .volume-row > span, .mute-row > span { font-size: 14px; }

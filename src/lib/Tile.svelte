@@ -97,8 +97,8 @@
       {#each DOTS[t.n] as [x, y], i}
         {@const r = dotR(t.n)}
         <circle cx={x} cy={y} r={r} fill={dotColor(t.n, i)} />
-        <circle cx={x} cy={y} r={r * 0.62} fill="none" stroke="#fffaf0" stroke-width={r * 0.18} />
-        <circle cx={x} cy={y} r={r * 0.22} fill="#fffaf0" />
+        <circle cx={x} cy={y} r={r * 0.62} fill="none" stroke="var(--tile-paper, #fffaf0)" stroke-width={r * 0.18} />
+        <circle cx={x} cy={y} r={r * 0.22} fill="var(--tile-paper, #fffaf0)" />
         {#if t.n === 1}
           <circle cx={x} cy={y} r={r * 0.9} fill="none" stroke={GREEN} stroke-width="2" />
         {/if}
@@ -110,10 +110,10 @@
         <g transform="translate(30 40)">
           <ellipse cx="0" cy="8" rx="13" ry="18" fill={GREEN} />
           <circle cx="0" cy="-16" r="9" fill={GREEN} />
-          <circle cx="3" cy="-18" r="2.2" fill="#fffaf0" />
+          <circle cx="3" cy="-18" r="2.2" fill="var(--tile-paper, #fffaf0)" />
           <path d="M8 -16 L17 -13 L8 -11 Z" fill={RED} />
           <path d="M-10 10 Q-22 26 -6 30 M10 10 Q22 26 6 30" stroke={RED} stroke-width="3" fill="none" />
-          <path d="M-5 0 Q0 12 5 0" stroke="#fffaf0" stroke-width="2" fill="none" />
+          <path d="M-5 0 Q0 12 5 0" stroke="var(--tile-paper, #fffaf0)" stroke-width="2" fill="none" />
         </g>
       {:else}
         {#each STICKS[t.n] as [x, y, angle = 0], i}
@@ -121,8 +121,8 @@
           {@const w = t.n === 8 ? 7 : 8}
           <g transform="rotate({angle} {x} {y})">
             <rect x={x - w / 2} y={y - h / 2} width={w} height={h} rx={w / 2} fill={stickColor(t.n, i)} />
-            <line x1={x - w / 2} x2={x + w / 2} y1={y} y2={y} stroke="#fffaf0" stroke-width="1.6" />
-            <line x1={x} x2={x} y1={y - h / 2 + 3} y2={y + h / 2 - 3} stroke="#fffaf0" stroke-opacity=".45" stroke-width="1.2" />
+            <line x1={x - w / 2} x2={x + w / 2} y1={y} y2={y} stroke="var(--tile-paper, #fffaf0)" stroke-width="1.6" />
+            <line x1={x} x2={x} y1={y - h / 2 + 3} y2={y + h / 2 - 3} stroke="var(--tile-paper, #fffaf0)" stroke-opacity=".45" stroke-width="1.2" />
           </g>
         {/each}
       {/if}
@@ -194,7 +194,7 @@
     height: 72%;
     border: calc(var(--w) * 0.07) solid #1d4e89;
     border-radius: calc(var(--w) * 0.08);
-    box-shadow: inset 0 0 0 calc(var(--w) * 0.05) #fffaf0, inset 0 0 0 calc(var(--w) * 0.1) #1d4e89;
+    box-shadow: inset 0 0 0 calc(var(--w) * 0.05) var(--tile-paper, #fffaf0), inset 0 0 0 calc(var(--w) * 0.1) #1d4e89;
   }
   .flower { display: flex; flex-direction: column; align-items: center; line-height: 1; color: #7b2cbf; }
   .flower.season { color: #d35400; }

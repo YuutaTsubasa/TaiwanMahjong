@@ -1,0 +1,177 @@
+/* Additional art directions share the same controls and table geometry. */
+:root[data-ui-style='taiwan-print'] {
+  --scene-title: url('/ui/taiwan-print/title-scene.png');
+  --scene-parlor: url('/ui/taiwan-print/parlor.png');
+  --felt: #305c45; --felt-dark: #153c32; --wood: #82492f;
+  --panel: #173f34; --panel-solid: #173f34; --raised: #315a46; --recessed: #102f28;
+  --text: #f4e1b3; --muted: #d5c395; --gold: #f0c878; --line: #b49053;
+  --red: #ffb394; --accent: #d6e5af; --negative: #ffb394;
+  --art-panel: #173f34; --art-line: #b49053;
+  --app-background: #153c32;
+  --surface-radius: 2px; --small-radius: 2px; --avatar-radius: 2px;
+  --panel-shadow: 4px 4px 0 #102f28;
+  --button-bg: #315a46; --button-text: #f4e1b3; --button-border: 1px solid #b49053;
+  --button-shadow: 3px 3px 0 #102f28; --button-hover: #476b4b;
+  --selected-bg: #f0c878; --selected-text: #153c32;
+  --primary-bg: #f0c878; --primary-text: #153c32;
+  --toolbar-bg: #102f28; --toolbar-text: #f4e1b3; --toolbar-muted: #d5c395; --toolbar-danger: #ffb394;
+  --title-bg: #8e3d2e; --title-text: #f4e1b3; --title-shadow: 2px 2px 0 #102f28;
+  --board-bg: #305c45; --board-radius: 2px; --table-center: #173f34;
+  --portrait-bg: #dfc58d; --active-shadow: 0 0 0 3px #f0c878;
+  --bubble-bg: #f4e1b3; --bubble-text: #153c32; --bubble-shadow: 3px 3px 0 #102f28;
+  --overlay-bg: #102f28ed; --tile-face: #f4e1b3; --tile-edge: #c6a671;
+  --tile-base: #153c32; --tile-back: #315a46; --tile-back-line: #d5c395;
+  --tile-round: .04; --tile-border: 1px solid #b49053;
+  --tile-blue: #173c55; --tile-green: #285d3b; --tile-red: #a33025; --tile-paper: #f4e1b3;
+  --tile-highlight: #ffb394; --control-inset: inset 2px 2px 0 #102f28;
+  --win-bg: #8e3d2e; --claim-bg: #315a46; --action-text: #f4e1b3;
+  --scroll-thumb: #b49053; --shadow-blur: 0px;
+}
+
+:root[data-ui-style='modern-paint'] {
+  --scene-title: url('/ui/modern-paint/title-scene.png');
+  --scene-parlor: url('/ui/modern-paint/parlor.png');
+  --heading-font: 'Microsoft JhengHei', 'PingFang TC', system-ui, sans-serif;
+  --felt: #23594e; --felt-dark: #101e37; --wood: #725245;
+  --panel: #152e4d; --panel-solid: #152e4d; --raised: #294d70; --recessed: #10243f;
+  --text: #f0f7ff; --muted: #bed5ed; --gold: #ffe5b4; --line: #87b5d1;
+  --red: #ffc1ce; --accent: #a2ebf2; --negative: #ffc1ce;
+  --art-panel: linear-gradient(135deg, #152e4df5, #203759ed); --art-line: #a0cde4;
+  --app-background: radial-gradient(ellipse at top, #476b93, #101e37);
+  --surface-radius: 10px; --small-radius: 6px; --avatar-radius: 8px;
+  --panel-shadow: 0 10px 28px #0a183c66;
+  --button-bg: #294d70; --button-text: #f0f7ff; --button-border: 1px solid #87b5d1;
+  --button-shadow: inset 0 1px 0 #d8f2ff40, 0 3px 12px #0a183c66; --button-hover: #3d6388;
+  --selected-bg: #c7e9f3; --selected-text: #152e4d;
+  --primary-bg: linear-gradient(115deg, #e6f5fa, #ffe5c1); --primary-text: #152e4d;
+  --toolbar-bg: #101e37; --toolbar-text: #f0f7ff; --toolbar-muted: #bed5ed; --toolbar-danger: #ffc1ce;
+  --title-bg: linear-gradient(110deg, #325d83, #444b73); --title-text: #ffe5b4;
+  --title-shadow: 0 2px 8px #101e37;
+  --board-bg: #23594e; --board-radius: 10px; --table-center: #152e4d;
+  --portrait-bg: linear-gradient(135deg, #81b5d4, #e9b8ae); --active-shadow: 0 0 0 2px #a2ebf2, 0 0 18px #a2ebf250;
+  --bubble-bg: #f0f7ff; --bubble-text: #152e4d; --bubble-shadow: 0 4px 12px #0a183c66;
+  --overlay-bg: #101e37dc; --tile-face: linear-gradient(145deg, #fcfeff, #e8e4d9);
+  --tile-edge: #b9c7ce; --tile-base: #23594e; --tile-back: linear-gradient(#438479, #23594e); --tile-back-line: #acd9d7;
+  --tile-border: 1px solid #e0edf2; --tile-blue: #203b60; --tile-green: #205a3e; --tile-red: #a32940;
+  --tile-highlight: #ffc1ce; --control-inset: inset 1px 2px 4px #0a183c66;
+  --win-bg: #704b70; --claim-bg: #325d83; --action-text: #f0f7ff; --scroll-thumb: #87b5d1;
+}
+
+html[data-ui-style='modern-paint'] .concept-page { background-image: linear-gradient(90deg, #101e3750, #101e3710), var(--scene-parlor); }
+html[data-ui-style='modern-paint'] .title-page { background-image: linear-gradient(90deg, #101e3755, transparent 65%), var(--scene-title); }
+html[data-ui-style='modern-paint'] .art-panel::after,
+html[data-ui-style='modern-paint'] .ornate .orn { display: none; }
+html[data-ui-style='modern-paint'] .concept-page .art-panel { box-shadow: inset 0 1px 0 #d8f2ff50, var(--panel-shadow); }
+html[data-ui-style='modern-paint'] .ornate .text { font-weight: 500; letter-spacing: .22em; text-shadow: 0 2px 8px #101e37; }
+html[data-ui-style='modern-paint'] .section-banner .ribbon { clip-path: none; border: 0; border-left: 2px solid var(--accent); background: transparent; box-shadow: none; color: var(--text); padding-left: 14px; }
+html[data-ui-style='modern-paint'] .style-option span { font-family: var(--ui-font); font-weight: 500; }
+html[data-ui-style='modern-paint'] .menu-item { color: var(--text); font-weight: 500; text-shadow: 0 2px 8px #101e37; }
+html[data-ui-style='modern-paint'] .menu-item:hover,
+html[data-ui-style='modern-paint'] .menu-item:focus-visible,
+html[data-ui-style='modern-paint'] .title-menu:not(:hover):not(:focus-within) .menu-item:first-child {
+  background: linear-gradient(110deg, #23496fe8, #394e77d9);
+  border-color: var(--accent); outline-color: var(--line); box-shadow: var(--button-shadow);
+}
+@media (max-width: 900px) {
+  html[data-ui-style='modern-paint'] .title-content { background: #142d4dad; border-radius: var(--surface-radius); }
+}
+
+:root[data-ui-style='gameboy'] {
+  --scene-title: url('/ui/gameboy/title-scene.png');
+  --scene-parlor: url('/ui/gameboy/parlor.png');
+  --ui-font: 'MingLiU', '細明體', monospace; --heading-font: 'MingLiU', '細明體', monospace;
+  --felt: #306230; --felt-dark: #0f380f; --wood: #0f380f;
+  --panel: #0f380f; --panel-solid: #0f380f; --raised: #306230; --recessed: #0f380f;
+  --text: #9bbc0f; --muted: #8bac0f; --gold: #9bbc0f; --line: #8bac0f;
+  --red: #9bbc0f; --accent: #9bbc0f; --negative: #9bbc0f;
+  --art-panel: #0f380f; --art-line: #8bac0f; --app-background: #306230;
+  --surface-radius: 0px; --small-radius: 0px; --avatar-radius: 0px;
+  --panel-border: 2px solid #8bac0f; --panel-shadow: 4px 4px 0 #0f380f;
+  --button-bg: #0f380f; --button-text: #9bbc0f; --button-border: 2px solid #8bac0f;
+  --button-shadow: 2px 2px 0 #0f380f; --button-hover: #306230;
+  --selected-bg: #9bbc0f; --selected-text: #0f380f;
+  --primary-bg: #9bbc0f; --primary-text: #0f380f;
+  --toolbar-bg: #0f380f; --toolbar-text: #9bbc0f; --toolbar-muted: #8bac0f; --toolbar-danger: #9bbc0f;
+  --title-bg: #306230; --title-text: #9bbc0f; --title-shadow: 2px 2px 0 #0f380f;
+  --board-bg: #306230; --board-radius: 0px; --board-frame: inset 0 0 0 6px #0f380f;
+  --table-center: #0f380f; --portrait-bg: #8bac0f; --active-shadow: 0 0 0 3px #9bbc0f;
+  --bubble-bg: #9bbc0f; --bubble-text: #0f380f; --bubble-shadow: 3px 3px 0 #0f380f;
+  --overlay-bg: #0f380f; --tile-face: #9bbc0f; --tile-edge: #8bac0f; --tile-base: #0f380f;
+  --tile-back: #306230; --tile-back-line: #8bac0f; --tile-round: 0;
+  --tile-border: 1px solid #0f380f; --tile-paper: #9bbc0f;
+  --tile-blue: #0f380f; --tile-green: #0f380f; --tile-red: #0f380f; --tile-highlight: #9bbc0f;
+  --control-inset: inset 2px 2px 0 #306230; --win-bg: #306230; --claim-bg: #306230;
+  --action-text: #9bbc0f; --scroll-thumb: #8bac0f; --shadow-blur: 0px;
+}
+
+/* Replace the shared gold/red ornament paint for the three new directions. */
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) .art-panel {
+  box-shadow: inset 0 0 0 4px var(--panel-solid), inset 0 0 0 5px var(--art-line), var(--panel-shadow);
+}
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) :is(a, button).fancy.gold,
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) :is(a, button).fancy.gold:hover:not(:disabled) {
+  color: var(--primary-text); background: var(--primary-bg); border-color: var(--gold); box-shadow: var(--button-shadow);
+}
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) :is(a, button).fancy.red,
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) :is(a, button).fancy.red:hover:not(:disabled) {
+  color: var(--action-text); background: var(--win-bg); box-shadow: var(--button-shadow);
+}
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) :is(.ribbon, .back-link) {
+  background: var(--title-bg); color: var(--text); box-shadow: var(--button-shadow); border-color: var(--art-line);
+}
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) .style-option.selected { box-shadow: 0 0 0 2px var(--gold); }
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) .style-option:not(.selected) { background: var(--recessed); border-color: var(--line); }
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) .style-option.selected span { color: var(--selected-text); }
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) .check { background: var(--primary-bg); color: var(--primary-text); border-color: var(--gold); }
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) .switch .knob { background: var(--gold); box-shadow: none; }
+html:is([data-ui-style='taiwan-print'], [data-ui-style='gameboy'], [data-ui-style='modern-paint']) .switch.on { background: var(--raised); }
+
+html[data-ui-style='gameboy'] :is(.concept-page, .gamescreen, .game) { background: var(--scene-parlor) center / cover; image-rendering: pixelated; }
+html[data-ui-style='gameboy'] .title-page { background-image: var(--scene-title); }
+html[data-ui-style='gameboy'] :is(.logo, .table) { image-rendering: pixelated; }
+html[data-ui-style='gameboy'] .art-panel::after,
+html[data-ui-style='gameboy'] :is(.rule, .ornate .orn) { display: none; }
+html[data-ui-style='gameboy'] :is(.concept-heading, .title-page, .ribbon) { text-shadow: none; }
+html[data-ui-style='gameboy'] :is(button, a, .avatar, .portrait, .tile, .brand, .settings-host .avatar) { filter: none; }
+html[data-ui-style='gameboy'] :is(button, .tile, .portrait, .bubble, .actions) { transition: none; animation: none; }
+html[data-ui-style='gameboy'] .tile { box-shadow: 0 3px 0 #8bac0f, 0 6px 0 #0f380f; }
+html[data-ui-style='gameboy'] .tile.back { box-shadow: inset 0 0 0 2px #8bac0f, 0 4px 0 #0f380f; }
+html[data-ui-style='gameboy'] .tile:is(.selected, .hl) { box-shadow: 0 0 0 3px #9bbc0f, 0 0 0 5px #0f380f, 0 6px 0 #0f380f; }
+html[data-ui-style='gameboy'] .tile .white { box-shadow: inset 0 0 0 calc(var(--w) * .05) #9bbc0f, inset 0 0 0 calc(var(--w) * .1) #0f380f; }
+html[data-ui-style='gameboy'] .tile .flower { color: #0f380f; }
+html[data-ui-style='gameboy'] .tile [stroke-opacity] { stroke-opacity: 1; }
+html[data-ui-style='gameboy'] .wind.dealer { background: #9bbc0f; color: #0f380f; }
+html[data-ui-style='gameboy'] .lobby-page .seats { background: #306230; }
+html[data-ui-style='gameboy'] .lobby-page .seat { box-shadow: 3px 3px 0 #0f380f; }
+html[data-ui-style='gameboy'] button:disabled { opacity: 1; color: #8bac0f; border-style: dashed; }
+html[data-ui-style='gameboy'] input::placeholder { opacity: 1; }
+html[data-ui-style='gameboy'] :is(.table, .gallery-portrait) { filter: none; }
+html[data-ui-style='gameboy'] :is(.ornate .text, .left-count b) { text-shadow: none; }
+html[data-ui-style='gameboy'] :is(.portrait, .pgrid .pic, .expression-option .avatar) { background: #306230; }
+html[data-ui-style='gameboy'] .pgrid button.cell,
+html[data-ui-style='gameboy'] .pgrid button.cell:hover:not(:disabled) { background: #0f380f; box-shadow: 2px 2px 0 #0f380f; }
+html[data-ui-style='gameboy'] .pgrid button.cell.sel,
+html[data-ui-style='gameboy'] .pgrid button.cell.sel:hover:not(:disabled) { box-shadow: 0 0 0 2px #9bbc0f; }
+html[data-ui-style='gameboy'] :is(.diamond, .drawn) { border-color: #0f380f; box-shadow: 0 0 0 2px #9bbc0f; }
+html[data-ui-style='gameboy'] :is(.center-panel, .banner, .auto-btn) { background: #0f380f; color: #9bbc0f; box-shadow: inset 0 0 0 3px #306230; }
+html[data-ui-style='gameboy'] :is(.tag, .streak) { background: #306230; color: #9bbc0f; border: 1px solid #8bac0f; }
+html[data-ui-style='gameboy'] .back-up { box-shadow: inset 0 -3px 0 #9bbc0f, 0 2px 0 #0f380f; }
+html[data-ui-style='gameboy'] .back-side { box-shadow: inset -3px 0 0 #9bbc0f, 0 2px 0 #0f380f; }
+html[data-ui-style='gameboy'] .wall-right .back-side { box-shadow: inset 3px 0 0 #9bbc0f, 0 2px 0 #0f380f; }
+html[data-ui-style='gameboy'] input[type='range'] { appearance: none; height: 28px; min-height: 28px; background: transparent; border: 0; border-radius: 0; }
+html[data-ui-style='gameboy'] input[type='range']::-webkit-slider-runnable-track { height: 8px; background: #306230; border: 1px solid #8bac0f; }
+html[data-ui-style='gameboy'] input[type='range']::-moz-range-track { height: 6px; background: #306230; border: 1px solid #8bac0f; }
+html[data-ui-style='gameboy'] input[type='range']::-webkit-slider-thumb { appearance: none; margin-top: -7px; width: 16px; height: 20px; background: #9bbc0f; border: 2px solid #0f380f; border-radius: 0; }
+html[data-ui-style='gameboy'] input[type='range']::-moz-range-thumb { width: 12px; height: 16px; background: #9bbc0f; border: 2px solid #0f380f; border-radius: 0; }
+html[data-ui-style='gameboy'] .switch .knob { border-radius: 0; }
+html[data-ui-style='gameboy'] .ribbon { clip-path: none; }
+html[data-ui-style='gameboy'] :is(a, button).fancy:hover:not(:disabled),
+html[data-ui-style='gameboy'] button.primary:hover:not(:disabled),
+html[data-ui-style='gameboy'] :is(a, button).fancy:disabled { filter: none; }
+html[data-ui-style='gameboy'] .gamescreen .tag { background: #306230; color: #9bbc0f; }
+html[data-ui-style='gameboy'] .gamescreen .tag.me { background: #9bbc0f; color: #0f380f; }
+html[data-ui-style='gameboy'] .gamescreen :is(.pcard, .side) { box-shadow: inset 0 0 0 3px #306230; }
+html[data-ui-style='gameboy'] .gamescreen .pcard.active { box-shadow: inset 0 0 0 3px #306230, 0 0 0 2px #9bbc0f; }
+html[data-ui-style='gameboy'] .gamescreen .pcard.thinking { box-shadow: 0 0 0 2px #9bbc0f; }
+html[data-ui-style='gameboy'] .gamescreen button.exit { background: #306230; color: #9bbc0f; box-shadow: 2px 2px 0 #0f380f; }
+html[data-ui-style='gameboy'] .gamescreen .tname { color: #9bbc0f; }

@@ -1,0 +1,174 @@
+{
+  "generator": "built-in image_gen only",
+  "style": "taiwan-print",
+  "expressions": [
+    "normal",
+    "happy",
+    "surprised",
+    "sad",
+    "win"
+  ],
+  "preparation": "Corrected separated five-expression sheets; deterministic column slicing, content crop using alpha>1 bounds plus two pixels to exclude invisible alpha=1 noise in distant empty canvas, proportional resize within 480x480 and centered in 512x512 RGBA. Alpha within the retained crop is preserved. No background keying or replacement. Ayi normal, logo and table use byte-exact approved samples. Backgrounds normalized to 1920x1080.",
+  "portraits": [
+    {
+      "id": "xiaocui",
+      "prompt": "Use case: style-transfer. Production game sprite sheet. Image 1 is the authoritative Xiaocui identity/costume reference; image 2 defines the APPROVED Taiwanese vintage hand-printed poster art style only. Generate ONE horizontal strip containing EXACTLY FIVE equally spaced head-and-shoulders busts of this SAME Xiaocui, left-to-right expressions: normal gentle closed-mouth smile; happy broad joyful open smile; surprised wide eyes and small round open mouth; sad downturned mouth and lowered worried brows; win confident beaming triumphant smile. The five busts must each be distinct expressions, not copies. Preserve her long deep jade green twin ponytails, vermilion-pink large hair bows, teal eyes, white sailor uniform with teal collar and white stripes; preserve youthful face and all costume identity. Translate image 1 into image2's unmistakable coarse dark-ink contours, deliberately flat jade/vermilion/ochre/ivory/muted teal-blue printing inks, subtle halftone shadow and ink grain INSIDE artwork only. No background copied from image1. Actual transparent RGBA background. Layout: 2560x512 very wide 5:1 strip, exactly five equal invisible 512x512 cells; every full bust including hair and shoulders entirely contained inside its own cell with at least 24px clear transparent margins on all four sides; consistent head scale and eye line, no overlap and no cropped hair. No grid, no captions, no words, no frame, no extra objects, no hands, no extra people. Only five isolated busts on transparency.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/xiaocui/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/taiwan-print/character.png"
+      ],
+      "source": "C:/Users/User/.codex/generated_images/01a15a35-21e8-7220-9324-254c2266250e/call_65aaef7ac3d5489c899b6ab39482812f.png",
+      "correction": {
+        "prompt": "Precise spacing/layout correction ONLY. This is a five-expression portrait sticker strip. The existing five characters are too large and touching. SHRINK EACH OF THE FIVE BUSTS TO 70% of current size, IN PLACE around its own center, so that every portrait becomes a completely SEPARATE floating sticker with a large TRANSPARENT GAP to its neighbors. Keep ALL five expressions, same exact face, hair, costume, ink art style and details from input. Draw missing outer hair/shoulder edges where input is cut. Each complete silhouette MUST have transparent margin all around it. Exactly 5 busts in 1 row. Target2000x800 transparent canvas. Bust bounding boxes should be no wider than300px and no taller than480px, centered at x200,600,1000,1400,1800 and y400. There must be at least80px fully empty transparent vertical gaps between silhouettes. No text, frames, background, grid, extra portraits, extra accessories or objects. Preserve genuine transparent RGBA alpha.",
+        "refs": [
+          "C:/Users/User/.codex/generated_images/01a15a35-21e8-7220-9324-254c2266250e/call_65aaef7ac3d5489c899b6ab39482812f.png"
+        ],
+        "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-bb637a10-1045-4188-9a64-95733aafb47d.png"
+      },
+      "output": "public/characters/xiaocui/taiwan-print/{normal,happy,surprised,sad,win}.png",
+      "normalApprovedCopy": false
+    },
+    {
+      "id": "yuehua",
+      "prompt": "Use case: style-transfer. Production game sprite sheet. Image 1 is authoritative character identity/costume, image 2 is approved Taiwanese vintage hand-printed poster STYLE only. ONE wide horizontal strip, EXACTLY FIVE equally spaced head-and-shoulders busts of the SAME character. Left-to-right expressions: normal gentle closed-mouth smile; happy joyful open smile; surprised wide eyes with round open mouth; sad downturned mouth with worried brows; win confident triumphant grin. Five unmistakably different expressions. Preserve costume, hair, accessories and identity. Match approved coarse dark ink contours, flat jade/vermilion/ochre/ivory/muted teal-blue inks, selective halftone and ink grain INSIDE artwork. No copied background. Layout landscape 2560x1024 transparent canvas; five invisible equal-width columns. One bust centered in EACH column. Each silhouette must stay entirely inside its column with generous clear gap, all hair and shoulders included. Consistent scale/eye line. No overlap, no clipped hair, no grid, labels, words, frame, hands, objects or extra people. Actual transparent RGBA. Character: Yuehua, elegant young woman with long flowing silver/ivory hair, violet eyes, small GOLD CRESCENT MOON hairclip on viewer-right, dark navy collared blouse with pale silver collar. Preserve silver hair, moon clip, mature graceful facial proportions.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/yuehua/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/taiwan-print/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-9575d18d-bc21-4eab-ab38-7fd68a1bfcb0.png",
+      "correction": {
+        "prompt": "Precise spacing/layout correction ONLY. This is a five-expression portrait sticker strip. The existing five characters are too large and touching. SHRINK EACH OF THE FIVE BUSTS TO 70% of current size, IN PLACE around its own center, so that every portrait becomes a completely SEPARATE floating sticker with a large TRANSPARENT GAP to its neighbors. Keep ALL five expressions, same exact face, hair, costume, ink art style and details from input. Draw missing outer hair/shoulder edges where input is cut. Each complete silhouette MUST have transparent margin all around it. Exactly 5 busts in 1 row. Target2000x800 transparent canvas. Bust bounding boxes should be no wider than300px and no taller than480px, centered at x200,600,1000,1400,1800 and y400. There must be at least80px fully empty transparent vertical gaps between silhouettes. No text, frames, background, grid, extra portraits, extra accessories or objects. Preserve genuine transparent RGBA alpha.",
+        "refs": [
+          "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-9575d18d-bc21-4eab-ab38-7fd68a1bfcb0.png"
+        ],
+        "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-63b6f8c5-32be-40ba-87c1-26c4fea394dd.png"
+      },
+      "output": "public/characters/yuehua/taiwan-print/{normal,happy,surprised,sad,win}.png",
+      "normalApprovedCopy": false
+    },
+    {
+      "id": "aming",
+      "prompt": "Use case: style-transfer. Production game sprite sheet. Image 1 is authoritative character identity/costume, image 2 is approved Taiwanese vintage hand-printed poster STYLE only. ONE wide horizontal strip, EXACTLY FIVE equally spaced head-and-shoulders busts of the SAME character. Left-to-right expressions: normal gentle closed-mouth smile; happy joyful open smile; surprised wide eyes with round open mouth; sad downturned mouth with worried brows; win confident triumphant grin. Five unmistakably different expressions. Preserve costume, hair, accessories and identity. Match approved coarse dark ink contours, flat jade/vermilion/ochre/ivory/muted teal-blue inks, selective halftone and ink grain INSIDE artwork. No copied background. Layout landscape 2560x1024 transparent canvas; five invisible equal-width columns. One bust centered in EACH column. Each silhouette must stay entirely inside its column with generous clear gap, all hair and shoulders included. Consistent scale/eye line. No overlap, no clipped hair, no grid, labels, words, frame, hands, objects or extra people. Actual transparent RGBA. Character: Aming, youthful man with spiky black hair, vermilion RED HEADBAND with two long red ties flowing on viewer-left, thick brows, reddish-brown eyes, vermilion jacket with large ochre-yellow upturned collar over white crewneck shirt. Preserve sporty masculine identity and red headband.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/aming/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/taiwan-print/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-a6acb79e-0a2f-4bc5-a28b-f1bb232f57b8.png",
+      "correction": {
+        "prompt": "Precise spacing/layout correction ONLY. This is a five-expression portrait sticker strip. The existing five characters are too large and touching. SHRINK EACH OF THE FIVE BUSTS TO 70% of current size, IN PLACE around its own center, so that every portrait becomes a completely SEPARATE floating sticker with a large TRANSPARENT GAP to its neighbors. Keep ALL five expressions, same exact face, hair, costume, ink art style and details from input. Draw missing outer hair/shoulder edges where input is cut. Each complete silhouette MUST have transparent margin all around it. Exactly 5 busts in 1 row. Target2000x800 transparent canvas. Bust bounding boxes should be no wider than300px and no taller than480px, centered at x200,600,1000,1400,1800 and y400. There must be at least80px fully empty transparent vertical gaps between silhouettes. No text, frames, background, grid, extra portraits, extra accessories or objects. Preserve genuine transparent RGBA alpha.",
+        "refs": [
+          "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-a6acb79e-0a2f-4bc5-a28b-f1bb232f57b8.png"
+        ],
+        "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-2e63ba5e-68a4-49bb-bf7c-a8119c4a9f1b.png"
+      },
+      "output": "public/characters/aming/taiwan-print/{normal,happy,surprised,sad,win}.png",
+      "normalApprovedCopy": false
+    },
+    {
+      "id": "tangtang",
+      "prompt": "Use case: style-transfer. Production game sprite sheet. Image 1 is authoritative character identity/costume, image 2 is approved Taiwanese vintage hand-printed poster STYLE only. ONE wide horizontal strip, EXACTLY FIVE equally spaced head-and-shoulders busts of the SAME character. Left-to-right expressions: normal gentle closed-mouth smile; happy joyful open smile; surprised wide eyes with round open mouth; sad downturned mouth with worried brows; win confident triumphant grin. Five unmistakably different expressions. Preserve costume, hair, accessories and identity. Match approved coarse dark ink contours, flat jade/vermilion/ochre/ivory/muted teal-blue inks, selective halftone and ink grain INSIDE artwork. No copied background. Layout landscape 2560x1024 transparent canvas; five invisible equal-width columns. One bust centered in EACH column. Each silhouette must stay entirely inside its column with generous clear gap, all hair and shoulders included. Consistent scale/eye line. No overlap, no clipped hair, no grid, labels, words, frame, hands, objects or extra people. Actual transparent RGBA. Character: Tangtang, cute young woman with PINK hair in two large buns and wispy chin-length side locks, pink/red eyes, GOLD FIVE-POINT STAR hairclip on viewer-right, pink puff-sleeve blouse with deep rose round collar, deep rose neck bow and round gold center button. Preserve pink hair translated into soft vermilion ink.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/tangtang/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/taiwan-print/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-7c9e2f9a-5fa7-435e-b3c2-d6e35a042538.png",
+      "correction": {
+        "prompt": "Precise spacing/layout correction ONLY. This is a five-expression portrait sticker strip. The existing five characters are too large and touching. SHRINK EACH OF THE FIVE BUSTS TO 70% of current size, IN PLACE around its own center, so that every portrait becomes a completely SEPARATE floating sticker with a large TRANSPARENT GAP to its neighbors. Keep ALL five expressions, same exact face, hair, costume, ink art style and details from input. Draw missing outer hair/shoulder edges where input is cut. Each complete silhouette MUST have transparent margin all around it. Exactly 5 busts in 1 row. Target2000x800 transparent canvas. Bust bounding boxes should be no wider than300px and no taller than480px, centered at x200,600,1000,1400,1800 and y400. There must be at least80px fully empty transparent vertical gaps between silhouettes. No text, frames, background, grid, extra portraits, extra accessories or objects. Preserve genuine transparent RGBA alpha.",
+        "refs": [
+          "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-7c9e2f9a-5fa7-435e-b3c2-d6e35a042538.png"
+        ],
+        "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-ff3981b6-0e9e-4686-84a6-c68c7a94300d.png"
+      },
+      "output": "public/characters/tangtang/taiwan-print/{normal,happy,surprised,sad,win}.png",
+      "normalApprovedCopy": false
+    },
+    {
+      "id": "xiaochun",
+      "prompt": "Use case: style-transfer. Production game sprite sheet. Image 1 is authoritative character identity/costume, image 2 is approved Taiwanese vintage hand-printed poster STYLE only. ONE wide horizontal strip, EXACTLY FIVE equally spaced head-and-shoulders busts of the SAME character. Left-to-right expressions: normal gentle closed-mouth smile; happy joyful open smile; surprised wide eyes with round open mouth; sad downturned mouth with worried brows; win confident triumphant grin. Five unmistakably different expressions. Preserve costume, hair, accessories and identity. Match approved coarse dark ink contours, flat jade/vermilion/ochre/ivory/muted teal-blue inks, selective halftone and ink grain INSIDE artwork. No copied background. Layout landscape 2560x1024 transparent canvas; five invisible equal-width columns. One bust centered in EACH column. Each silhouette must stay entirely inside its column with generous clear gap, all hair and shoulders included. Consistent scale/eye line. No overlap, no clipped hair, no grid, labels, words, frame, hands, objects or extra people. Actual transparent RGBA. Character: Xiaochun, sporty young woman with warm ORANGE high ponytail tied with large WHITE ribbon on viewer-right, long orange bangs, teal eyes, royal-blue athletic jersey with white pointed collar and white shoulder stripes. Preserve orange hair, ponytail, ribbon and blue uniform.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/xiaochun/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/taiwan-print/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-470127dd-24e2-4b84-937d-74b78def0673.png",
+      "correction": {
+        "prompt": "Precise spacing/layout correction ONLY. This is a five-expression portrait sticker strip. The existing five characters are too large and touching. SHRINK EACH OF THE FIVE BUSTS TO 70% of current size, IN PLACE around its own center, so that every portrait becomes a completely SEPARATE floating sticker with a large TRANSPARENT GAP to its neighbors. Keep ALL five expressions, same exact face, hair, costume, ink art style and details from input. Draw missing outer hair/shoulder edges where input is cut. Each complete silhouette MUST have transparent margin all around it. Exactly 5 busts in 1 row. Target2000x800 transparent canvas. Bust bounding boxes should be no wider than300px and no taller than480px, centered at x200,600,1000,1400,1800 and y400. There must be at least80px fully empty transparent vertical gaps between silhouettes. No text, frames, background, grid, extra portraits, extra accessories or objects. Preserve genuine transparent RGBA alpha.",
+        "refs": [
+          "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-470127dd-24e2-4b84-937d-74b78def0673.png"
+        ],
+        "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-9fab3e99-f1ba-4056-bba6-79a5e01549b7.png"
+      },
+      "output": "public/characters/xiaochun/taiwan-print/{normal,happy,surprised,sad,win}.png",
+      "normalApprovedCopy": false
+    },
+    {
+      "id": "lanjie",
+      "prompt": "Use case: style-transfer. Production game sprite sheet. Image 1 is authoritative character identity/costume, image 2 is approved Taiwanese vintage hand-printed poster STYLE only. ONE wide horizontal strip, EXACTLY FIVE equally spaced head-and-shoulders busts of the SAME character. Left-to-right expressions: normal gentle closed-mouth smile; happy joyful open smile; surprised wide eyes with round open mouth; sad downturned mouth with worried brows; win confident triumphant grin. Five unmistakably different expressions. Preserve costume, hair, accessories and identity. Match approved coarse dark ink contours, flat jade/vermilion/ochre/ivory/muted teal-blue inks, selective halftone and ink grain INSIDE artwork. No copied background. Layout landscape 2560x1024 transparent canvas; five invisible equal-width columns. One bust centered in EACH column. Each silhouette must stay entirely inside its column with generous clear gap, all hair and shoulders included. Consistent scale/eye line. No overlap, no clipped hair, no grid, labels, words, frame, hands, objects or extra people. Actual transparent RGBA. Character: Lanjie, mature elegant smiling woman with purple hair in high swept bun, long curled tendrils, rectangular slender GOLD GLASSES, violet eyes, red high-collared qipao with gold piping and gold frog closure. Preserve older adult facial proportions, glasses, purple hair translated to dark teal-violet ink and red qipao.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/lanjie/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/taiwan-print/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-f2bdf216-036e-4e7b-a6ad-c65583412427.png",
+      "correction": {
+        "prompt": "Precise spacing/layout correction ONLY. This is a five-expression portrait sticker strip. The existing five characters are too large and touching. SHRINK EACH OF THE FIVE BUSTS TO 70% of current size, IN PLACE around its own center, so that every portrait becomes a completely SEPARATE floating sticker with a large TRANSPARENT GAP to its neighbors. Keep ALL five expressions, same exact face, hair, costume, ink art style and details from input. Draw missing outer hair/shoulder edges where input is cut. Each complete silhouette MUST have transparent margin all around it. Exactly 5 busts in 1 row. Target2000x800 transparent canvas. Bust bounding boxes should be no wider than300px and no taller than480px, centered at x200,600,1000,1400,1800 and y400. There must be at least80px fully empty transparent vertical gaps between silhouettes. No text, frames, background, grid, extra portraits, extra accessories or objects. Preserve genuine transparent RGBA alpha.",
+        "refs": [
+          "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-f2bdf216-036e-4e7b-a6ad-c65583412427.png"
+        ],
+        "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-2140dc24-3a91-403f-8bd1-982e3e241126.png"
+      },
+      "output": "public/characters/lanjie/taiwan-print/{normal,happy,surprised,sad,win}.png",
+      "normalApprovedCopy": false
+    },
+    {
+      "id": "ayi",
+      "prompt": "Use case: style-transfer. Production game sprite sheet. Image 1 is authoritative character identity/costume, image 2 is approved Taiwanese vintage hand-printed poster STYLE only. ONE wide horizontal strip, EXACTLY FIVE equally spaced head-and-shoulders busts of the SAME character. Left-to-right expressions: normal gentle closed-mouth smile; happy joyful open smile; surprised wide eyes with round open mouth; sad downturned mouth with worried brows; win confident triumphant grin. Five unmistakably different expressions. Preserve costume, hair, accessories and identity. Match approved coarse dark ink contours, flat jade/vermilion/ochre/ivory/muted teal-blue inks, selective halftone and ink grain INSIDE artwork. No copied background. Layout landscape 2560x1024 transparent canvas; five invisible equal-width columns. One bust centered in EACH column. Each silhouette must stay entirely inside its column with generous clear gap, all hair and shoulders included. Consistent scale/eye line. No overlap, no clipped hair, no grid, labels, words, frame, hands, objects or extra people. Actual transparent RGBA. Character: Ayi, youthful male hero, short tousled warm brown hair with distinctive high upward cowlick, large BLUE eyes, silver chest and shoulder armor, black high-neck undersuit. Match image2 exactly for art style AND Ayi identity; no added gloves, cape or weapon.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/characters/ayi/normal.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/taiwan-print/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-8672aad3-7f57-4a59-be08-1e6870245949.png",
+      "correction": {
+        "prompt": "Precise spacing/layout correction ONLY. This is a five-expression portrait sticker strip. The existing five characters are too large and touching. SHRINK EACH OF THE FIVE BUSTS TO 70% of current size, IN PLACE around its own center, so that every portrait becomes a completely SEPARATE floating sticker with a large TRANSPARENT GAP to its neighbors. Keep ALL five expressions, same exact face, hair, costume, ink art style and details from input. Draw missing outer hair/shoulder edges where input is cut. Each complete silhouette MUST have transparent margin all around it. Exactly 5 busts in 1 row. Target2000x800 transparent canvas. Bust bounding boxes should be no wider than300px and no taller than480px, centered at x200,600,1000,1400,1800 and y400. There must be at least80px fully empty transparent vertical gaps between silhouettes. No text, frames, background, grid, extra portraits, extra accessories or objects. Preserve genuine transparent RGBA alpha.",
+        "refs": [
+          "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-8672aad3-7f57-4a59-be08-1e6870245949.png"
+        ],
+        "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-1ecb081a-189f-4950-ac70-96ac7c071d2c.png"
+      },
+      "output": "public/characters/ayi/taiwan-print/{normal,happy,surprised,sad,win}.png",
+      "normalApprovedCopy": true
+    }
+  ],
+  "backgrounds": [
+    {
+      "id": "title-scene",
+      "prompt": "Use case: style-transfer. Image 1 is authoritative for scene composition/subjects; image 2 defines approved Taiwanese vintage hand-printed poster art medium. Redraw image1 in this medium: confident coarse dark ink contours, deliberately flat shapes, limited deep jade green/vermilion/ochre/ivory/muted teal-blue printing inks, halftone shadows and printed ink grain. Strong handcrafted screenprint, not shiny 3D, not merely a filter. Landscape 16:9 full-bleed opaque background, no border or watermark, no added text, letters, menus, interface or invented objects. Preserve EXACT four characters and their costumes and positions in the RIGHT 60% of scene: foreground right Xiaocui with deep jade twin ponytails/red bows and white teal sailor uniform, left of group Yuehua with long silver hair and crescent clip/navy blouse, back center Lanjie with purple updo/gold glasses/red qipao holding existing tea tray, Aming with spiky black hair/red headband/red jacket/yellow collar. Preserve faces, welcoming poses, mahjong table and tiles, warm stained glass pendant, wood interior and window. Keep LEFT 40% quiet dark jade with subdued botanical texture for later UI overlay; no faces, hands, high contrast objects or words in left40%. No fifth character. Preserve natural recognizable hair colors translated through print inks. Do not add text to scene; simplify distant sign lettering to abstract tiny ink marks.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/ui/anime90/title-scene.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/taiwan-print/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-d16183d7-b8b1-4314-b345-81890155b084.png"
+    },
+    {
+      "id": "parlor",
+      "prompt": "Use case: style-transfer. Image 1 is authoritative for scene composition/subjects; image 2 defines approved Taiwanese vintage hand-printed poster art medium. Redraw image1 in this medium: confident coarse dark ink contours, deliberately flat shapes, limited deep jade green/vermilion/ochre/ivory/muted teal-blue printing inks, halftone shadows and printed ink grain. Strong handcrafted screenprint, not shiny 3D, not merely a filter. Landscape 16:9 full-bleed opaque background, no border or watermark, no added text, letters, menus, interface or invented objects. Preserve exact empty vintage Taiwanese mahjong parlor and matching eye-level three-quarter camera angle: central green felt mahjong table, four carved dark wood chairs with red upholstery, large overhead amber stained-glass lamp, windows at left with night-city colored lights, wooden cabinets and plants, ceramic blue-white tea wares, right wall fan and shelf. Preserve existing tile walls and cups on table, no additional objects. NO PEOPLE or silhouettes. No UI, no writing or menu. Do not add or remove furniture, do not change room architecture or camera. Warm intimate ochre and vermilion lighting balanced by dark jade shadows and teal-blue evening windows.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/ui/anime90/parlor.png",
+        "C:/Users/User/Repo/TaiwanMahjong/docs/art/style-studies/2026-10-21/taiwan-print/character.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-21e8-7220-9324-254c2266250e\\exec-4256f659-80a4-479f-86e5-9b8789739d77.png"
+    }
+  ],
+  "approvedCopies": [
+    {
+      "source": "docs/art/style-studies/2026-10-21/taiwan-print/character.png",
+      "output": "public/characters/ayi/taiwan-print/normal.png"
+    },
+    {
+      "source": "docs/art/style-studies/2026-10-21/taiwan-print/logo.png",
+      "output": "public/ui/taiwan-print/logo.png"
+    },
+    {
+      "source": "docs/art/style-studies/2026-10-21/taiwan-print/table.png",
+      "output": "public/ui/taiwan-print/table.png"
+    }
+  ]
+}

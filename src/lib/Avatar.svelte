@@ -1,7 +1,7 @@
 <script>
   // 二次元角色頭像。內建用 SVG 畫；角色設定有 images 時改用圖片。
   import { getCharacter, getCharacterImage } from './characters.js';
-  import { artStyle } from './art-style.js';
+  import { artStyle, isPixelStyle } from './art-style.js';
 
   /** expression: normal | happy | surprised | sad | win */
   let { id, expression = 'normal', size = 64, crop = false } = $props();
@@ -34,7 +34,7 @@
 
 <div class="avatar" class:crop style:width="{size}px" style:height="{size}px">
   {#if img}
-    <img src={img} alt={c.name} class:pixel={$artStyle !== 'anime90'} />
+    <img src={img} alt={c.name} class:pixel={isPixelStyle($artStyle)} />
   {:else}
     <svg viewBox={view} xmlns="http://www.w3.org/2000/svg" aria-label={c.name}>
       <defs>

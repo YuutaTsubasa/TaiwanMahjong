@@ -1,0 +1,74 @@
+{
+  "generator": "built-in image_gen",
+  "direction": "Luminous anime cinema after rain at dusk; azure/violet cloud sky and amber horizon, warm indoor lamp vs cool sky reflections.",
+  "runtimeStyleId": "modern-paint",
+  "processing": "Backgrounds fit 1920x1080 opaque. Logo alpha bounds above 8/255 cropped and fit proportionally within1352x372 on1400x420 transparent canvas. Corrected table physically inspected and cropped atx266,y45,width982,height944, then resized1000x1000 and composited atx300,y50 on1600x1100 transparent canvas; almost-transparent diffusion outside the physical tabletop is excluded. Alpha normalization: <=8/255 cleared to0; >=240/255 made255; intermediate edge alpha preserved.",
+  "assets": [
+    {
+      "id": "title-scene",
+      "transparent": false,
+      "prompt": "Use case: style-transfer. Production art for Virtual Taiwan Mahjong Parlor. Redesign in Makoto Shinkai inspired luminous contemporary anime feature-film visual language: exquisitely crisp intricate anime draftsmanship, airy clarity, translucent azure/violet atmospheric color, golden-hour light, restrained luminous bloom, clean linework and subtle smooth cinematic shading. It must feel clearly NEW and dramatically more luminous and airy than the brown-heavy old reference. Avoid heavy oil-paint brushwork, chunky old 90s cel shading, grungy texture, 3D plastic. Scene: a Taiwan mahjong parlor after rain at dusk. A very LARGE EXPANSIVE WINDOW opens onto a glorious detailed layered azure and violet cloud sky with an amber-pink horizon, wet Taiwan rooftops, glistening street reflections. Warm delicate indoor pendant lamps contrast with broad cool blue sky reflections. Gentle volumetric sunbeams, clear breathable space, clean intricate background, bright luminous romantic mood. Lighter walls and slender refined wood trim, NOT a cramped dark brown wood room. Keep Taiwan teacups, plants, mahjong and subtle local architectural character. Wide16:9 composition1920x1080, fully opaque. No UI, text, watermark or title. Reference locks ONLY the four original character identities/costumes and convivial mahjong arrangement, NOT the old room or its light. LEFT40% must be a quiet darker indigo/blue wall or shadow area with extremely subdued details for a readable logo/menu, no person or foreground objects in that zone. RIGHT60% contains precisely FOUR characters: foreground young teal twin-ponytail girl with pink bows and teal-white sailor uniform warmly reaching to the viewer; long silver-haired violet-eyed elegant woman with gold crescent clip and dark collared blouse seated near center-right; youthful black-spiky-haired man with red headband and red jacket over light shirt just behind; mature purple-haired bun woman with glasses in red gold-trimmed qipao standing with tea tray. All four readable with unchanged hair, face identity and costume. Huge sky window behind and above characters. Refine faces into beautiful luminous anime film drawing. Table with mahjong tiles and tea remains at right. No additional people.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/ui/modern-paint/title-scene.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-5bca1e78-1ec1-4174-89e9-faa4cefb1ea3.png",
+      "initialSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-5bca1e78-1ec1-4174-89e9-faa4cefb1ea3.png",
+      "referenceArchive": "references/title-scene.png",
+      "correction": null
+    },
+    {
+      "id": "parlor",
+      "transparent": false,
+      "prompt": "Use case: style-transfer. Production art for Virtual Taiwan Mahjong Parlor. Redesign in Makoto Shinkai inspired luminous contemporary anime feature-film visual language: exquisitely crisp intricate anime draftsmanship, airy clarity, translucent azure/violet atmospheric color, golden-hour light, restrained luminous bloom, clean linework and subtle smooth cinematic shading. It must feel clearly NEW and dramatically more luminous and airy than the brown-heavy old reference. Avoid heavy oil-paint brushwork, chunky old 90s cel shading, grungy texture, 3D plastic. Scene: a Taiwan mahjong parlor after rain at dusk. A very LARGE EXPANSIVE WINDOW opens onto a glorious detailed layered azure and violet cloud sky with an amber-pink horizon, wet Taiwan rooftops, glistening street reflections. Warm delicate indoor pendant lamps contrast with broad cool blue sky reflections. Gentle volumetric sunbeams, clear breathable space, clean intricate background, bright luminous romantic mood. Lighter walls and slender refined wood trim, NOT a cramped dark brown wood room. Keep Taiwan teacups, plants, mahjong and subtle local architectural character. Wide16:9 composition1920x1080, fully opaque. No UI, text, watermark or title. An inviting EMPTY parlor with absolutely NO PEOPLE. Eye-level oblique camera, central mahjong table and four wooden chairs, neatly arranged tile walls and teacups. Preserve general furniture/camera layout from reference while radically modernizing the skyward space and lighting. Replace the small busy dark window views with an expansive glorious dusk sky. Background should remain readable as game/settings backdrop, elegant clean shapes and soft luminous depth. No figures in windows, reflections, pictures or distant streets.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/ui/modern-paint/parlor.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-210afbcd-7735-4ae5-b2b9-569692179234.png",
+      "initialSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-210afbcd-7735-4ae5-b2b9-569692179234.png",
+      "referenceArchive": "references/parlor.png",
+      "correction": null
+    },
+    {
+      "id": "logo",
+      "transparent": true,
+      "prompt": "Use case: style-transfer. Production art for Virtual Taiwan Mahjong Parlor. Redesign in Makoto Shinkai inspired luminous contemporary anime feature-film visual language: exquisitely crisp intricate anime draftsmanship, airy clarity, translucent azure/violet atmospheric color, golden-hour light, restrained luminous bloom, clean linework and subtle smooth cinematic shading. It must feel clearly NEW and dramatically more luminous and airy than the brown-heavy old reference. Avoid heavy oil-paint brushwork, chunky old 90s cel shading, grungy texture, 3D plastic. Create a completely redesigned clean refined cinematic anime-film logo on ACTUAL TRANSPARENT alpha background. Reference is for exact text only; replace chunky calligraphy and heavy antique ornament with elegant slender luminous ivory lettering, a very subtle pale-gold rim, tiny restrained cool-blue glow closely around letters, sophisticated airy movie-title spacing. Main line EXACTLY these FIVE Traditional Chinese characters: 虛擬台麻館 . Below one smaller clean beautifully readable line EXACTLY: Virtual Taiwan Mahjong Parlor . Correct Traditional Chinese strokes and exact English spelling. Do NOT replace 台 with 臺. Light ivory lettering legible on darker blue backgrounds. Keep it a single horizontal mark within1400x420 with adequate transparent margins, no cropped glyphs. Optional one tiny subtle ivory mahjong-tile motif at far right; no heavy flourishes, no massive metallic texture, no extra text. All space outside the lettering and small mark is transparent, no sky, no panel, no rectangular backdrop.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/ui/modern-paint/logo.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-8e463f48-83e2-4406-a0d0-c1d0cebee9d2.png",
+      "initialSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-a6271934-e27f-4e27-90c6-14710e98ea58.png",
+      "referenceArchive": "references/logo.png",
+      "correction": {
+        "id": "logo",
+        "prompt": "Precise background-extraction and light cleanup edit. Preserve the exact correct Traditional Chinese main title 虛擬台麻館 and English subtitle Virtual Taiwan Mahjong Parlor, their ivory pale-gold glyphs and delicate refined shapes, small right mahjong tile motif and thin flourishes. REMOVE ALL THE BLUE FOG/GLOW/BACKDROP surrounding and between the letters. Absolutely NO blue mist, blue panel, luminous cloud or colored background. All negative space between glyphs and outside their actual strokes must be genuinely alpha0 transparent. Keep only crisp ivory/gold letters, fine ornament lines, tile motif and tiny star points. Thin subtle dark-blue outline on the strokes is allowed, but no diffuse bloom at all. Do not change spelling or character count. Output a standalone clean elegant cinematic logo on actual transparent RGBA, wide1400x420 layout. No crop of lettering.",
+        "refs": [
+          "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-a6271934-e27f-4e27-90c6-14710e98ea58.png"
+        ]
+      }
+    },
+    {
+      "id": "table",
+      "transparent": true,
+      "prompt": "Use case: style-transfer. Production art for Virtual Taiwan Mahjong Parlor. Redesign in Makoto Shinkai inspired luminous contemporary anime feature-film visual language: exquisitely crisp intricate anime draftsmanship, airy clarity, translucent azure/violet atmospheric color, golden-hour light, restrained luminous bloom, clean linework and subtle smooth cinematic shading. It must feel clearly NEW and dramatically more luminous and airy than the brown-heavy old reference. Avoid heavy oil-paint brushwork, chunky old 90s cel shading, grungy texture, 3D plastic. Redesign ONE isolated mahjong tabletop for runtime game overlay. Transparent1600x1100 canvas. EXACT geometry: centered1000x1000 square tabletop x300..1300,y50..1050;50px wood frame on ALL sides,900x900 quiet green felt interior. STRICT orthographic directly overhead plan view: exact square, no perspective, no legs, no visible vertical thickness. Preserve reference geometry. Frame is refined dark walnut with subtle cool sky reflections and thin warm soft cinematic edge light, barely carved corners. The felt is DEEP EMERALD GREEN, almost uniform quiet with barely perceptible fine texture and subtle luminous soft light. ENTIRE tabletop MUST remain completely EMPTY: no tiles, cups, dice, text, logos, symbols, decoration on felt, center marks or objects. Calm professional playable surface. Outside the actual outer square wood edge MUST be alpha0, no shadow, no atmosphere, no gradient or glow behind it. Soft cinematic lighting only INSIDE wood/felt; NO glowing halo outside. No pixelart.",
+      "refs": [
+        "C:/Users/User/Repo/TaiwanMahjong/public/ui/modern-paint/table.png"
+      ],
+      "source": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-41691be8-ef31-48f7-a95e-382ded7cd7cb.png",
+      "initialSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-91508c23-58fc-4f00-8cd6-2a5af61167ec.png",
+      "referenceArchive": "references/table.png",
+      "correction": {
+        "id": "table",
+        "prompt": "Precise background-extraction edit. Keep the existing beautiful deep-green empty felt and refined dark walnut square mahjong frame with cool-blue reflections and thin warm light INSIDE the wood. DELETE ALL brown/orange/blue atmosphere, light spill, halo, glow, shadow, backdrop OUTSIDE THE ACTUAL WOODEN TABLE EDGE. Everything outside the physical square tabletop must be completely alpha0 transparent; no faint semi-transparent glow whatsoever. Preserve strict straight overhead orthographic view, absolutely no perspective. Complete square tabletop, all four sides visible. After extraction tabletop is square; frame thickness5% of outer tabletop width on each side, interior felt90% of width. Empty quiet deep-green felt, no objects, no letters, no decorative center symbols.1600x1100 transparent canvas, tabletop1000x1000 centered atx300y50, no shadow outside. Only extraction; do not add any new elements.",
+        "refs": [
+          "C:\\Users\\User\\.codex\\generated_images\\01a15a35-8a36-7ae1-8263-ba2b99c3c91e\\exec-91508c23-58fc-4f00-8cd6-2a5af61167ec.png"
+        ]
+      }
+    }
+  ],
+  "visualReview": {
+    "title": "Approved by root; four correct characters on right and quiet dark blue left; large sunset sky window.",
+    "parlor": "No people; luminous sky and warm lamps; preserved table/chair camera.",
+    "logo": "Exact Traditional Chinese and English text visually checked; blue haze removed.",
+    "table": "Empty felt with no objects/text. Physical square bounds exactly300,50 through1299,1049; frame approximately50px, felt approximately900px."
+  }
+}

@@ -1,0 +1,223 @@
+{
+  "generator": "built-in image_gen",
+  "style": "modern-paint",
+  "date": "2026-10-21",
+  "entries": [
+    {
+      "id": "xiaocui",
+      "prompt": "Use case: style-transfer. Asset: five-expression sprite sheet for the Mahjong game. Image 1 is the exact identity/costume/color reference for Xiaocui. Image 2 is ONLY the approved full-color contemporary painterly anime rendering reference. Draw EXACTLY FIVE separate head-and-shoulders portraits of Xiaocui in ONE horizontal row on a genuine transparent RGBA canvas, five equal-width columns with clear gutters. Order left-to-right: normal gentle closed-mouth smile; happy laughing eyes and open smile; surprised raised brows wide eyes small open mouth; sad lowered brows and downturned lips; win confident joyful grin and a subtle head tilt. All five must have clearly DIFFERENT facial expressions, identical character age, costume, hair, framing and scale. Preserve Xiaocui's dark emerald teal twin-tails, bright pink ribbons, teal eyes, white sailor blouse with teal collar and pink bow. Modern richly painted anime: nuanced skin light, visible confident brushstrokes in hair and cloth, dimensional fabric, warm amber key and restrained cool fill, crisp eyes and softer interior edges. FULL NATURAL COLOR, never monochrome or green-tinted skin. NOT flat cel shading, NOT photorealism, NOT 3D, no bloom. Complete hair ribbons and shoulders must fit inside each individual column with generous transparent margin at top/bottom/sides; flat chest-level bust bottom. Each portrait is centered in its own equal-width cell; no overlap between portraits. No hands, props, scene, text, numbers, labels, border, or watermark. Requested canvas 2560x768, five equally spaced busts.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-5fca2204-da38-46e3-ba20-17d32d9b1754.png",
+      "archivedSource": "docs/art/modern-paint/sources/xiaocui-expressions.png",
+      "references": [
+        "public/characters/xiaocui/normal.png",
+        "docs/art/style-studies/2026-10-21/modern-paint/character.png"
+      ],
+      "cropBoundaries": [
+        0,
+        402,
+        799,
+        1190,
+        1586,
+        1983
+      ],
+      "outputs": [
+        "public/characters/xiaocui/modern-paint/normal.png",
+        "public/characters/xiaocui/modern-paint/happy.png",
+        "public/characters/xiaocui/modern-paint/surprised.png",
+        "public/characters/xiaocui/modern-paint/sad.png",
+        "public/characters/xiaocui/modern-paint/win.png"
+      ]
+    },
+    {
+      "id": "yuehua",
+      "prompt": "Use case: style-transfer. Asset: five-expression sprite sheet for the Mahjong game. Image 1 is the exact identity/costume/color reference for Yuehua. Image 2 is ONLY the approved full-color contemporary painterly anime rendering reference. Draw EXACTLY FIVE separate head-and-shoulders portraits of Yuehua in ONE horizontal row on a genuine transparent RGBA canvas, five equal-width columns with clear gutters. Order left-to-right: normal gentle closed-mouth smile; happy laughing eyes and open smile; surprised raised brows wide eyes small open mouth; sad lowered brows and downturned lips; win confident joyful grin and a subtle head tilt. All five must have clearly DIFFERENT facial expressions, identical character age, costume, hair, framing and scale. Preserve Yuehua's long flowing silver-lavender hair, small gold crescent hair clip, violet eyes, mature elegant face, navy collared blouse with pale lavender collar. Modern richly painted anime: nuanced skin light, visible confident brushstrokes in hair and cloth, dimensional fabric, warm amber key and restrained cool fill, crisp eyes and softer interior edges. FULL NATURAL COLOR, never monochrome or green-tinted skin. NOT flat cel shading, NOT photorealism, NOT 3D, no bloom. Complete hair ribbons and shoulders must fit inside each individual column with generous transparent margin at top/bottom/sides; flat chest-level bust bottom. Each portrait is centered in its own equal-width cell; no overlap between portraits. No hands, props, scene, text, numbers, labels, border, or watermark. Requested canvas 2560x768. Each bust occupies only 80% of its cell width, leaving wide TRANSPARENT gutters. Five equally spaced busts, no touching.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-64e3122d-dc48-4bf0-a98d-fbf3f89892d7.png",
+      "archivedSource": "docs/art/modern-paint/sources/yuehua-expressions.png",
+      "references": [
+        "public/characters/yuehua/normal.png",
+        "docs/art/style-studies/2026-10-21/modern-paint/character.png"
+      ],
+      "cropBoundaries": [
+        0,
+        399,
+        793,
+        1190,
+        1586,
+        1983
+      ],
+      "outputs": [
+        "public/characters/yuehua/modern-paint/normal.png",
+        "public/characters/yuehua/modern-paint/happy.png",
+        "public/characters/yuehua/modern-paint/surprised.png",
+        "public/characters/yuehua/modern-paint/sad.png",
+        "public/characters/yuehua/modern-paint/win.png"
+      ]
+    },
+    {
+      "id": "aming",
+      "prompt": "Use case: style-transfer. Asset: five-expression sprite sheet for the Mahjong game. Image 1 is the exact identity/costume/color reference for Aming. Image 2 is ONLY the approved full-color contemporary painterly anime rendering reference. Draw EXACTLY FIVE separate head-and-shoulders portraits of Aming in ONE horizontal row on a genuine transparent RGBA canvas, five equal-width columns with clear gutters. Order left-to-right: normal gentle closed-mouth smile; happy laughing eyes and open smile; surprised raised brows wide eyes small open mouth; sad lowered brows and downturned lips; win confident joyful grin and a subtle head tilt. All five must have clearly DIFFERENT facial expressions, identical character age, costume, hair, framing and scale. Preserve Aming's short spiky black hair, red forehead band with tails to viewer left, reddish-brown eyes, thick brows, orange-red jacket with tall mustard-yellow collar over white shirt. Modern richly painted anime: nuanced skin light, visible confident brushstrokes in hair and cloth, dimensional fabric, warm amber key and restrained cool fill, crisp eyes and softer interior edges. FULL NATURAL COLOR, never monochrome or green-tinted skin. NOT flat cel shading, NOT photorealism, NOT 3D, no bloom. Complete hair ribbons and shoulders must fit inside each individual column with generous transparent margin at top/bottom/sides; flat chest-level bust bottom. Each portrait is centered in its own equal-width cell; no overlap between portraits. No hands, props, scene, text, numbers, labels, border, or watermark. Requested canvas 2560x768. Each bust occupies only 80% of its cell width, leaving wide TRANSPARENT gutters. Five equally spaced busts, no touching.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-8283dae7-c613-4c52-85ba-106b86d5b9a4.png",
+      "archivedSource": "docs/art/modern-paint/sources/aming-expressions.png",
+      "references": [
+        "public/characters/aming/normal.png",
+        "docs/art/style-studies/2026-10-21/modern-paint/character.png"
+      ],
+      "cropBoundaries": [
+        0,
+        397,
+        793,
+        1190,
+        1586,
+        1983
+      ],
+      "outputs": [
+        "public/characters/aming/modern-paint/normal.png",
+        "public/characters/aming/modern-paint/happy.png",
+        "public/characters/aming/modern-paint/surprised.png",
+        "public/characters/aming/modern-paint/sad.png",
+        "public/characters/aming/modern-paint/win.png"
+      ]
+    },
+    {
+      "id": "tangtang",
+      "prompt": "Use case: style-transfer. Asset: five-expression sprite sheet for the Mahjong game. Image 1 is the exact identity/costume/color reference for Tangtang. Image 2 is ONLY the approved full-color contemporary painterly anime rendering reference. Draw EXACTLY FIVE separate head-and-shoulders portraits of Tangtang in ONE horizontal row on a genuine transparent RGBA canvas, five equal-width columns with clear gutters. Order left-to-right: normal gentle closed-mouth smile; happy laughing eyes and open smile; surprised raised brows wide eyes small open mouth; sad lowered brows and downturned lips; win confident joyful grin and a subtle head tilt. All five must have clearly DIFFERENT facial expressions, identical character age, costume, hair, framing and scale. Preserve Tangtang's pink hair in two rounded buns with loose side locks, gold star hair clip, pink-red eyes, pink puff-sleeve blouse with darker rose sailor-style collar and bow, central gold button. Modern richly painted anime: nuanced skin light, visible confident brushstrokes in hair and cloth, dimensional fabric, warm amber key and restrained cool fill, crisp eyes and softer interior edges. FULL NATURAL COLOR, never monochrome or green-tinted skin. NOT flat cel shading, NOT photorealism, NOT 3D, no bloom. Complete hair ribbons and shoulders must fit inside each individual column with generous transparent margin at top/bottom/sides; flat chest-level bust bottom. Each portrait is centered in its own equal-width cell; no overlap between portraits. No hands, props, scene, text, numbers, labels, border, or watermark. Requested canvas 2560x768. Each bust occupies only 80% of its cell width, leaving wide TRANSPARENT gutters. Five equally spaced busts, no touching.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-e3428d64-1581-483e-b554-9d8f64b69635.png",
+      "archivedSource": "docs/art/modern-paint/sources/tangtang-expressions.png",
+      "references": [
+        "public/characters/tangtang/normal.png",
+        "docs/art/style-studies/2026-10-21/modern-paint/character.png"
+      ],
+      "cropBoundaries": [
+        0,
+        397,
+        793,
+        1194,
+        1588,
+        1983
+      ],
+      "outputs": [
+        "public/characters/tangtang/modern-paint/normal.png",
+        "public/characters/tangtang/modern-paint/happy.png",
+        "public/characters/tangtang/modern-paint/surprised.png",
+        "public/characters/tangtang/modern-paint/sad.png",
+        "public/characters/tangtang/modern-paint/win.png"
+      ]
+    },
+    {
+      "id": "xiaochun",
+      "prompt": "Use case: style-transfer. Asset: five-expression sprite sheet for the Mahjong game. Image 1 is the exact identity/costume/color reference for Xiaochun. Image 2 is ONLY the approved full-color contemporary painterly anime rendering reference. Draw EXACTLY FIVE separate head-and-shoulders portraits of Xiaochun in ONE horizontal row on a genuine transparent RGBA canvas, five equal-width columns with clear gutters. Order left-to-right: normal gentle closed-mouth smile; happy laughing eyes and open smile; surprised raised brows wide eyes small open mouth; sad lowered brows and downturned lips; win confident joyful grin and a subtle head tilt. All five must have clearly DIFFERENT facial expressions, identical character age, costume, hair, framing and scale. Preserve Xiaochun's long bright orange hair in a high ponytail, large white hair ribbon, teal eyes, royal-blue athletic shirt with white collar and white shoulder stripes. Modern richly painted anime: nuanced skin light, visible confident brushstrokes in hair and cloth, dimensional fabric, warm amber key and restrained cool fill, crisp eyes and softer interior edges. FULL NATURAL COLOR, never monochrome or green-tinted skin. NOT flat cel shading, NOT photorealism, NOT 3D, no bloom. Complete hair ribbons and shoulders must fit inside each individual column with generous transparent margin at top/bottom/sides; flat chest-level bust bottom. Each portrait is centered in its own equal-width cell; no overlap between portraits. No hands, props, scene, text, numbers, labels, border, or watermark. Requested canvas 2560x768. Each bust occupies only 80% of its cell width, leaving wide TRANSPARENT gutters. Five equally spaced busts, no touching.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-98cb4b2a-6dcd-4a49-b00e-2ba8596568fc.png",
+      "archivedSource": "docs/art/modern-paint/sources/xiaochun-expressions.png",
+      "references": [
+        "public/characters/xiaochun/normal.png",
+        "docs/art/style-studies/2026-10-21/modern-paint/character.png"
+      ],
+      "cropBoundaries": [
+        0,
+        406,
+        806,
+        1190,
+        1585,
+        1983
+      ],
+      "outputs": [
+        "public/characters/xiaochun/modern-paint/normal.png",
+        "public/characters/xiaochun/modern-paint/happy.png",
+        "public/characters/xiaochun/modern-paint/surprised.png",
+        "public/characters/xiaochun/modern-paint/sad.png",
+        "public/characters/xiaochun/modern-paint/win.png"
+      ]
+    },
+    {
+      "id": "lanjie",
+      "prompt": "Use case: style-transfer. Asset: five-expression sprite sheet for the Mahjong game. Image 1 is the exact identity/costume/color reference for Lanjie. Image 2 is ONLY the approved full-color contemporary painterly anime rendering reference. Draw EXACTLY FIVE separate head-and-shoulders portraits of Lanjie in ONE horizontal row on a genuine transparent RGBA canvas, five equal-width columns with clear gutters. Order left-to-right: normal gentle closed-mouth smile; happy laughing eyes and open smile; surprised raised brows wide eyes small open mouth; sad lowered brows and downturned lips; win confident joyful grin and a subtle head tilt. All five must have clearly DIFFERENT facial expressions, identical character age, costume, hair, framing and scale. Preserve Lanjie's dark purple hair in a pinned elegant updo with loose curved side locks, violet eyes, thin GOLD rectangular glasses, mature woman face, deep red qipao with golden piping and gold frog closure. Modern richly painted anime: nuanced skin light, visible confident brushstrokes in hair and cloth, dimensional fabric, warm amber key and restrained cool fill, crisp eyes and softer interior edges. FULL NATURAL COLOR, never monochrome or green-tinted skin. NOT flat cel shading, NOT photorealism, NOT 3D, no bloom. Complete hair ribbons and shoulders must fit inside each individual column with generous transparent margin at top/bottom/sides; flat chest-level bust bottom. Each portrait is centered in its own equal-width cell; no overlap between portraits. No hands, props, scene, text, numbers, labels, border, or watermark. Requested canvas 2560x768. Each bust occupies only 80% of its cell width, leaving wide TRANSPARENT gutters. Five equally spaced busts, no touching.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-b330ed71-1b26-4a41-b502-dc8b4c284ac1.png",
+      "archivedSource": "docs/art/modern-paint/sources/lanjie-expressions.png",
+      "references": [
+        "public/characters/lanjie/normal.png",
+        "docs/art/style-studies/2026-10-21/modern-paint/character.png"
+      ],
+      "cropBoundaries": [
+        0,
+        399,
+        793,
+        1190,
+        1579,
+        1983
+      ],
+      "outputs": [
+        "public/characters/lanjie/modern-paint/normal.png",
+        "public/characters/lanjie/modern-paint/happy.png",
+        "public/characters/lanjie/modern-paint/surprised.png",
+        "public/characters/lanjie/modern-paint/sad.png",
+        "public/characters/lanjie/modern-paint/win.png"
+      ]
+    },
+    {
+      "id": "ayi",
+      "prompt": "Use case: style-transfer. Asset: five-expression sprite sheet for the Mahjong game. Image 1 is the exact identity/costume/color reference for Ayi. Image 2 is ONLY the approved full-color contemporary painterly anime rendering reference. Draw EXACTLY FIVE separate head-and-shoulders portraits of Ayi in ONE horizontal row on a genuine transparent RGBA canvas, five equal-width columns with clear gutters. Order left-to-right: normal gentle closed-mouth smile; happy laughing eyes and open smile; surprised raised brows wide eyes small open mouth; sad lowered brows and downturned lips; win confident joyful grin and a subtle head tilt. All five must have clearly DIFFERENT facial expressions, identical character age, costume, hair, framing and scale. Preserve Ayi's warm BROWN tousled short hair with distinctive upward cowlick, sapphire BLUE eyes, silver gray steel shoulder/chest armor with black high-neck undersuit; NEVER green hair/eyes/armor. Modern richly painted anime: nuanced skin light, visible confident brushstrokes in hair and cloth, dimensional fabric, warm amber key and restrained cool fill, crisp eyes and softer interior edges. FULL NATURAL COLOR, never monochrome or green-tinted skin. NOT flat cel shading, NOT photorealism, NOT 3D, no bloom. Complete hair ribbons and shoulders must fit inside each individual column with generous transparent margin at top/bottom/sides; flat chest-level bust bottom. Each portrait is centered in its own equal-width cell; no overlap between portraits. No hands, props, scene, text, numbers, labels, border, or watermark. Requested canvas 2560x768. Each bust occupies only 80% of its cell width, leaving wide TRANSPARENT gutters. Five equally spaced busts, no touching. Match Image 2 approved Ayi paintwork very closely.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-578a9752-729e-440b-974a-ece7a855c4a0.png",
+      "archivedSource": "docs/art/modern-paint/sources/ayi-expressions.png",
+      "references": [
+        "public/characters/ayi/normal.png",
+        "docs/art/style-studies/2026-10-21/modern-paint/character.png"
+      ],
+      "cropBoundaries": [
+        0,
+        397,
+        793,
+        1190,
+        1586,
+        1983
+      ],
+      "outputs": [
+        "public/characters/ayi/modern-paint/normal.png",
+        "public/characters/ayi/modern-paint/happy.png",
+        "public/characters/ayi/modern-paint/surprised.png",
+        "public/characters/ayi/modern-paint/sad.png",
+        "public/characters/ayi/modern-paint/win.png"
+      ]
+    },
+    {
+      "id": "title",
+      "prompt": "Use case: style-transfer. Asset: 16:9 title scene for Virtual Taiwan Mahjong Parlor. Image 1 is the authoritative scene composition, room geometry and four-character identity/costume reference. Image 2 demonstrates the approved modern painted anime finish only. Repaint image 1 as rich contemporary hand-painted anime key art with visible restrained brushwork, nuanced skin and fabric shading, dimensional wood/ceramic/felt material, warm amber hanging lamp light and cool night window fill. Preserve exact four identities and color schemes: Xiaocui foreground right with dark teal twin-tails, pink ribbons, teal sailor collar and white blouse reaching to viewer; Yuehua silver hair purple eyes gold crescent clip and dark navy blouse seated left of group; Aming black spiky hair red headband orange jacket and yellow collar seated behind table; Lanjie purple updo gold glasses red/gold qipao standing holding tea tray. Place all four people and main mahjong table within RIGHT 60 percent. LEFT 40 percent must remain quiet deep jade/teal painterly shadow with only very faint foliage hints for later menu/logo overlay. Keep traditional Taiwan mahjong room furniture, green table felt and mahjong tiles, amber hanging lampshade at top right, dark wood, blue-white tea ware, night window and wall fan. Reduce tiny background ornament and shiny speckled reflections: subdued contrast and broad quiet shapes behind faces. Full natural colors, no monochrome cast. Anime drawings, NOT photo, NOT 3D, NOT flat cel art. No added people, no UI, no title, no lettering, no watermark. Final landscape 1920x1080.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-90c26207-04a8-4c61-a228-db10eeec85d0.png",
+      "archivedSource": "docs/art/modern-paint/sources/title.png",
+      "references": [
+        "public/ui/anime90/title-scene.png",
+        "docs/art/style-studies/2026-10-21/modern-paint/character.png"
+      ],
+      "initialGeneratedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-a361e41e-f563-49e6-b2c4-671f1e553186.png",
+      "correction": {
+        "prompt": "Precise composition refinement of this generated title illustration. Preserve contemporary painterly anime style, exact four characters, their faces/costumes/colors, mahjong table, room furniture, warm amber lighting and 16:9 canvas. CRITICAL: the entire LEFT 40% of the canvas (x=0 through x=768 in 1920 wide output) is quiet deep jade painterly shadow reserved for UI, with only faint low contrast foliage texture. No character, bright window, lamp, table edge or high-contrast object in that left 40%. Shift and compact the whole four-person scene into RIGHT 60%: silver-haired Yuehua at x>=800, Lanjie standing behind her toward center-right, Aming behind table further right, teal twin-tail Xiaocui foreground far right. Preserve all four recognizable identities, complete faces, and inviting pose. Keep background night window subdued, left edge seamlessly fades to deep teal shadow. Do not add text, logo, watermark or UI. Final1920x1080.",
+        "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-90c26207-04a8-4c61-a228-db10eeec85d0.png",
+        "reference": "C:/Users/User/.codex/generated_images/01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef/exec-a361e41e-f563-49e6-b2c4-671f1e553186.png"
+      }
+    },
+    {
+      "id": "parlor",
+      "prompt": "Use case: style-transfer. Asset: empty parlor game backdrop, landscape 16:9. Image 1 is the exact room layout, camera viewpoint, table and furniture reference. Image 2 is approved painted material/style reference. Repaint the identical empty Taiwan mahjong room in contemporary painterly anime background-art style: visible confident brushwork, rich but controlled natural colors, believable painted walnut wood, velvet green felt, ceramic tea ware, warm amber hanging lampshade and restrained cool blue nighttime window light. Keep the foreground square green mahjong table with green-backed tile walls, four red upholstered dark wooden chairs, left windows, right sideboard, tea shelf and wall fan, potted plants and the same fixed camera perspective. No people whatsoever, no portrait, no UI, no logo, no watermark. Reduce clutter contrast and tiny glittering reflections substantially: calm broad shadows, low contrast plants and wall details, no excessive bloom. Keep center table readable and deep emerald. Do not add new furnishings or alter scene geometry. Preserve colors of all furniture. NOT photograph, NOT 3D, NOT flat cel art. 1920x1080.",
+      "generatedSource": "C:\\Users\\User\\.codex\\generated_images\\01a15a35-e9e7-7d73-9a36-d6e5f6bf07ef\\exec-56028d1a-f3c6-48eb-8dfa-3bf5aa05c964.png",
+      "archivedSource": "docs/art/modern-paint/sources/parlor.png",
+      "references": [
+        "public/ui/anime90/parlor.png",
+        "docs/art/style-studies/2026-10-21/modern-paint/table.png"
+      ]
+    }
+  ],
+  "approvedCopies": [
+    {
+      "source": "docs/art/style-studies/2026-10-21/modern-paint/character.png",
+      "destination": "public/characters/ayi/modern-paint/normal.png"
+    },
+    {
+      "source": "docs/art/style-studies/2026-10-21/modern-paint/logo.png",
+      "destination": "public/ui/modern-paint/logo.png"
+    },
+    {
+      "source": "docs/art/style-studies/2026-10-21/modern-paint/table.png",
+      "destination": "public/ui/modern-paint/table.png"
+    }
+  ],
+  "processing": "Portraits split at minimum-alpha columns near five equal cell boundaries, alpha-trimmed, proportionally fit into 480x480 and padded 16 px to 512x512. Ayi normal, logo and table copied byte-identically from approved studies. Scene resize only to 1920x1080."
+}
