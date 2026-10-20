@@ -4,7 +4,7 @@
   //   桌面上是各家的手牌牆、副露、花與牌河，中央是局數／剩餘張數／倒數；
   //   下方是自己的名牌、提示列與手牌；右側是牌桌紀錄與聊天。
   import { onMount } from 'svelte';
-  import { net, act, clock, leave, hostCmd, disconnect, setAuto } from './net.svelte.js';
+  import { net, act, clock, leave, hostCmd, disconnect, setAuto, toast } from './net.svelte.js';
   import { artStyle } from './art-style.js';
   import { asset } from './site.js';
   import Tile from './Tile.svelte';
@@ -38,6 +38,8 @@
 
   // 新手提示（引擎算好放在 s.hint）：建議打的牌發光、建議的吃碰按鈕標出來，並由自己的角色說明原因
   const hint = $derived($showHints && !auto ? s.hint : null);
+  // 舊版伺服器送來的狀態裡沒有 hint 這個欄位（新版沒提示時是 null）
+  const hintsSupported = $derived('hint' in s);
   const hintKey = $derived.by(() => {
     if (hint?.type !== 'discard') return null;
     if (mine.drawn === hint.tile) return 'drawn';
@@ -298,7 +300,12 @@
         {/if}
 
         {#if isPlayer && s.phase === 'playing'}
-          <button class="hint-btn" class:on={$showHints} onclick={() => setShowHints(!$showHints)} title={$showHints ? '關閉新手提示' : '開啟新手提示'} aria-pressed={$showHints}>提示</button>
+          {#if hintsSupported}
+            <button class="hint-btn" class:on={$showHints} onclick={() => setShowHints(!$showHints)} title={$showHints ? '關閉新手提示' : '開啟新手提示'} aria-pressed={$showHints}>提示</button>
+          {:else}
+            <!-- 提示由房主的伺服器計算；0.3.0 以前的版本沒有這個功能 -->
+            <button class="hint-btn" onclick={() => toast('房主的伺服器版本較舊（0.3.0 以前），沒有提供新手提示；請房主更新 App。', 'info')} title="房主的伺服器版本較舊，沒有提供新手提示">提示？</button>
+          {/if}
           <button class="auto-btn" class:on={auto} onclick={() => setAuto(!auto)} title="讓電腦幫你打，隨時可以取消">
             {auto ? '我要自己打' : '託管'}
           </button>
