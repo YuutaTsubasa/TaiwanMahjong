@@ -7,6 +7,10 @@
 //       prog：'Dmaj7 Bm7 G7:2 C7:2'（預設一個和弦一小節，:n 表示 n 拍）
 //       rhythm：一小節 8 格（八分音符）；x = 短促、W = 延長整個和弦
 //   { kind: 'drums',  k, s, h, o, hits }          一小節 16 格，x 表示打；hits 是 [種類, 拍] 的額外打擊
+//   { kind: 'bass',   patch, prog, pattern }       依和弦自動彈貝斯：pattern 一小節 8 格（八分音符）
+//       r = 根音、5 = 五度、o = 高八度根音、3 = 三度、. = 休息
+//   { kind: 'arp',    prog, pattern, oct, patch? } 依和弦自動琶音（十六分音符），pattern 是和弦音的編號，
+//       例如 '0121'；沒給 patch 就用 SSG 方波
 // 長度（拍數）以最長的旋律音軌為準。
 // 曲子可以設 gain（0～1）調整整首的音量。
 
@@ -196,6 +200,32 @@ function compile(song) {
       length = Math.max(length, len);
       for (const n of notes) events.push({ beat: n.beat, dur: n.dur, midi: n.midi, vel: n.vel * (tr.vel ?? 1), tr });
     }
+    if (tr.kind === 'bass' || tr.kind === 'arp') {
+      let beat = 0;
+      for (const tok of tr.prog.split(/\s+/).filter(Boolean)) {
+        const [name, b] = tok.split(':');
+        const beats = b ? Number(b) : 4;
+        const notes = chordNotes(name);
+        if (tr.kind === 'bass') {
+          // 根音放在 C2～B2 一帶
+          let root = notes[0] - 24;
+          if (root < 36) root += 12;
+          const pick = { r: root, 5: root + 7, o: root + 12, 3: root + (notes[1] - notes[0]) };
+          for (let step = 0; step < beats * 2; step++) {
+            const ch = tr.pattern[(Math.round(beat * 2) + step) % tr.pattern.length];
+            if (ch in pick) events.push({ beat: beat + step / 2, dur: 0.45, midi: pick[ch], vel: tr.vel ?? 1, tr });
+          }
+        } else {
+          for (let step = 0; step < beats * 4; step++) {
+            const k = Number(tr.pattern[step % tr.pattern.length]);
+            const midi = notes[k % notes.length] + 12 * (Math.floor(k / notes.length) + (tr.oct ?? 1));
+            events.push({ beat: beat + step / 4, dur: 0.22, midi, vel: tr.vel ?? 1, tr });
+          }
+        }
+        beat += beats;
+      }
+      length = Math.max(length, beat);
+    }
     if (tr.kind === 'chords') {
       let beat = 0;
       for (const tok of tr.prog.split(/\s+/).filter(Boolean)) {
@@ -282,7 +312,8 @@ export class Player {
         if (t < ctx.currentTime - 0.05) continue; // 分頁在背景時落後太多就跳過
         const pan = ev.tr.pan ?? 0;
         if (ev.drum) drum(out, ev.drum, t);
-        else if (ev.tr.kind === 'ssg') ssgNote(out, ev.midi, t, ev.dur * spb * 0.9, ev.vel, pan);
+        else if (ev.tr.kind === 'ssg' || (ev.tr.kind === 'arp' && !ev.tr.patch)) ssgNote(out, ev.midi, t, ev.dur * spb * 0.9, ev.vel, pan);
+        else if (ev.tr.kind === 'bass') fmNote(out, ev.tr.patch ?? 'bass', ev.midi, t, ev.dur * spb * 0.92, ev.vel, pan);
         else fmNote(out, ev.tr.patch, ev.midi, t, ev.dur * spb * 0.92, ev.vel, pan);
       }
     };

@@ -1,6 +1,10 @@
 // 音樂與音效的總管：設定（音量、靜音）、音效、依牌局狀態切換 BGM 與短曲。
 import { audioContext, buses, fmNote, ssgNote, drum, noiseHit, setBusVolume, PATCHES } from './synth.js';
 import { Player, SONGS } from './music.js';
+import { CHARACTER_THEMES, themeName } from './themes.js';
+
+/** 'char:<角色 id>' 是角色主題曲，其他是 SONGS 裡的曲子 */
+const songFor = (name) => (name?.startsWith('char:') ? CHARACTER_THEMES[name.slice(5)] : SONGS[name]);
 
 function load(key, fallback) {
   try {
@@ -72,7 +76,12 @@ let currentBgm = null;
 function startBgm(name) {
   currentBgm = name;
   if (!name) return bgm.stop(0.8);
-  bgm.play(SONGS[name]);
+  bgm.play(songFor(name));
+}
+
+/** 角色圖鑑：選到誰就播誰的主題曲；離開圖鑑時呼叫 previewTheme(null) 回到標題曲 */
+export function previewTheme(characterId) {
+  setBgm(themeName(characterId) ?? 'title');
 }
 
 export function setBgm(name) {
@@ -280,7 +289,11 @@ export function onGameState(state) {
 
   // BGM
   if (state.phase === 'lobby') setBgm('lobby');
-  else if (state.phase === 'playing') setBgm(state.wall_count != null && state.wall_count <= 16 ? 'tension' : 'game');
+  // 對局中播莊家的主題曲（自訂角色沒有主題曲就播一般對局曲）；牌快摸完時換成緊張的曲子
+  else if (state.phase === 'playing') {
+    const dealerTheme = themeName(state.seats[state.dealer]?.character) ?? 'game';
+    setBgm(state.wall_count != null && state.wall_count <= 16 ? 'tension' : dealerTheme);
+  }
   else if (state.phase === 'game_over') setBgm('lobby');
   else setBgm(null);
 

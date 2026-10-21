@@ -98,6 +98,33 @@ export const PATCHES = {
     mods: [{ ratio: 1, index: 0.9, env: { a: 0.2, d: 0.5, s: 0.8, r: 0.3 } }],
     detune: 4,
   },
+  // 角色主題曲用的音色
+  flute: {
+    level: 0.17,
+    env: { a: 0.04, d: 0.3, s: 0.8, r: 0.15 },
+    mods: [{ ratio: 1, index: 0.35, env: { a: 0.05, d: 0.3, s: 0.6, r: 0.1 } }],
+  },
+  sax: {
+    level: 0.16,
+    env: { a: 0.03, d: 0.3, s: 0.75, r: 0.1 },
+    mods: [
+      { ratio: 1, index: 1.8, env: { a: 0.04, d: 0.2, s: 0.6, r: 0.1 } },
+      { ratio: 3, index: 0.3, env: { a: 0.01, d: 0.1, s: 0.2, r: 0.05 } },
+    ],
+  },
+  guitar: {
+    level: 0.14,
+    env: { a: 0.005, d: 0.6, s: 0.5, r: 0.1 },
+    mods: [
+      { ratio: 1, index: 3.5, env: { a: 0.005, d: 0.3, s: 0.5, r: 0.1 } },
+      { ratio: 2, index: 1.2, env: { a: 0.005, d: 0.2, s: 0.3, r: 0.1 } },
+    ],
+  },
+  organ: {
+    level: 0.09,
+    env: { a: 0.01, d: 0.2, s: 1, r: 0.08 },
+    mods: [{ ratio: 2, index: 0.6, env: { a: 0.01, d: 0.2, s: 1, r: 0.08 } }],
+  },
 };
 
 /** 播一個 FM 音（時間 t 秒、長度 dur 秒） */

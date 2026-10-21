@@ -5,6 +5,8 @@
   import Brand from './Brand.svelte';
   import OrnateHeading from './ui/OrnateHeading.svelte';
   import PortraitGrid from './ui/PortraitGrid.svelte';
+  import { onDestroy } from 'svelte';
+  import { previewTheme } from './audio/sound.svelte.js';
 
   const EXPRESSIONS = [
     { id: 'normal', name: '常態', line: 'chow' },
@@ -14,6 +16,9 @@
     { id: 'win', name: '勝利', line: 'tsumo' },
   ];
   let character = $state('xiaocui');
+  // 選到誰就播誰的主題曲；離開圖鑑回到標題曲
+  $effect(() => previewTheme(character));
+  onDestroy(() => previewTheme(null));
   let expression = $state('happy');
   const selected = $derived(getCharacter(character));
   const preview = $derived(EXPRESSIONS.find((item) => item.id === expression));
