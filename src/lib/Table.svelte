@@ -61,14 +61,16 @@
   // 提示框放在「提示」按鈕正上方，左右不超出畫面
   let hintBtn = $state(null);
   let hintPos = $state({ left: -360, arrow: 400, width: 420 });
+  let bottomEl = $state(null);
   function placeHint() {
-    if (!hintBtn) return;
+    if (!hintBtn || !bottomEl) return;
     const r = hintBtn.getBoundingClientRect();
+    const box = bottomEl.getBoundingClientRect();
     const width = Math.min(420, window.innerWidth - 16);
     const cx = r.left + r.width / 2;
     const left = Math.min(Math.max(cx - width + 44, 8), window.innerWidth - width - 8);
-    // 提示框放在按鈕旁的 .hint-anchor 裡，left 是相對於按鈕左邊
-    hintPos = { left: left - r.left, arrow: cx - left, width };
+    // 提示框放在 .bottom 裡、整個提示列的上方；left 是相對於 .bottom 左邊
+    hintPos = { left: left - box.left, arrow: cx - left, width };
   }
   $effect(() => {
     if (!hint) return;
@@ -79,6 +81,7 @@
   });
   // 舊版伺服器送來的狀態裡沒有 hint 這個欄位（新版沒提示時是 null）
   const hintsSupported = $derived('hint' in s);
+  const chows = $derived(special.filter((a) => a.type === 'chow'));
   const hintKey = $derived.by(() => {
     if (hint?.type !== 'discard') return null;
     if (mine.drawn === hint.tile) return 'drawn';
@@ -278,24 +281,34 @@
     <div class="seat-me">
       <PlayerCard seat={mine} variant={compact ? 'chip' : 'me'} active={active(me)} thinking={thinking(me)} isMe={isPlayer} bubble="up" />
     </div>
-    <div class="bottom">
+    <div class="bottom" bind:this={bottomEl}>
       <div class="prompt-row">
+        <div class="prompt-main">
         {#if auto && s.phase === 'playing'}
           <div class="banner auto-banner">
             <b>託管中</b><span class="sep"></span><span>電腦正在幫你打</span>
           </div>
         {:else if special.length}
           <div class="actions">
-            {#each special as a (a.id)}
+            {#each special.filter((a) => a.type !== 'chow') as a (a.id)}
               <button class="act {btnClass[a.type]}" class:recommended={recommended(a)} onclick={() => act(a.id)}>
                 <span>{a.type === 'skill' ? a.label : btnText[a.type]}</span>
-                {#if a.type === 'chow'}
-                  <span class="mini">{#each a.tiles as t}<Tile code={t} size="xs" />{/each}</span>
-                {:else if a.tile && a.type !== 'pass'}
+                {#if a.tile && a.type !== 'pass'}
                   <span class="mini"><Tile code={a.tile} size="xs" /></span>
                 {/if}
               </button>
             {/each}
+            {#if chows.length}
+              <!-- 吃有好幾種組合時併成一組：「吃」後面每個組合各是一顆按鈕 -->
+              <div class="act claim chow-group" role="group" aria-label="吃">
+                <span>吃</span>
+                {#each chows as a (a.id)}
+                  <button class="chow-opt" class:recommended={recommended(a)} onclick={() => act(a.id)} aria-label="吃 {a.label ?? ''}">
+                    {#each a.tiles as t}<Tile code={t} size="xs" />{/each}
+                  </button>
+                {/each}
+              </div>
+            {/if}
             {#if remaining != null}<span class="cd" class:urgent={remaining <= 5}>{remaining}s</span>{/if}
           </div>
         {:else if canDiscard}
@@ -320,7 +333,7 @@
           </div>
         {/if}
         {#if mind}
-          <div class="waits skill-info" title="讀心術：這家的整副手牌（還能看 {mind.left} 張）">
+          <div class="waits skill-info" title="鎖定獵物：這家的整副手牌（還能看 {mind.left} 張）">
             <b>讀心</b><span class="who">{relName(mind.seat)}</span>{#each mind.tiles as t}<Tile code={t} size="xs" />{/each}
           </div>
         {/if}
@@ -336,12 +349,24 @@
           </div>
         {/if}
 
+        </div>
+        <div class="prompt-tools">
         {#if isPlayer && s.phase === 'playing'}
           {#if hintsSupported}
-            <span class="hint-anchor">
-              <button bind:this={hintBtn} class="hint-btn" class:on={hintOpen} class:ready={!!s.hint && !hintOpen && !auto} onclick={toggleHint} title={hintOpen ? '關上提示' : '看提示：建議打哪張、要不要吃碰'} aria-expanded={hintOpen}>提示</button>
+            <button bind:this={hintBtn} class="hint-btn" class:on={hintOpen} class:ready={!!s.hint && !hintOpen && !auto} onclick={toggleHint} title={hintOpen ? '關上提示' : '看提示：建議打哪張、要不要吃碰'} aria-expanded={hintOpen}>提示</button>
+          {:else}
+            <!-- 提示由房主的伺服器計算；0.3.0 以前的版本沒有這個功能 -->
+            <button class="hint-btn" onclick={() => toast('房主的伺服器版本較舊（0.3.0 以前），沒有提供新手提示；請房主更新 App。', 'info')} title="房主的伺服器版本較舊，沒有提供新手提示">提示？</button>
+          {/if}
+          <button class="auto-btn" class:on={auto} onclick={() => setAuto(!auto)} title="讓電腦幫你打，隨時可以取消">
+            {auto ? '我要自己打' : '託管'}
+          </button>
+        {/if}
+        </div>
+      </div>
+
       {#if hint}
-        <!-- 浮在畫面上的提示框（不佔排版），跟著「提示」按鈕、箭頭指向它 -->
+        <!-- 浮在畫面上的提示框（不佔排版）：放在整個提示列上方，不會蓋到按鈕；箭頭指向「提示」 -->
         <div class="hint-pop" role="dialog" aria-label="提示" style:left="{hintPos.left}px" style:width="{hintPos.width}px" style:--arrow="{hintPos.arrow}px">
           <div class="hint-body">
             <Avatar id={mine.character} size={34} crop />
@@ -358,17 +383,6 @@
           </label>
         </div>
       {/if}
-            </span>
-          {:else}
-            <!-- 提示由房主的伺服器計算；0.3.0 以前的版本沒有這個功能 -->
-            <button class="hint-btn" onclick={() => toast('房主的伺服器版本較舊（0.3.0 以前），沒有提供新手提示；請房主更新 App。', 'info')} title="房主的伺服器版本較舊，沒有提供新手提示">提示？</button>
-          {/if}
-          <button class="auto-btn" class:on={auto} onclick={() => setAuto(!auto)} title="讓電腦幫你打，隨時可以取消">
-            {auto ? '我要自己打' : '託管'}
-          </button>
-        {/if}
-      </div>
-
       <div class="hand" class:turn={canDiscard}>
         {#each mine.hand ?? [] as t, i (keyFor(t, i))}
           <Tile code={t} size="xl" clickable={canDiscard} selected={selected === keyFor(t, i)} hint={hintKey === keyFor(t, i)} onclick={() => clickTile(t, keyFor(t, i))} />
@@ -540,8 +554,11 @@
   .timer.urgent { color: var(--red); font-weight: 700; }
 
   /* ───── 下方：提示列＋手牌 ───── */
-  .bottom { grid-area: bottom; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; container-type: inline-size; }
-  .prompt-row { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 46px; width: 100%; flex-wrap: wrap; }
+  .bottom { position: relative; grid-area: bottom; min-width: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; container-type: inline-size; }
+  .prompt-row { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 46px; width: 100%; }
+  /* 左邊：動作按鈕或狀態（太多時在這一塊裡換行）；右邊：「提示」「託管」固定不動 */
+  .prompt-main { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; min-width: 0; flex: 0 1 auto; }
+  .prompt-tools { display: flex; align-items: center; gap: 8px; flex: none; }
   .banner {
     display: flex;
     align-items: center;
@@ -559,7 +576,12 @@
   .banner.turn { border-color: var(--gold); }
   .auto-banner b { color: var(--accent); }
 
-  .actions { display: flex; gap: 10px; align-items: center; animation: rise 0.2s ease; }
+  .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; align-items: center; animation: rise 0.2s ease; }
+  /* 吃的組合：一個「吃」字，後面每種組合是一顆小按鈕 */
+  :global(html[data-ui-style]) .chow-group { display: flex; align-items: center; gap: 6px; padding: 4px 6px 4px 14px; cursor: default; }
+  :global(html[data-ui-style]) .chow-opt { display: inline-flex; gap: 1px; min-height: 0; padding: 3px 4px; background: #0003; border: 1px solid transparent; border-radius: var(--small-radius); box-shadow: none; }
+  :global(html[data-ui-style]) .chow-opt:hover:not(:disabled) { background: #0005; border-color: var(--gold); }
+  :global(html[data-ui-style]) .chow-opt.recommended { border-color: var(--gold); box-shadow: 0 0 8px color-mix(in srgb, var(--gold) 70%, transparent); }
   @keyframes rise { from { transform: translateY(8px); opacity: 0; } }
   .act { display: flex; align-items: center; gap: 8px; font-family: var(--heading-font); font-size: 24px; font-weight: 700; padding: 6px 22px; }
   .mini { display: inline-flex; gap: 1px; }
@@ -579,10 +601,9 @@
   }
   /* 新手提示：自己的角色小頭像＋一句說明 */
   /* 提示框：浮在畫面上（fixed，不佔排版），跟角色反應泡泡同一套配色，下方的箭頭指向「提示」按鈕 */
-  .hint-anchor { position: relative; display: inline-flex; }
   .hint-pop {
     position: absolute;
-    bottom: calc(100% + 12px);
+    bottom: calc(100% + 10px);
     z-index: 15;
     padding: 8px 10px 6px;
     color: var(--bubble-text);
@@ -685,7 +706,9 @@
   .compact .banner { padding: 4px 12px; gap: 8px; }
   .compact .banner b { font-size: 16px; letter-spacing: 0.1em; }
   .compact .banner span { font-size: 12px; }
-  .compact .act { font-size: 18px; padding: 4px 14px; }
+  .compact .act { font-size: 16px; padding: 3px 10px; gap: 4px; }
+  .compact .actions { gap: 6px; }
+  :global(html[data-ui-style]) .compact .chow-group { padding: 3px 4px 3px 10px; gap: 4px; }
   .compact .auto-btn { min-width: 0; padding: 4px 12px; font-size: 15px; letter-spacing: 0.1em; }
   .compact .hand { padding: 10px 4px 4px; }
   .compact .hand :global(.tile) { --w: clamp(22px, min(calc((100cqw - 40px) / 18.4), 9vh), 54px); }
@@ -711,7 +734,8 @@
   .strip .bottom { grid-column: 1 / -1; grid-row: 3; }
   /* 左邊讓出自己的名牌（名牌最寬 166px，託管、莊等標籤都在裡面） */
   .strip .seat-me :global(.v-chip) { max-width: 166px; }
-  .strip .prompt-row { padding-left: 172px; justify-content: flex-start; gap: 8px; }
+  .strip .prompt-row { padding-left: 172px; justify-content: space-between; gap: 8px; }
+  .strip .prompt-main { justify-content: flex-start; flex: 1; }
   .strip .hand { flex-wrap: wrap; justify-content: center; overflow: visible; row-gap: 6px; }
   .strip .hand :global(.tile) { --w: clamp(26px, calc((100cqw - 40px) / 9.6), 48px); }
   .strip .drawn-gap { width: 6px; }
@@ -720,7 +744,11 @@
   .strip .banner.quiet span { display: inline; font-size: 12px; }
   .strip .prompt-row { flex-wrap: nowrap; }
   /* 要吃碰胡時按鈕比較多：先藏起託管鈕，動作按鈕縮小一點，免得擠出畫面 */
-  .strip .actions ~ .auto-btn { display: none; }
+  .strip .prompt-row:has(.actions) .auto-btn { display: none; }
+  /* 要吃碰胡時，暫時收起自己的小名牌，讓按鈕用整排的寬度（不然會被擠成一顆一行） */
+  .strip .tableboard:has(.actions) .seat-me { visibility: hidden; }
+  .strip .prompt-row:has(.actions) { padding-left: 0; }
+  .strip .prompt-row:has(.actions) .prompt-main { justify-content: center; }
   .strip .actions { gap: 6px; flex-wrap: wrap; min-width: 0; flex: 1; }
   .strip .act { font-size: 16px; padding: 4px 10px; gap: 4px; }
   .strip .banner { padding: 6px 12px; }
@@ -730,6 +758,5 @@
   @media (max-width: 379px) { .strip .auto-banner { display: none; } }
   /* 「紀錄」按鈕移到牌桌右上角，不擋到下家的名牌 */
   .strip .open-side { top: 62px; right: 10px; }
-  .compact .seat-left :global(.v-chip .wind), .compact .seat-right :global(.v-chip .wind) { left: 33px; top: 31px; }
 
 </style>

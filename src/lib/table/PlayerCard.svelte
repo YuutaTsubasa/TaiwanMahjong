@@ -135,7 +135,8 @@
   }
   .skill-badge.used { color: #bbb; background: #555; border-color: #333; }
   .v-side .skill-badge { display: none; }
-  .v-chip .skill-badge { width: 15px; height: 15px; font-size: 9px; left: 1px; bottom: 1px; }
+  /* 小名牌：「技」縮小放左上角（頭髮的位置），不遮臉 */
+  .v-chip .skill-badge { width: 13px; height: 13px; font-size: 8px; left: 1px; top: 1px; bottom: auto; }
   /* 對家名牌很矮：標籤排成一行，放不下時技能名稱用省略號（滑鼠移上去看得到完整說明） */
   .v-top .line2 { flex-wrap: nowrap; overflow: hidden; }
   .tag.skill.used { background: #555; color: #bbb; text-decoration: line-through; }
@@ -161,9 +162,9 @@
   .v-chip .portrait :global(.avatar) { width: 150% !important; top: -8%; }
   .v-chip .meta { padding: 0; gap: 1px; min-width: 0; }
   .v-chip .line1 { gap: 5px; justify-content: flex-start; }
-  .v-chip .nm { font-size: 13px; letter-spacing: 0.02em; max-width: 7em; }
-  /* 門風疊在頭像右下角，名字才有空間 */
-  .v-chip .wind { position: absolute; left: 27px; top: 25px; width: 19px; height: 19px; font-size: 12px; box-shadow: 0 1px 3px #000a; z-index: 1; }
+  .v-chip .nm { min-width: 0; font-size: 13px; letter-spacing: 0.02em; max-width: 6em; }
+  /* 門風放在名字旁邊（以前疊在頭像上，會遮住臉） */
+  .v-chip .wind { flex: none; width: 17px; height: 17px; font-size: 11px; box-shadow: 0 1px 0 var(--tile-edge); }
   .v-chip .line2 { gap: 3px; border-top: 0; padding-top: 0; flex-wrap: nowrap; }
   .v-chip .score { font-size: 11px; margin-right: 2px; }
   .v-chip .tag { font-size: 9px; padding: 0 4px; line-height: 1.6; }
