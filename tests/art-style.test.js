@@ -41,7 +41,7 @@ test('each style resolves a different complete set without changing identities',
 test('four new men are regular playable characters with dialogue and matching engine identities', () => {
   assert.equal(characters.getSelectableCharacters().length, 10);
   assert.equal(characters.getSelectableCharacters(true).length, 11);
-  for (const [id, name] of [['ziheng', '子衡'], ['chengyue', '承岳'], ['zhibai', '知白'], ['youchen', '佑辰']]) {
+  for (const [id, name] of [['jinye', '金爺'], ['alie', '阿烈'], ['leo', '雷歐'], ['cangya', '蒼牙']]) {
     const character = characters.getSelectableCharacters().find(c => c.id === id);
     assert.equal(character?.name, name);
     for (const event of Object.keys(characters.EVENT_EXPRESSION)) {

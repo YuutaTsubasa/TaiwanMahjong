@@ -21,13 +21,13 @@ pub enum Skill {
     Peek,
     /// 阿翼：放槍時不用付錢（被動，一場一次）
     Shield,
-    /// 子衡：胡牌時多算 1 台（被動）
+    /// 金爺：胡牌時多算 1 台（被動）
     Foreshadow,
-    /// 承岳：別人自摸時不用付錢（被動，一場一次）
+    /// 阿烈：別人自摸時不用付錢（被動，一場一次）
     Sturdy,
-    /// 知白：這一回合打出的牌別人不能胡（吃碰槓不擋）（主動）
+    /// 雷歐：這一回合打出的牌別人不能胡（吃碰槓不擋）（主動）
     Rest,
-    /// 佑辰：看到分數最高那家的整副手牌，維持到自己打出三張牌（主動）
+    /// 蒼牙：看到分數最高那家的整副手牌，維持到自己打出三張牌（主動）
     ReadMind,
 }
 
@@ -41,10 +41,10 @@ impl Skill {
             "xiaochun" => Skill::QuickChow,
             "lanjie" => Skill::Peek,
             "ayi" => Skill::Shield,
-            "ziheng" => Skill::Foreshadow,
-            "chengyue" => Skill::Sturdy,
-            "zhibai" => Skill::Rest,
-            "youchen" => Skill::ReadMind,
+            "jinye" => Skill::Foreshadow,
+            "alie" => Skill::Sturdy,
+            "leo" => Skill::Rest,
+            "cangya" => Skill::ReadMind,
             _ => return None,
         })
     }
@@ -74,10 +74,10 @@ impl Skill {
             Skill::QuickChow => "快攻",
             Skill::Peek => "老闆娘的眼力",
             Skill::Shield => "銀之盾",
-            Skill::Foreshadow => "伏筆回收",
-            Skill::Sturdy => "穩固",
-            Skill::Rest => "休止符",
-            Skill::ReadMind => "讀心術",
+            Skill::Foreshadow => "加注",
+            Skill::Sturdy => "身經百戰",
+            Skill::Rest => "王命",
+            Skill::ReadMind => "鎖定獵物",
         }
     }
 
