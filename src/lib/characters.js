@@ -4,6 +4,8 @@
 //   images: { normal: '/characters/<id>/normal.png', happy: '...', surprised: '...', sad: '...', win: '...' }
 // 沒給的表情會退回 normal 那張；完全沒給 images 就用內建的 SVG 畫法。
 //
+// faceShift：臉在圖裡位置比較低時（0～1，占整張圖的比例），牌桌名牌裁切時往上移這麼多。
+//
 // 外觀參數（給內建 SVG 用）：
 //   hair      髮色          hairStyle  twintails | long | short | bun | doublebun | ponytail
 //   bangs     soft | spiky | parted
@@ -174,6 +176,7 @@ export const CHARACTERS = [
     images: characterImages('cangya'),
     name: '蒼牙',
     intro: '銀髮狼耳、鼻子靈又好勝的狼族少年',
+    faceShift: 0.13, // 狼耳／王冠很高，臉在圖裡比較低：名牌裁切時往上移
     hair: '#a7a9ad',
     hairStyle: 'short',
     bangs: 'spiky',
@@ -220,6 +223,7 @@ export const CHARACTERS = [
     images: characterImages('leo'),
     name: '雷歐',
     intro: '戴著王冠、一本正經的異國王子騎士',
+    faceShift: 0.08, // 狼耳／王冠很高，臉在圖裡比較低：名牌裁切時往上移
     hair: '#f2c94c',
     hairStyle: 'short',
     bangs: 'spiky',

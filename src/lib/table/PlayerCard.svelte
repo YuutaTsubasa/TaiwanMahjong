@@ -3,6 +3,7 @@
   // variant：side（左右兩家，直式）、top（對家，橫式）、me（自己，橫式）、chip（手機用的小名牌）
   import Avatar from '../Avatar.svelte';
   import { reactionFor } from '../reactions.svelte.js';
+  import { getCharacter } from '../characters.js';
 
   let { seat, variant = 'side', active = false, thinking = false, isMe = false, bubble = 'down' } = $props();
 
@@ -14,7 +15,8 @@
 </script>
 
 <div class="pcard v-{variant}" class:active class:thinking class:empty={!seat.name}>
-  <div class="portrait" class:pop={reaction}>
+  <!-- 臉在圖裡位置比較低的角色（例如狼耳、王冠很高），裁切時整張圖往上移一點 -->
+  <div class="portrait" class:pop={reaction} style:--face-shift={seat.character ? (getCharacter(seat.character).faceShift ?? 0) : 0}>
     {#if seat.character}
       <Avatar id={seat.character} expression={reaction?.expression ?? 'normal'} size={240} />
     {/if}
@@ -75,7 +77,7 @@
     width: 125% !important;
     height: auto !important;
     aspect-ratio: 1;
-    transform: translateX(-50%);
+    transform: translate(-50%, calc(var(--face-shift, 0) * -100%));
   }
   .portrait.pop { animation: pop 0.35s ease; }
   @keyframes pop { 40% { filter: brightness(1.25); transform: scale(1.04); } }
