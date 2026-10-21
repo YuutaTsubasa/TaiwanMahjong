@@ -27,13 +27,17 @@ pub enum SeatKind {
 }
 
 /// 內建角色（id, 名字, 介紹）。前端 src/lib/characters.js 的外觀與台詞要跟這裡同步。
-pub const CHARACTERS: [(&str, &str, &str); 6] = [
+pub const CHARACTERS: [(&str, &str, &str); 10] = [
     ("xiaocui", "小翠", "綠色雙馬尾的元氣少女"),
     ("yuehua", "月華", "銀髮的冷靜大小姐"),
     ("aming", "阿明", "熱血的刺蝟頭少年"),
     ("tangtang", "糖糖", "愛撒嬌的粉紅包包頭"),
     ("xiaochun", "小春", "橘色馬尾的運動少女"),
     ("lanjie", "蘭姐", "戴眼鏡的麻將館老闆娘"),
+    ("ziheng", "子衡", "溫柔有禮、牌風卻毫不留情的書店老闆"),
+    ("chengyue", "承岳", "沉穩可靠、常來幫忙修桌椅的家具修復師"),
+    ("zhibai", "知白", "話少卻細心、銀藍髮的大提琴手"),
+    ("youchen", "佑辰", "笑容親切、擅長讀心的活動主持人"),
 ];
 
 pub fn character_name(id: &str) -> Option<&'static str> {
@@ -135,6 +139,11 @@ pub struct PlayerState {
     /// 蘭姐偷看到的牌，以及偷看時牌牆前面已經被摸走幾張
     pub peek: Vec<Tile>,
     pub peek_at: usize,
+    /// 知白：下一張打出的牌別人不能胡
+    pub no_ron_next: bool,
+    /// 佑辰的讀心術：看誰的手牌、還能看幾張（自己每打一張減一）
+    pub read_mind: Option<usize>,
+    pub read_mind_left: u8,
 }
 
 #[derive(Clone, Debug)]
@@ -836,8 +845,12 @@ impl Room {
         h.last_discard = Some((seat, t));
         // 糖糖的「拜託嘛～」：這張牌只能被胡
         let no_claim = std::mem::take(&mut h.players[seat].no_claim_next);
+        // 知白的「休止符」：這張牌不能被胡
+        let no_ron = std::mem::take(&mut h.players[seat].no_ron_next);
         let sw = &mut h.players[seat].see_waits_left;
         *sw = sw.saturating_sub(1);
+        let rm = &mut h.players[seat].read_mind_left;
+        *rm = rm.saturating_sub(1);
         let quick_chow: [bool; 4] = std::array::from_fn(|o| {
             self.settings.skills
                 && self.seats[o].as_ref().and_then(|i| Skill::of(&i.character)) == Some(Skill::QuickChow)
@@ -851,7 +864,7 @@ impl Room {
             let mut c = counts(&q.concealed);
             let mut opts = Vec::new();
             c[t as usize] += 1;
-            if !q.skip_ron && is_win(&c) {
+            if !q.skip_ron && !no_ron && is_win(&c) {
                 opts.push(Action::Ron);
             }
             c[t as usize] -= 1;
@@ -917,7 +930,7 @@ impl Room {
         match skill {
             Skill::Redraw => drawn.is_some() && !claimed && h.wall.len() > RESERVE + 1,
             Skill::Peek => h.wall.len() > RESERVE,
-            Skill::SeeWaits | Skill::NoClaim => true,
+            Skill::SeeWaits | Skill::NoClaim | Skill::Rest | Skill::ReadMind => true,
             _ => false,
         }
     }
@@ -948,6 +961,17 @@ impl Room {
             Skill::Peek => {
                 p.peek = h.wall.iter().take(3).copied().collect();
                 p.peek_at = h.front_drawn;
+            }
+            Skill::Rest => p.no_ron_next = true,
+            Skill::ReadMind => {
+                // 分數最高的另一家；同分時取離自己最近的下家方向
+                let scores = self.scores;
+                let target = (1..4)
+                    .map(|k| (seat + k) % 4)
+                    .max_by_key(|&o| (scores[o], std::cmp::Reverse((o + 4 - seat) % 4)));
+                let p = &mut self.hand.as_mut().unwrap().players[seat];
+                p.read_mind = target;
+                p.read_mind_left = 3;
             }
             _ => {}
         }
@@ -1217,7 +1241,12 @@ impl Room {
             earth: f.earth,
             flower_win: f.flower_win,
         };
-        let items = score(&ctx);
+        let mut items = score(&ctx);
+        // 子衡的「伏筆回收」：胡牌多 1 台
+        let foreshadow = self.skill_of(w) == Some(Skill::Foreshadow);
+        if foreshadow {
+            items.push(ScoreItem { name: "伏筆回收".into(), tai: 1 });
+        }
         let hand_tai: u32 = items.iter().map(|i| i.tai).sum();
         let mut dealer_items = vec![ScoreItem { name: "莊家".into(), tai: 1 }];
         if self.streak > 0 {
@@ -1238,9 +1267,15 @@ impl Room {
             (Some(l), false) if self.skill_of(l) == Some(Skill::Shield) && !self.shield_used[l] => Some(l),
             _ => None,
         };
+        // 承岳的「穩固」：別人自摸時不用付錢（一場一次）
+        let sturdy: Vec<usize> = if f.self_draw {
+            payers.iter().copied().filter(|&s| self.skill_of(s) == Some(Skill::Sturdy) && !self.shield_used[s]).collect()
+        } else {
+            vec![]
+        };
         for pr in payers {
             let tai = hand_tai + if w == self.dealer || pr == self.dealer { dealer_tai } else { 0 };
-            let amount = if shielded == Some(pr) { 0 } else { self.settings.base + tai as i64 * self.settings.per_tai };
+            let amount = if shielded == Some(pr) || sturdy.contains(&pr) { 0 } else { self.settings.base + tai as i64 * self.settings.per_tai };
             deltas[pr] -= amount;
             deltas[w] += amount;
             payments.push(Payment { from: pr, to: w, tai, amount });
@@ -1261,6 +1296,16 @@ impl Room {
             self.hand.as_mut().unwrap().players[l].skill_used = true;
             summary.push_str(&format!("（{} 的銀之盾擋下了付款）", self.name(l)));
             self.announce_skill(l, Skill::Shield);
+        }
+        for &s in &sturdy {
+            self.shield_used[s] = true;
+            self.hand.as_mut().unwrap().players[s].skill_used = true;
+            summary.push_str(&format!("（{} 的穩固：這次不用付）", self.name(s)));
+            self.announce_skill(s, Skill::Sturdy);
+        }
+        if foreshadow {
+            self.hand.as_mut().unwrap().players[w].skill_used = true;
+            self.announce_skill(w, Skill::Foreshadow);
         }
         self.push_log(summary.clone());
         self.push_event(w, if f.self_draw { "tsumo" } else { "ron" }, win_tile);
@@ -1556,9 +1601,10 @@ impl Room {
                     "character": info.map(|i| i.character.clone()),
                 });
                 if let Some(k) = self.skill_of(s) {
-                    let used = match k {
-                        Skill::Shield => self.shield_used[s],
-                        _ => self.hand.as_ref().map_or(false, |h| h.players[s].skill_used),
+                    let used = if k.once_per_game() {
+                        self.shield_used[s]
+                    } else {
+                        self.hand.as_ref().map_or(false, |h| h.players[s].skill_used)
                     };
                     v["skill"] = json!({ "id": k.id(), "name": k.name(), "desc": k.desc(), "active": k.is_active(), "used": used });
                 }
@@ -1672,6 +1718,11 @@ impl Room {
                 .collect();
             o["see_waits"] = json!({ "left": p.see_waits_left, "seats": seen });
         }
+        if let (Some(t), true) = (p.read_mind, p.read_mind_left > 0) {
+            let mut tiles = h.players[t].concealed.clone();
+            tiles.sort_unstable();
+            o["read_mind"] = json!({ "seat": t, "left": p.read_mind_left, "tiles": list_codes(&tiles) });
+        }
         let taken = h.front_drawn.saturating_sub(p.peek_at);
         if !p.peek.is_empty() && taken < p.peek.len() {
             o["peek"] = json!(list_codes(&p.peek[taken..]));
@@ -1777,7 +1828,7 @@ impl Room {
         }
         let _ = writeln!(o, "\n★ 你的手牌（{} 張）：{}", me.concealed.len(), ls(&hand));
         if let Some(k) = self.skill_of(viewer) {
-            let used = if k == Skill::Shield { self.shield_used[viewer] } else { me.skill_used };
+            let used = if k.once_per_game() { self.shield_used[viewer] } else { me.skill_used };
             let _ = writeln!(o, "★ 你的技能「{}」：{}{}", k.name(), k.desc(), if used { "（已用過）" } else { "" });
             let info = self.skill_info(h, viewer);
             if let Some(sw) = info.get("see_waits") {
@@ -1787,6 +1838,11 @@ impl Room {
                     let txt = if x["waits"].is_null() { "（看不出來）".to_string() } else if w.is_empty() { "沒聽牌".to_string() } else { w.join(" ") };
                     let _ = writeln!(o, "  看穿 {}（{}）聽：{}", self.name(s), rel(s), txt);
                 }
+            }
+            if let Some(rm) = info.get("read_mind") {
+                let s = rm["seat"].as_u64().unwrap_or(0) as usize;
+                let ts: Vec<&str> = rm["tiles"].as_array().into_iter().flatten().filter_map(|t| t.as_str()).collect();
+                let _ = writeln!(o, "  讀心 {}（{}）的手牌：{}", self.name(s), rel(s), ts.join(" "));
             }
             if let Some(pk) = info.get("peek").and_then(|x| x.as_array()) {
                 let ts: Vec<&str> = pk.iter().filter_map(|t| t.as_str()).collect();
@@ -1859,6 +1915,22 @@ impl Room {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn new_regular_characters_keep_their_identity_in_a_game() {
+        let mut room = Room::new(Settings::default());
+        for (id, name) in [("ziheng", "子衡"), ("chengyue", "承岳"), ("zhibai", "知白"), ("youchen", "佑辰")] {
+            assert_eq!(character_name(id), Some(name));
+            let (seat, _) = room.join(name, SeatKind::Human, Some(id)).unwrap();
+            assert_eq!(room.seats[seat].as_ref().unwrap().character, id);
+        }
+        room.start_game().unwrap();
+        let view = room.view(Some(0));
+        for (seat, id) in ["ziheng", "chengyue", "zhibai", "youchen"].iter().enumerate() {
+            assert_eq!(view["seats"][seat]["character"], *id);
+        }
+        assert!(!CHARACTERS.iter().any(|c| c.0 == "ayi"), "Ayi must stay out of random bot selection");
+    }
 
     /// 四個電腦自己打完整場，確認不會卡住或 panic。
     #[test]
@@ -2125,6 +2197,94 @@ mod tests {
         room.phase = Phase::GameOver;
         room.start_game().unwrap();
         assert!(!room.shield_used[1]);
+    }
+
+    /// 知白：休止符那一張別人不能胡，吃碰還是可以；下一張恢復
+    #[test]
+    fn rest_blocks_ron_only() {
+        let mut room = skill_room(["zhibai", "xiaocui", "tangtang", "lanjie"]);
+        let h = room.hand.as_mut().unwrap();
+        h.players[1].concealed = vec![3, 4, 27, 27]; // 下家聽二萬五萬
+        h.players[2].concealed = vec![2, 2, 25]; // 對家可以碰二萬
+        room.act(0, Action::Skill).unwrap();
+        room.act(0, Action::Discard(2)).unwrap();
+        let h = room.hand.as_ref().unwrap();
+        let Step::Claims { options, .. } = &h.step else { panic!("對家還能碰，要等搶牌") };
+        assert!(!options[1].contains(&Action::Ron), "休止符：不能胡");
+        assert!(options[2].contains(&Action::Pung), "碰不受影響");
+        assert!(!h.players[0].no_ron_next);
+        assert!(h.players[0].skill_used);
+    }
+
+    /// 子衡：胡牌多 1 台
+    #[test]
+    fn foreshadow_adds_one_tai() {
+        let mut room = skill_room(["xiaocui", "ziheng", "tangtang", "lanjie"]);
+        room.hand.as_mut().unwrap().players[1].concealed = vec![3, 4, 27, 27];
+        room.act(0, Action::Discard(2)).unwrap();
+        room.act(1, Action::Ron).unwrap();
+        let r = room.result.as_ref().unwrap();
+        assert!(r.items.iter().any(|i| i.name == "伏筆回收" && i.tai == 1));
+        // 沒有技能模式就不加
+        let mut room = skill_room(["xiaocui", "ziheng", "tangtang", "lanjie"]);
+        room.settings.skills = false;
+        room.hand.as_mut().unwrap().players[1].concealed = vec![3, 4, 27, 27];
+        room.act(0, Action::Discard(2)).unwrap();
+        room.act(1, Action::Ron).unwrap();
+        assert!(!room.result.as_ref().unwrap().items.iter().any(|i| i.name == "伏筆回收"));
+    }
+
+    /// 承岳：別人自摸時不用付，一場一次；放槍照付
+    #[test]
+    fn sturdy_skips_tsumo_payment_once_per_game() {
+        let tsumo = |room: &mut Room| {
+            let h = room.hand.as_mut().unwrap();
+            for p in h.players.iter_mut() {
+                *p = PlayerState::default();
+            }
+            h.players[0].concealed = vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 27, 27];
+            h.players[0].draws = 3;
+            h.step = Step::Turn { seat: 0, drawn: Some(27), after_kong: false, claimed: false };
+            room.act(0, Action::Tsumo).unwrap();
+        };
+        let mut room = skill_room(["xiaocui", "chengyue", "tangtang", "lanjie"]);
+        tsumo(&mut room);
+        let r = room.result.as_ref().unwrap();
+        assert_eq!(r.deltas[1], 0, "穩固：不用付");
+        assert!(r.deltas[2] < 0 && r.deltas[3] < 0);
+        assert!(r.summary.contains("穩固"));
+        assert!(room.shield_used[1]);
+        room.next_hand();
+        assert_eq!(room.view(Some(1))["seats"][1]["skill"]["used"], true, "一場一次");
+        tsumo(&mut room);
+        assert!(room.result.as_ref().unwrap().deltas[1] < 0, "第二次要付");
+    }
+
+    /// 佑辰：讀心術看到分數最高那家的手牌，自己打三張後消失，別人看不到
+    #[test]
+    fn read_mind_shows_leader_hand() {
+        let mut room = skill_room(["youchen", "xiaocui", "tangtang", "lanjie"]);
+        room.scores = [0, 10, 50, 50];
+        room.hand.as_mut().unwrap().players[0].concealed = vec![2, 5, 6, 7, 30, 31, 32];
+        room.act(0, Action::Skill).unwrap();
+        let v = room.view(Some(0));
+        assert_eq!(v["skill_info"]["read_mind"]["seat"], json!(2), "同分取離自己近的那家");
+        assert_eq!(v["skill_info"]["read_mind"]["tiles"].as_array().unwrap().len(), 3);
+        assert!(room.view(Some(1))["skill_info"]["read_mind"].is_null(), "只有自己看得到");
+        assert!(room.text_view(0).contains("讀心"));
+        for t in [5, 6, 7] {
+            let h = room.hand.as_mut().unwrap();
+            h.step = Step::Turn { seat: 0, drawn: None, after_kong: false, claimed: false };
+            room.act(0, Action::Discard(t)).unwrap();
+        }
+        assert!(room.view(Some(0))["skill_info"]["read_mind"].is_null(), "打完三張就看不到了");
+    }
+
+    /// 新角色的技能也能讓電腦打完整場
+    #[test]
+    fn bots_play_with_new_skills() {
+        let s = Settings { bot_delay_ms: 0, rounds: 1, skills: true, ..Default::default() };
+        bots_finish(s, ["ziheng", "chengyue", "zhibai", "youchen"]);
     }
 
     /// 阿明：分數最低時開局換牌（洗牌是隨機的，試幾次一定會發動）

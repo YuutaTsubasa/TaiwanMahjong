@@ -4,13 +4,13 @@
   import { ayiUnlocked } from '../unlocks.js';
   import Avatar from '../Avatar.svelte';
 
-  let { value = $bindable(), onpick = undefined, taken = [], columns = 3, label = '選擇角色' } = $props();
+  let { value = $bindable(), onpick = undefined, taken = [], columns = undefined, label = '選擇角色' } = $props();
 
   // 隱藏角色一律列出：還沒解鎖時是黑色剪影、名字「???」、不能選
   const list = CHARACTERS;
   const unlocked = $derived(new Set(getSelectableCharacters($ayiUnlocked).map((c) => c.id)));
-  // 7 人時多開一欄，排數維持不變，畫面才不會變長
-  const cols = $derived(columns + (list.length > 6 ? 1 : 0));
+  // 沒指定欄數時固定排成兩排，角色變多時欄數跟著加，畫面才不會變長
+  const cols = $derived(columns ?? Math.ceil(list.length / 2));
 
   function pick(id) {
     value = id;

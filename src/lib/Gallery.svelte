@@ -29,7 +29,7 @@
   <div class="gallery-layout">
     <section class="art-panel selection-panel" aria-labelledby="gallery-heading">
       <OrnateHeading text="角色圖鑑" size="md" id="gallery-heading" />
-      <div class="characters"><PortraitGrid bind:value={character} columns={2} label="選擇角色" /></div>
+      <div class="characters"><PortraitGrid bind:value={character} columns={3} label="選擇角色" /></div>
     </section>
     <div class="gallery-portrait" aria-label="{selected.name}的{preview.name}表情">
       <Avatar id={character} {expression} size={540} />
@@ -59,7 +59,7 @@
   .back-link { color: var(--gold); text-decoration: none; border: 1px solid var(--line); padding: 10px 18px; background: #071c18d9; white-space: nowrap; }
   .gallery-layout { display: grid; grid-template-columns: minmax(210px, 27%) minmax(0, 1fr) minmax(320px, 36%); align-items: center; gap: 14px; }
   .selection-panel { padding: clamp(10px, 2vh, 20px); }
-  .characters { margin-top: clamp(6px, 1.4vh, 16px); --pic-h: clamp(52px, 14.5vh, 170px); }
+  .characters { margin-top: clamp(6px, 1.4vh, 16px); --pic-h: clamp(52px, 10vh, 120px); }
   .character-option, .expression-option { display: flex; flex-direction: column; align-items: center; overflow: hidden; padding: 0; border: 1px solid #9a7839; border-radius: 2px; background: #001f1b; min-width: 0; }
   .character-option :global(.avatar), .expression-option :global(.avatar) { width: 100% !important; height: auto !important; aspect-ratio: 1; background: #795d3c55; }
   .character-option span { display: block; padding: 6px; font: 600 19px 'DFKai-SB', '標楷體', serif; letter-spacing: .16em; color: var(--gold); }

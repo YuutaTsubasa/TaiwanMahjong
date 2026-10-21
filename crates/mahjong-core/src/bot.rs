@@ -89,7 +89,9 @@ fn wants_skill(room: &Room, h: &Hand, seat: usize, n: i32, visible: &Counts) -> 
             out == d && shanten(&c2, n) > 0
         }
         // 月華、蘭姐：牌局過了一半再用
-        Some(Skill::SeeWaits) | Some(Skill::Peek) => h.drawable() < 45,
+        Some(Skill::SeeWaits) | Some(Skill::Peek) | Some(Skill::ReadMind) => h.drawable() < 45,
+        // 知白：牌局後半、快聽牌時保護自己打出的牌
+        Some(Skill::Rest) => shanten(&c, n) <= 1 && h.drawable() < 40,
         // 糖糖：快聽牌時保護自己打出的牌
         Some(Skill::NoClaim) => shanten(&c, n) <= 1 && h.drawable() < 55,
         _ => false,

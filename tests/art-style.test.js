@@ -35,7 +35,24 @@ test('each style resolves a different complete set without changing identities',
       }
     }
   }
-  assert.equal(paths.size, 210);
+  assert.equal(paths.size, 330);
+});
+
+test('four new men are regular playable characters with dialogue and matching engine identities', () => {
+  assert.equal(characters.getSelectableCharacters().length, 10);
+  assert.equal(characters.getSelectableCharacters(true).length, 11);
+  for (const [id, name] of [['ziheng', '子衡'], ['chengyue', '承岳'], ['zhibai', '知白'], ['youchen', '佑辰']]) {
+    const character = characters.getSelectableCharacters().find(c => c.id === id);
+    assert.equal(character?.name, name);
+    for (const event of Object.keys(characters.EVENT_EXPRESSION)) {
+      assert.ok(character.lines[event]?.every(line => typeof line === 'string' && line.trim()), `${id}/${event}`);
+      assert.ok(characters.pickLine(id, event), `${id}/${event} reaction`);
+    }
+  }
+  const core = readFileSync(new URL('../crates/mahjong-core/src/room.rs', import.meta.url), 'utf8');
+  const registry = core.match(/pub const CHARACTERS:[\s\S]*?= \[([\s\S]*?)\];/)[1];
+  const engineCharacters = [...registry.matchAll(/\("([a-z]+)",\s*"([^"]+)"/g)].map(match => [match[1], match[2]]);
+  assert.deepEqual(engineCharacters, characters.getSelectableCharacters().map(c => [c.id, c.name]));
 });
 
 test('Ayi is hidden from new players but renderable for opponents and unlocked players', () => {

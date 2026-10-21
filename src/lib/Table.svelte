@@ -135,6 +135,7 @@
   const relName = (seat) => ['', '下家', '對家', '上家'][(seat - me + 4) % 4];
   const seen = $derived(s.skill_info?.see_waits);
   const peek = $derived(s.skill_info?.peek);
+  const mind = $derived(s.skill_info?.read_mind);
 
   const waitingText = $derived.by(() => {
     if (s.phase !== 'playing') return '';
@@ -316,6 +317,11 @@
               {:else if x.waits.length}{#each x.waits as w}<Tile code={w} size="xs" />{/each}
               {:else}<span class="muted">沒聽</span>{/if}
             {/each}
+          </div>
+        {/if}
+        {#if mind}
+          <div class="waits skill-info" title="讀心術：這家的整副手牌（還能看 {mind.left} 張）">
+            <b>讀心</b><span class="who">{relName(mind.seat)}</span>{#each mind.tiles as t}<Tile code={t} size="xs" />{/each}
           </div>
         {/if}
         {#if peek?.length}

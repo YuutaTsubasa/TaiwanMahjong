@@ -21,6 +21,14 @@ pub enum Skill {
     Peek,
     /// 阿翼：放槍時不用付錢（被動，一場一次）
     Shield,
+    /// 子衡：胡牌時多算 1 台（被動）
+    Foreshadow,
+    /// 承岳：別人自摸時不用付錢（被動，一場一次）
+    Sturdy,
+    /// 知白：這一回合打出的牌別人不能胡（吃碰槓不擋）（主動）
+    Rest,
+    /// 佑辰：看到分數最高那家的整副手牌，維持到自己打出三張牌（主動）
+    ReadMind,
 }
 
 impl Skill {
@@ -33,6 +41,10 @@ impl Skill {
             "xiaochun" => Skill::QuickChow,
             "lanjie" => Skill::Peek,
             "ayi" => Skill::Shield,
+            "ziheng" => Skill::Foreshadow,
+            "chengyue" => Skill::Sturdy,
+            "zhibai" => Skill::Rest,
+            "youchen" => Skill::ReadMind,
             _ => return None,
         })
     }
@@ -46,6 +58,10 @@ impl Skill {
             Skill::QuickChow => "quick_chow",
             Skill::Peek => "peek",
             Skill::Shield => "shield",
+            Skill::Foreshadow => "foreshadow",
+            Skill::Sturdy => "sturdy",
+            Skill::Rest => "rest",
+            Skill::ReadMind => "read_mind",
         }
     }
 
@@ -58,6 +74,10 @@ impl Skill {
             Skill::QuickChow => "快攻",
             Skill::Peek => "老闆娘的眼力",
             Skill::Shield => "銀之盾",
+            Skill::Foreshadow => "伏筆回收",
+            Skill::Sturdy => "穩固",
+            Skill::Rest => "休止符",
+            Skill::ReadMind => "讀心術",
         }
     }
 
@@ -70,12 +90,21 @@ impl Skill {
             Skill::QuickChow => "可以吃任何人打出的牌，不限上家。每局一次。",
             Skill::Peek => "偷看牌牆接下來會被摸走的 3 張牌。每局一次。",
             Skill::Shield => "放槍時不用付錢。一場一次。",
+            Skill::Foreshadow => "胡牌時多算 1 台。",
+            Skill::Sturdy => "別人自摸時不用付錢。一場一次。",
+            Skill::Rest => "這一回合打出的牌，別人不能胡（吃、碰、槓擋不住）。每局一次。",
+            Skill::ReadMind => "看穿分數最高那家的整副手牌，維持到自己再打出三張牌。每局一次。",
         }
     }
 
     /// 要自己按「技能」才會發動的
     pub fn is_active(self) -> bool {
-        matches!(self, Skill::Redraw | Skill::SeeWaits | Skill::NoClaim | Skill::Peek)
+        matches!(self, Skill::Redraw | Skill::SeeWaits | Skill::NoClaim | Skill::Peek | Skill::Rest | Skill::ReadMind)
+    }
+
+    /// 一場只能用一次的（用過與否記在 Room::shield_used，跨局保留）
+    pub fn once_per_game(self) -> bool {
+        matches!(self, Skill::Shield | Skill::Sturdy)
     }
 }
 
