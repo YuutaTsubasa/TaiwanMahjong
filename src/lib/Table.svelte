@@ -240,6 +240,12 @@
     </div>
     <div class="bottom">
       <div class="prompt-row">
+        {#if hint}
+          <!-- 新手提示：自己的角色說的話，獨立一行、用對話框的樣子，跟動作按鈕分開 -->
+          <div class="hint-line" title={hint.skill ? `${hint.text}\n${hint.skill}` : hint.text}>
+            <p class="hint-say"><Avatar id={mine.character} size={26} crop /><span class="hint-tag">提示</span><span>{hint.text}</span></p>
+          </div>
+        {/if}
         {#if auto && s.phase === 'playing'}
           <div class="banner auto-banner">
             <b>託管中</b><span class="sep"></span><span>電腦正在幫你打</span>
@@ -257,18 +263,10 @@
               </button>
             {/each}
             {#if remaining != null}<span class="cd" class:urgent={remaining <= 5}>{remaining}s</span>{/if}
-            {#if hint}
-              <span class="hint-say" title={hint.skill ?? ''}><Avatar id={mine.character} size={26} crop />{hint.text}</span>
-            {/if}
           </div>
         {:else if canDiscard}
           <div class="banner turn" title="鍵盤／手把：方向鍵選牌 · Enter／A 確認 · Esc／B 取消">
-            <b>輪到你出牌</b><span class="sep"></span>
-            {#if hint}
-              <span class="hint-say" title={hint.skill ?? ''}><Avatar id={mine.character} size={26} crop />{hint.text}</span>
-            {:else}
-              <span>點一下選牌，再點一下打出</span>
-            {/if}
+            <b>輪到你出牌</b><span class="sep"></span><span>點一下選牌，再點一下打出</span>
           </div>
         {:else if waitingText}
           <div class="banner quiet"><span>{waitingText}</span></div>
@@ -520,9 +518,34 @@
     border-radius: var(--surface-radius);
   }
   /* 新手提示：自己的角色小頭像＋一句說明 */
-  .hint-say { display: inline-flex; align-items: center; gap: 6px; max-width: min(520px, 60vw); font-size: 13px !important; line-height: 1.4; color: var(--text); }
+  /* 獨立一行的對話框（跟角色反應泡泡同一套配色），一眼就跟按鈕分得開 */
+  .hint-line { flex: 0 0 100%; display: flex; justify-content: center; min-width: 0; }
+  .hint-say {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: min(720px, 100%);
+    margin: 0 0 2px;
+    padding: 3px 12px 3px 4px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: var(--bubble-text);
+    background: var(--bubble-bg);
+    border: 1px solid var(--art-line);
+    border-radius: 18px;
+    box-shadow: var(--bubble-shadow, 0 3px 10px #0007);
+    animation: hint-in 0.25s ease;
+  }
+  /* 手機直向：欄位很窄，拿掉「提示」標籤、最多三行（完整內容在滑鼠提示裡） */
+  @media (max-width: 760px) {
+    .hint-say { gap: 6px; padding: 4px 10px 4px 4px; font-size: 12px; border-radius: 12px; }
+    .hint-tag { display: none; }
+    .hint-say > span:last-child { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  }
+  @keyframes hint-in { from { opacity: 0; transform: translateY(4px); } }
   .hint-say :global(.avatar) { flex: none; border-radius: 50%; }
-  .actions .hint-say { padding: 4px 10px; background: var(--art-panel); border: 1px solid var(--art-line); border-radius: var(--surface-radius); }
+  .hint-tag { flex: none; padding: 0 6px; font-size: 11px; font-weight: 700; border-radius: var(--small-radius); color: #3a2410; background: linear-gradient(#ffe7a4, #d5a34d); }
   :global(html[data-ui-style]) .act.recommended { box-shadow: 0 0 0 2px var(--gold), 0 0 14px color-mix(in srgb, var(--gold) 70%, transparent); }
   .waits .left { font-size: 11px; color: var(--muted); margin: 0 4px 0 1px; }
   .waits .left.none { color: var(--red); }
