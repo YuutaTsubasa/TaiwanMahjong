@@ -1,5 +1,7 @@
 // 新手提示：輪到你時告訴你電腦會怎麼選（提示內容由牌局引擎算好，放在 state.hint）。
-// 開關記在這台電腦上，預設開啟；在「遊戲設定」或牌桌上的「提示」按鈕切換。
+// 牌桌上的「提示」按鈕隨時可以打開／關上提示框；
+// 「自動彈出提示」開著時，每次輪到你做決定就自動打開。這個開關記在這台電腦上，預設開啟，
+// 在「遊戲設定」或提示框下方都可以切換。
 import { writable } from 'svelte/store';
 
 const STORAGE_KEY = 'mj_hints';
@@ -13,9 +15,9 @@ function load() {
 }
 
 const preference = writable(load());
-export const showHints = { subscribe: preference.subscribe };
+export const autoHints = { subscribe: preference.subscribe };
 
-export function setShowHints(on) {
+export function setAutoHints(on) {
   preference.set(!!on);
   try { localStorage.setItem(STORAGE_KEY, on ? '1' : '0'); } catch {}
 }

@@ -14,7 +14,8 @@
   import PlayerCard from './table/PlayerCard.svelte';
   import SideLog from './table/SideLog.svelte';
   import Avatar from './Avatar.svelte';
-  import { showHints, setShowHints } from './hints.js';
+  import { autoHints, setAutoHints } from './hints.js';
+  import { get } from 'svelte/store';
 
   let confirmation;
 
@@ -36,8 +37,46 @@
   const special = $derived(actions.filter((a) => a.type !== 'discard' && a.type !== 'next'));
   const canDiscard = $derived(discardById.size > 0);
 
-  // 新手提示（引擎算好放在 s.hint）：建議打的牌發光、建議的吃碰按鈕標出來，並由自己的角色說明原因
-  const hint = $derived($showHints && !auto ? s.hint : null);
+  // 新手提示（引擎算好放在 s.hint）：浮在畫面上的提示框，箭頭指向「提示」按鈕，不佔排版、牌桌不會跳動。
+  // 「提示」按鈕隨時打開／關上；開了「自動彈出提示」時，每次輪到你做決定就自動打開。
+  // 提示框開著時，建議打的牌發光、建議的吃碰按鈕加金框。
+  let hintOpen = $state(false);
+  let hintDecision = null;
+  $effect(() => {
+    const d = s.decision_id;
+    if (!s.hint || auto) {
+      hintOpen = false;
+      hintDecision = null;
+    } else if (d !== hintDecision) {
+      hintDecision = d;
+      hintOpen = get(autoHints);
+    }
+  });
+  const hint = $derived(hintOpen && !auto ? s.hint : null);
+  function toggleHint() {
+    if (!s.hint) return toast('輪到你做決定時才有提示喔', 'info');
+    hintOpen = !hintOpen;
+  }
+
+  // 提示框放在「提示」按鈕正上方，左右不超出畫面
+  let hintBtn = $state(null);
+  let hintPos = $state({ left: -360, arrow: 400, width: 420 });
+  function placeHint() {
+    if (!hintBtn) return;
+    const r = hintBtn.getBoundingClientRect();
+    const width = Math.min(420, window.innerWidth - 16);
+    const cx = r.left + r.width / 2;
+    const left = Math.min(Math.max(cx - width + 44, 8), window.innerWidth - width - 8);
+    // 提示框放在按鈕旁的 .hint-anchor 裡，left 是相對於按鈕左邊
+    hintPos = { left: left - r.left, arrow: cx - left, width };
+  }
+  $effect(() => {
+    if (!hint) return;
+    hint.text; // 換了提示也重新定位
+    requestAnimationFrame(placeHint);
+    window.addEventListener('resize', placeHint);
+    return () => window.removeEventListener('resize', placeHint);
+  });
   // 舊版伺服器送來的狀態裡沒有 hint 這個欄位（新版沒提示時是 null）
   const hintsSupported = $derived('hint' in s);
   const hintKey = $derived.by(() => {
@@ -240,12 +279,6 @@
     </div>
     <div class="bottom">
       <div class="prompt-row">
-        {#if hint}
-          <!-- 新手提示：自己的角色說的話，獨立一行、用對話框的樣子，跟動作按鈕分開 -->
-          <div class="hint-line" title={hint.skill ? `${hint.text}\n${hint.skill}` : hint.text}>
-            <p class="hint-say"><Avatar id={mine.character} size={26} crop /><span class="hint-tag">提示</span><span>{hint.text}</span></p>
-          </div>
-        {/if}
         {#if auto && s.phase === 'playing'}
           <div class="banner auto-banner">
             <b>託管中</b><span class="sep"></span><span>電腦正在幫你打</span>
@@ -292,14 +325,34 @@
         {/if}
 
         {#if s.my_waits?.length && !auto}
-          <div class="waits" title={$showHints ? '聽的牌，以及各還剩幾張沒出現' : ''}>
-            聽 {#each s.my_waits as w, i}<Tile code={w} size="xs" />{#if $showHints && s.my_waits_left}<small class="left" class:none={!s.my_waits_left[i]}>×{s.my_waits_left[i]}</small>{/if}{/each}
+          <div class="waits" title="聽的牌，以及各還剩幾張沒出現">
+            聽 {#each s.my_waits as w, i}<Tile code={w} size="xs" />{#if s.my_waits_left}<small class="left" class:none={!s.my_waits_left[i]}>×{s.my_waits_left[i]}</small>{/if}{/each}
           </div>
         {/if}
 
         {#if isPlayer && s.phase === 'playing'}
           {#if hintsSupported}
-            <button class="hint-btn" class:on={$showHints} onclick={() => setShowHints(!$showHints)} title={$showHints ? '關閉新手提示' : '開啟新手提示'} aria-pressed={$showHints}>提示</button>
+            <span class="hint-anchor">
+              <button bind:this={hintBtn} class="hint-btn" class:on={hintOpen} class:ready={!!s.hint && !hintOpen && !auto} onclick={toggleHint} title={hintOpen ? '關上提示' : '看提示：建議打哪張、要不要吃碰'} aria-expanded={hintOpen}>提示</button>
+      {#if hint}
+        <!-- 浮在畫面上的提示框（不佔排版），跟著「提示」按鈕、箭頭指向它 -->
+        <div class="hint-pop" role="dialog" aria-label="提示" style:left="{hintPos.left}px" style:width="{hintPos.width}px" style:--arrow="{hintPos.arrow}px">
+          <div class="hint-body">
+            <Avatar id={mine.character} size={34} crop />
+            <div class="hint-text">
+              <p>{hint.text}</p>
+              {#if hint.skill}<p class="hint-skill">{hint.skill}</p>{/if}
+            </div>
+            <button type="button" class="hint-close" onclick={() => (hintOpen = false)} aria-label="關上提示">×</button>
+          </div>
+          <label class="hint-foot">
+            <input type="checkbox" checked={$autoHints} onchange={(e) => setAutoHints(e.currentTarget.checked)} />
+            <span>每次輪到我時自動彈出提示</span>
+            <small>（不要自動彈出的話，也可以到「遊戲設定」關閉）</small>
+          </label>
+        </div>
+      {/if}
+            </span>
           {:else}
             <!-- 提示由房主的伺服器計算；0.3.0 以前的版本沒有這個功能 -->
             <button class="hint-btn" onclick={() => toast('房主的伺服器版本較舊（0.3.0 以前），沒有提供新手提示；請房主更新 App。', 'info')} title="房主的伺服器版本較舊，沒有提供新手提示">提示？</button>
@@ -322,6 +375,7 @@
         {/if}
       </div>
     </div>
+
 
     {#if s.phase === 'hand_over' || s.phase === 'game_over'}
       <Result />
@@ -518,39 +572,55 @@
     border-radius: var(--surface-radius);
   }
   /* 新手提示：自己的角色小頭像＋一句說明 */
-  /* 獨立一行的對話框（跟角色反應泡泡同一套配色），一眼就跟按鈕分得開 */
-  .hint-line { flex: 0 0 100%; display: flex; justify-content: center; min-width: 0; }
-  .hint-say {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    max-width: min(720px, 100%);
-    margin: 0 0 2px;
-    padding: 3px 12px 3px 4px;
-    font-size: 13px;
-    line-height: 1.4;
+  /* 提示框：浮在畫面上（fixed，不佔排版），跟角色反應泡泡同一套配色，下方的箭頭指向「提示」按鈕 */
+  .hint-anchor { position: relative; display: inline-flex; }
+  .hint-pop {
+    position: absolute;
+    bottom: calc(100% + 12px);
+    z-index: 15;
+    padding: 8px 10px 6px;
     color: var(--bubble-text);
     background: var(--bubble-bg);
     border: 1px solid var(--art-line);
-    border-radius: 18px;
-    box-shadow: var(--bubble-shadow, 0 3px 10px #0007);
-    animation: hint-in 0.25s ease;
+    border-radius: 12px;
+    box-shadow: var(--bubble-shadow, 0 6px 18px #000a);
+    animation: hint-in 0.2s ease;
   }
-  /* 手機直向：欄位很窄，拿掉「提示」標籤、最多三行（完整內容在滑鼠提示裡） */
-  @media (max-width: 760px) {
-    .hint-say { gap: 6px; padding: 4px 10px 4px 4px; font-size: 12px; border-radius: 12px; }
-    .hint-tag { display: none; }
-    .hint-say > span:last-child { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .hint-pop::after {
+    content: '';
+    position: absolute;
+    left: calc(var(--arrow) - 8px);
+    bottom: -8px;
+    width: 14px;
+    height: 14px;
+    background: var(--bubble-bg);
+    border-right: 1px solid var(--art-line);
+    border-bottom: 1px solid var(--art-line);
+    transform: rotate(45deg);
   }
-  @keyframes hint-in { from { opacity: 0; transform: translateY(4px); } }
-  .hint-say :global(.avatar) { flex: none; border-radius: 50%; }
-  .hint-tag { flex: none; padding: 0 6px; font-size: 11px; font-weight: 700; border-radius: var(--small-radius); color: #3a2410; background: linear-gradient(#ffe7a4, #d5a34d); }
+  @keyframes hint-in { from { opacity: 0; transform: translateY(6px); } }
+  .hint-body { display: flex; align-items: flex-start; gap: 8px; }
+  .hint-body :global(.avatar) { flex: none; border-radius: 50%; }
+  .hint-text { flex: 1; min-width: 0; }
+  .hint-text p { margin: 0; font-size: 14px; line-height: 1.5; }
+  .hint-text .hint-skill { margin-top: 2px; font-size: 12px; opacity: 0.8; }
+  :global(html[data-ui-style]) .hint-close { flex: none; min-height: 0; width: 24px; height: 24px; padding: 0; font-size: 16px; line-height: 1; color: inherit; background: transparent; border: 0; box-shadow: none; opacity: 0.6; }
+  .hint-close:hover { opacity: 1; }
+  .hint-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; margin-top: 6px; padding-top: 5px; border-top: 1px solid color-mix(in srgb, var(--bubble-text) 20%, transparent); font-size: 12px; cursor: pointer; }
+  .hint-foot input { margin: 0; min-height: 0 !important; width: 14px; height: 14px; accent-color: var(--gold); }
+  .hint-foot small { font-size: 11px; opacity: 0.7; }
+  @media (max-width: 760px), (max-height: 520px) {
+    .hint-text p { font-size: 13px; }
+    .hint-foot small { display: none; }
+  }
   :global(html[data-ui-style]) .act.recommended { box-shadow: 0 0 0 2px var(--gold), 0 0 14px color-mix(in srgb, var(--gold) 70%, transparent); }
   .waits .left { font-size: 11px; color: var(--muted); margin: 0 4px 0 1px; }
   .waits .left.none { color: var(--red); }
   .hint-btn { min-width: 0; padding: 8px 12px; font-family: var(--heading-font); font-size: 15px; letter-spacing: 0.1em; background: var(--art-panel); color: var(--muted); border: 1px solid var(--art-line); }
   .hint-btn.on { color: var(--gold); border-color: var(--gold); }
+  /* 有提示但提示框沒開：按鈕輕輕亮一下，讓人知道可以按 */
+  .hint-btn.ready { color: var(--gold); animation: hint-ready 1.8s ease-in-out infinite; }
+  @keyframes hint-ready { 50% { box-shadow: 0 0 0 2px color-mix(in srgb, var(--gold) 60%, transparent); } }
   .skill-info { color: var(--gold); gap: 4px; }
   .skill-info b { font-family: var(--heading-font); letter-spacing: 0.1em; margin-right: 2px; }
   .skill-info .who { margin-left: 6px; color: var(--text); font-size: 12px; }

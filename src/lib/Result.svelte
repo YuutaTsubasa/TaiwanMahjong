@@ -6,7 +6,7 @@
   import FinalRanking from './FinalRanking.svelte';
   import { reactions } from './reactions.svelte.js';
   import { getCharacter, pickLine } from './characters.js';
-  import { showHints, taiInfo } from './hints.js';
+  import { autoHints, taiInfo } from './hints.js';
 
   let openTai = $state(null);
   const toggleTai = (name) => (openTai = openTai === name ? null : name);
@@ -83,7 +83,7 @@
             <button type="button" class="tai-info" onclick={() => (openTai = null)}><b>{openTai}</b>：{taiInfo(openTai)}</button>
           {/if}
           {#each r.payments as p, i}
-            <div>{s.seats[p.from].name} → {s.seats[p.to].name}：{p.tai} 台，{p.amount}{#if $showHints && i === r.payments.length - 1}<span class="tai-tip">（點台數看說明）</span>{/if}</div>
+            <div>{s.seats[p.from].name} → {s.seats[p.to].name}：{p.tai} 台，{p.amount}{#if $autoHints && i === r.payments.length - 1}<span class="tai-tip">（點台數看說明）</span>{/if}</div>
           {/each}
         </div>
       {/if}

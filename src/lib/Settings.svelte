@@ -7,7 +7,7 @@
   import OrnateHeading from './ui/OrnateHeading.svelte';
   import SectionBanner from './ui/SectionBanner.svelte';
   import ToggleSwitch from './ui/ToggleSwitch.svelte';
-  import { showHints, setShowHints } from './hints.js';
+  import { autoHints, setAutoHints } from './hints.js';
   import FancyButton from './ui/FancyButton.svelte';
 </script>
 
@@ -43,7 +43,7 @@
         </label>
         <div class="toggle-pair">
           <div class="mute-row"><span>靜音</span><ToggleSwitch label="靜音" checked={soundSettings.muted} onchange={toggleMute} /></div>
-          <div class="mute-row" title="輪到你時，提示建議打哪張、要不要吃碰，並說明原因"><span>新手提示</span><ToggleSwitch label="新手提示" checked={$showHints} onchange={setShowHints} /></div>
+          <div class="mute-row" title="輪到你做決定時，自動彈出提示框（建議打哪張、要不要吃碰）；牌桌上的「提示」按鈕隨時可以打開"><span>自動提示</span><ToggleSwitch label="自動彈出提示" checked={$autoHints} onchange={setAutoHints} /></div>
         </div>
       </div>
       <p class="save-note">— 設定會自動儲存。—</p>
