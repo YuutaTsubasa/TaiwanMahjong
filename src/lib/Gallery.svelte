@@ -76,7 +76,10 @@
   h3 { display: flex; align-items: center; gap: 14px; color: var(--gold); font: 600 20px 'DFKai-SB', '標楷體', serif; letter-spacing: .16em; text-align: center; margin: clamp(10px, 2.4vh, 26px) 0 clamp(8px, 1.8vh, 18px); }
   h3::before, h3::after { content: ''; flex: 1; height: 1px; background: var(--line); }
   .expressions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
-  .expression-option span { font-size: 12px; padding: 6px 2px; white-space: nowrap; }
+  /* 文字顏色要自己指定：有些畫風（MS-DOS）的按鈕預設是深色字，會跟深色底融在一起 */
+  .expression-option span { font-size: 12px; padding: 6px 2px; white-space: nowrap; color: var(--gold); }
+  /* 選中的那格各畫風會換底色，字色跟著畫風的按鈕走 */
+  .expression-option.selected span { color: inherit; }
   blockquote { margin: 0; min-height: 94px; display: grid; place-items: center; border: 1px solid var(--line); background: #0005; padding: 14px; font: 20px/1.7 'DFKai-SB', '標楷體', serif; color: #ffecc5; }
   @media (max-width: 900px) {
     .gallery-layout { grid-template-columns: minmax(220px, 32%) minmax(0, 1fr); }

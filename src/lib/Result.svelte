@@ -160,6 +160,8 @@
   .d.me { outline: 1px solid var(--gold); }
   .d b { font-size: 20px; }
   .d small { color: var(--muted); }
+  /* Game Boy 只有四種綠，muted 在分數格上太暗，改用最亮的那種綠 */
+  :global(html[data-ui-style='gameboy']) .d small { color: #9bbc0f; }
   .neg { color: #ff8fa3; }
   .pos { color: var(--accent); }
   .btns { display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 8px; }
