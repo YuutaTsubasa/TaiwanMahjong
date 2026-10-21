@@ -2005,6 +2005,8 @@ mod tests {
         let h = room.hand.as_mut().unwrap();
         h.players[0].concealed.push(33);
         h.step = Step::Turn { seat: 0, drawn: Some(33), after_kong: false, claimed: false };
+        // 重摸的那張固定不是花（摸到花會從牌尾補，測試就不穩定）
+        h.wall.push_front(5);
         assert!(room.legal_actions(0).contains(&Action::Skill));
         room.act(0, Action::Skill).unwrap();
         let h = room.hand.as_ref().unwrap();

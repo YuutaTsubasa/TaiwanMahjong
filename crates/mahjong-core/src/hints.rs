@@ -60,11 +60,25 @@ fn discard_hint(room: &Room, h: &Hand, seat: usize, legal: &[Action]) -> Value {
     c2[out as usize] -= 1;
     let s = shanten(&c2, n);
 
+    // 摸牌前就已經聽牌了嗎？（吃碰後要打牌時沒有「摸到的牌」）
+    let drawn = match h.step {
+        Step::Turn { drawn, .. } => drawn,
+        _ => None,
+    };
+    let was_ready = drawn.map_or(false, |d| {
+        let mut c0 = c;
+        c0[d as usize] -= 1;
+        !waits(&c0).is_empty()
+    });
     let text = if s <= 0 {
         let w = waits(&c2);
         let left: u32 = w.iter().map(|&t| 4u32.saturating_sub(visible[t as usize] as u32)).sum();
         if w.is_empty() {
             format!("建議打{}。", zh(out))
+        } else if was_ready && drawn == Some(out) {
+            format!("繼續聽 {}（還剩 {} 張）：摸到的{}用不到，打掉就好。", tiles_text(&w), left, zh(out))
+        } else if was_ready {
+            format!("打{}，改聽 {}（還剩 {} 張）。", zh(out), tiles_text(&w), left)
         } else {
             format!("打{}就聽牌了，聽 {}（還剩 {} 張）。", zh(out), tiles_text(&w), left)
         }
@@ -250,6 +264,23 @@ mod tests {
         assert_eq!(v["type"], "claim");
         assert_eq!(v["advice"], "pung");
         assert!(v["text"].as_str().unwrap().contains("門清"));
+    }
+
+    /// 已經聽牌，摸到用不到的牌：說「繼續聽」，不要再說「打這張就聽牌了」
+    #[test]
+    fn already_ready_says_keep_waiting() {
+        // 一二三萬 四五六筒 七八九條 一一一筒 東東 三四萬（聽二萬、五萬），剛摸到北
+        let mut room = room_with([
+            vec![0, 1, 2, 12, 13, 14, 24, 25, 26, 9, 9, 9, 27, 27, 2, 3, 30],
+            vec![],
+            vec![],
+            vec![],
+        ]);
+        room.hand.as_mut().unwrap().step = Step::Turn { seat: 0, drawn: Some(30), after_kong: false, claimed: false };
+        let v = hint(&room, 0);
+        let text = v["text"].as_str().unwrap();
+        assert_eq!(v["tile"], code(30));
+        assert!(text.starts_with("繼續聽"), "{}", text);
     }
 
     #[test]
