@@ -290,10 +290,11 @@
           </div>
         {:else if special.length}
           <div class="actions">
-            {#each special.filter((a) => a.type !== 'chow') as a (a.id)}
+            <!-- 順序：胡、槓、碰（自摸、暗槓、技能…）→ 吃 → 過 -->
+            {#each special.filter((a) => a.type !== 'chow' && a.type !== 'pass') as a (a.id)}
               <button class="act {btnClass[a.type]}" class:recommended={recommended(a)} onclick={() => act(a.id)}>
                 <span>{a.type === 'skill' ? a.label : btnText[a.type]}</span>
-                {#if a.tile && a.type !== 'pass'}
+                {#if a.tile}
                   <span class="mini"><Tile code={a.tile} size="xs" /></span>
                 {/if}
               </button>
@@ -309,6 +310,9 @@
                 {/each}
               </div>
             {/if}
+            {#each special.filter((a) => a.type === 'pass') as a (a.id)}
+              <button class="act pass" class:recommended={recommended(a)} onclick={() => act(a.id)}><span>{btnText.pass}</span></button>
+            {/each}
             {#if remaining != null}<span class="cd" class:urgent={remaining <= 5}>{remaining}s</span>{/if}
           </div>
         {:else if canDiscard}
@@ -751,6 +755,9 @@
   .strip .prompt-row:has(.actions) .prompt-main { justify-content: center; }
   .strip .actions { gap: 6px; flex-wrap: wrap; min-width: 0; flex: 1; }
   .strip .act { font-size: 16px; padding: 4px 10px; gap: 4px; }
+  :global(html[data-ui-style]) .strip .chow-group { padding: 3px 3px 3px 8px; gap: 3px; }
+  :global(html[data-ui-style]) .strip .chow-opt { padding: 2px; }
+  .strip .chow-opt :global(.tile) { --w: 17px; }
   .strip .banner { padding: 6px 12px; }
   .strip .banner b { font-size: 16px; letter-spacing: 0.08em; white-space: nowrap; }
   .strip .auto-btn { padding: 4px 10px; letter-spacing: 0.04em; white-space: nowrap; }
