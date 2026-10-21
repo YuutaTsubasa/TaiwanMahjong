@@ -1,6 +1,6 @@
 [package]
 name = "taiwan-mahjong"
-version = "0.3.1"
+version = "0.3.2"
 description = "虛擬台麻館：線上的台灣十六張麻將，人類、AI 與虛擬角色同桌遊玩"
 edition = "2021"
 rust-version = "1.89"
