@@ -7,6 +7,7 @@
   import PortraitGrid from './ui/PortraitGrid.svelte';
   import { onDestroy } from 'svelte';
   import { previewTheme } from './audio/sound.svelte.js';
+  import { t } from './i18n.svelte.js';
 
   const EXPRESSIONS = [
     { id: 'normal', name: '常態', line: 'chow' },
@@ -29,31 +30,31 @@
 <main class="concept-page gallery-page">
   <header class="page-header">
     <Brand compact />
-    <a class="back-link" href="#title">← 返回標題</a>
+    <a class="back-link" href="#title">← {t('返回標題')}</a>
   </header>
   <div class="gallery-layout">
     <section class="art-panel selection-panel" aria-labelledby="gallery-heading">
-      <OrnateHeading text="角色圖鑑" size="md" id="gallery-heading" />
-      <div class="characters"><PortraitGrid bind:value={character} columns={3} label="選擇角色" /></div>
+      <OrnateHeading text={t('角色圖鑑')} size="md" id="gallery-heading" />
+      <div class="characters"><PortraitGrid bind:value={character} columns={3} label={t('選擇角色')} /></div>
     </section>
-    <div class="gallery-portrait" aria-label="{selected.name}的{preview.name}表情">
+    <div class="gallery-portrait" aria-label={t('{name}的{expression}表情', { name: t(selected.name), expression: t(preview.name) })}>
       <Avatar id={character} {expression} size={540} />
     </div>
-    <section class="art-panel detail-panel" aria-label="角色介紹">
-      <OrnateHeading text={selected.name} tag="h2" />
-      <p class="intro">{selected.intro}。</p>
-      {#if skill}<p class="skill-line" title="技能模式開啟時可以使用"><b>技能「{skill.name}」</b>{skill.desc}</p>{/if}
-      <h3>表情預覽</h3>
-      <div class="expressions" role="group" aria-label="選擇表情">
+    <section class="art-panel detail-panel" aria-label={t('角色介紹')}>
+      <OrnateHeading text={t(selected.name)} tag="h2" />
+      <p class="intro">{t('{intro}。', { intro: t(selected.intro) })}</p>
+      {#if skill}<p class="skill-line" title={t('技能模式開啟時可以使用')}><b>{t('技能「{name}」', { name: t(skill.name) })}</b>{t(skill.desc)}</p>{/if}
+      <h3>{t('表情預覽')}</h3>
+      <div class="expressions" role="group" aria-label={t('選擇表情')}>
         {#each EXPRESSIONS as item}
           <button type="button" class="expression-option" class:selected={expression === item.id} aria-pressed={expression === item.id} onclick={() => (expression = item.id)}>
             <Avatar id={character} expression={item.id} size={70} />
-            <span>{item.name}</span>
+            <span>{t(item.name)}</span>
           </button>
         {/each}
       </div>
-      <h3>台詞欣賞</h3>
-      <blockquote aria-live="polite">「{line}」</blockquote>
+      <h3>{t('台詞欣賞')}</h3>
+      <blockquote aria-live="polite">{t('「{line}」', { line })}</blockquote>
     </section>
   </div>
 </main>
@@ -79,6 +80,7 @@
   .skill-line { margin: 4px 0 0; text-align: center; font-size: 14px; line-height: 1.6; color: var(--text); }
   .skill-line b { color: var(--gold); margin-right: 6px; }
   h3 { display: flex; align-items: center; gap: 14px; color: var(--gold); font: 600 20px 'DFKai-SB', '標楷體', serif; letter-spacing: .16em; text-align: center; margin: clamp(10px, 2.4vh, 26px) 0 clamp(8px, 1.8vh, 18px); }
+  :global(html[lang='en']) h3 { letter-spacing: .04em; }
   h3::before, h3::after { content: ''; flex: 1; height: 1px; background: var(--line); }
   .expressions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
   /* 文字顏色要自己指定：有些畫風（MS-DOS）的按鈕預設是深色字，會跟深色底融在一起 */

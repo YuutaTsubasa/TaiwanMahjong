@@ -11,6 +11,8 @@
   import Controls from './lib/Controls.svelte';
   import { resolvePage } from './lib/menu.js';
   import ArtStylePicker from './lib/ArtStylePicker.svelte';
+  import LanguagePicker from './lib/LanguagePicker.svelte';
+  import { htmlLang, t } from './lib/i18n.svelte.js';
   import Brand from './lib/Brand.svelte';
   import { artStyle } from './lib/art-style.js';
   import { processEvents, resetReactions } from './lib/reactions.svelte.js';
@@ -22,6 +24,9 @@
 
   $effect(() => {
     document.documentElement.dataset.uiStyle = $artStyle;
+  });
+  $effect(() => {
+    document.documentElement.lang = htmlLang();
   });
 
   let hash = $state(location.hash);
@@ -45,6 +50,7 @@
   <div class="topbar">
     {#if page === 'table'}<div class="topbar-brand"><Brand compact /></div>{/if}
     <ArtStylePicker />
+    <LanguagePicker />
     <SoundControl />
   </div>
   <div class="screen">
@@ -70,12 +76,12 @@
 }} />
 
 {#if net.status === 'reconnecting'}
-  <div class="banner">連線中斷，重新連線中…</div>
+  <div class="banner">{t('連線中斷，重新連線中…')}</div>
 {/if}
 
 <div class="toasts">
-  {#each net.toasts as t (t.id)}
-    <div class="toast {t.kind}">{t.message}</div>
+  {#each net.toasts as item (item.id)}
+    <div class="toast {item.kind}">{item.message}</div>
   {/each}
 </div>
 

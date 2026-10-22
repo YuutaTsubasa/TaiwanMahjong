@@ -4,6 +4,8 @@
   import Avatar from './Avatar.svelte';
   import OrnateHeading from './ui/OrnateHeading.svelte';
   import FancyButton from './ui/FancyButton.svelte';
+  import { t } from './i18n.svelte.js';
+  import { seatName } from './tiles.js';
 
   const s = $derived(net.state);
   const local = $derived(net.mode === 'local');
@@ -18,26 +20,31 @@
     });
   });
   const champion = $derived(ranked[0]);
-  const roundsLabel = $derived(({ 1: '東風圈', 2: '東南圈', 4: '一將' })[s.settings?.rounds] ?? `${s.settings?.rounds ?? ''} 圈`);
+  const roundsLabel = $derived.by(() => {
+    const n = s.settings?.rounds;
+    const fixed = { 1: '東風圈', 2: '東南圈', 4: '一將' }[n];
+    return fixed ? t(fixed) : t('{n} 圈', { n: n ?? '' });
+  });
   const RANK_NAME = ['', '第一名', '第二名', '第三名', '第四名'];
+  const championName = $derived(champion ? seatName(champion) : '');
   const expressionFor = (p) => (p.rank === 1 ? 'win' : p.rank === ranked.length && p.score < 0 ? 'sad' : p.rank === 2 ? 'happy' : 'normal');
 </script>
 
 <div class="final">
-  <OrnateHeading text="最終排名" sub="{roundsLabel}結束・恭喜 {champion?.name} 拿下第一！" />
+  <OrnateHeading text={t('最終排名')} sub={t('{rounds}結束・恭喜 {name} 拿下第一！', { rounds: roundsLabel, name: championName })} />
 
   <ol class="podium">
     {#each ranked as p (p.seat)}
       <li class="card r{p.rank}" class:me={p.seat === net.seat} style:--delay="{(ranked.length - p.rank) * 0.12}s">
-        <div class="rank-badge">{RANK_NAME[p.rank]}</div>
+        <div class="rank-badge">{t(RANK_NAME[p.rank])}</div>
         <div class="pic">
           {#if p.character}<Avatar id={p.character} expression={expressionFor(p)} size={260} />{/if}
           {#if p.rank === 1}<span class="crown" aria-hidden="true">♛</span>{/if}
         </div>
         <div class="info">
-          <b class="nm" title={p.name}>{p.name}</b>
+          <b class="nm" title={seatName(p)}>{seatName(p)}</b>
           <span class="score" class:neg={p.score < 0} class:pos={p.score > 0}>{p.score > 0 ? '+' : ''}{p.score}</span>
-          {#if p.seat === net.seat}<span class="you">你</span>{/if}
+          {#if p.seat === net.seat}<span class="you">{t('你')}</span>{/if}
         </div>
       </li>
     {/each}
@@ -45,10 +52,10 @@
 
   <div class="btns">
     {#if net.isHost}
-      <FancyButton variant="red" onclick={() => hostCmd('reset')}>{local ? '回標題' : '回大廳'}</FancyButton>
-      <FancyButton variant="gold" tile="F" onclick={() => hostCmd('start')}>再來一場</FancyButton>
+      <FancyButton variant="red" onclick={() => hostCmd('reset')}>{local ? t('回標題') : t('回大廳')}</FancyButton>
+      <FancyButton variant="gold" tile="F" onclick={() => hostCmd('start')}>{t('再來一場')}</FancyButton>
     {:else}
-      <FancyButton variant="red" onclick={disconnect}>回首頁</FancyButton>
+      <FancyButton variant="red" onclick={disconnect}>{t('回首頁')}</FancyButton>
     {/if}
   </div>
 </div>

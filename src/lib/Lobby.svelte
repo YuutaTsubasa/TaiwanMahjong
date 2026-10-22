@@ -2,6 +2,7 @@
   // 房間大廳，依 docs/art/concepts/lobby-host-anime90.png（房主）與 lobby-guest-anime90.png（訪客）排版。
   import { net, hostCmd, leave, disconnect, serverUrls, toast, send, setCharacter, inTauri } from './net.svelte.js';
   import { WEB_URL } from './site.js';
+  import { t, displayName } from './i18n.svelte.js';
   import Avatar from './Avatar.svelte';
   import Brand from './Brand.svelte';
   import OrnateHeading from './ui/OrnateHeading.svelte';
@@ -37,38 +38,38 @@
 
   function applySettings() {
     hostCmd('settings', { settings: Object.fromEntries(Object.entries(settings).map(([k, v]) => [k, Number(v)])) });
-    toast('規則已更新', 'info');
+    toast(t('規則已更新'), 'info');
     showRules = false;
   }
 
-  async function copy(t) {
+  async function copy(text) {
     try {
-      await navigator.clipboard.writeText(t);
-      toast('已複製', 'info');
+      await navigator.clipboard.writeText(text);
+      toast(t('已複製'), 'info');
     } catch {
-      toast('複製失敗，請手動選取');
+      toast(t('複製失敗，請手動選取'));
     }
   }
 
   function roleOf(seat, i) {
-    if (s.host_seat === i) return ['房主', 'host'];
-    if (i === net.seat) return ['你', 'me'];
-    if (seat.kind === 'bot') return ['電腦', 'bot'];
+    if (s.host_seat === i) return [t('房主'), 'host'];
+    if (i === net.seat) return [t('你'), 'me'];
+    if (seat.kind === 'bot') return [t('電腦'), 'bot'];
     if (seat.kind === 'agent') return ['AI', 'ai'];
-    return ['玩家', 'human'];
+    return [t('玩家'), 'human'];
   }
   function statusOf(seat) {
-    if (seat.kind === 'bot') return '已入席';
-    return seat.connected ? '在線' : '離線';
+    if (seat.kind === 'bot') return t('已入席');
+    return seat.connected ? t('在線') : t('離線');
   }
 
-  const roundsLabel = (n) => ({ 1: '東風圈', 2: '東南圈', 4: '一將' })[n] ?? `${n} 圈`;
+  const roundsLabel = (n) => t({ 1: '東風圈', 2: '東南圈', 4: '一將' }[n] ?? '{n} 圈', { n });
   const rules = $derived([
-    `底 ${s.settings.base}`,
-    `每台 ${s.settings.per_tai}`,
+    t('底 {n}', { n: s.settings.base }),
+    t('每台 {n}', { n: s.settings.per_tai }),
     roundsLabel(s.settings.rounds),
-    `出牌 ${s.settings.turn_timeout ? s.settings.turn_timeout + ' 秒' : '不限'}`,
-    ...(s.settings.skills ? ['技能模式'] : []),
+    s.settings.turn_timeout ? t('出牌 {n} 秒', { n: s.settings.turn_timeout }) : t('出牌 不限'),
+    ...(s.settings.skills ? [t('技能模式')] : []),
   ]);
 
   const fields = [
@@ -81,6 +82,8 @@
     ['bot_delay_ms', '電腦思考毫秒', 100],
     ['skills', '技能模式（0=關 1=開）', 1],
   ];
+
+  const nameOf = (c) => displayName(c.name, s.seats[c.seat]?.character);
 
   // 聊天：系統訊息（加入、離開…）與玩家聊天混在一起，依時間順序
   const chatLines = $derived([
@@ -106,27 +109,28 @@
   }
 
   const claudeCmd = $derived(`claude mcp add --transport http mahjong ${base}/mcp`);
-  const aiPrompt = (who) =>
-    `用 mahjong MCP 工具，以「${who}」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲。之後不斷重複：呼叫 wait_for_turn，輪到你時用 take_action 選擇最好的 action_id，直到遊戲結束。打牌要快，每次決定都有時間限制。可以用 send_chat 跟大家聊天。`;
-  const curlPrompt = $derived(`請讀 ${base}/llms.txt 的說明，用 curl 以「AI」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲，然後一直玩到遊戲結束。`);
+  // tool：Claude 用「mahjong MCP 工具」，ChatGPT 用「麻將工具」
+  const aiPrompt = (who, tool = 'mahjong MCP 工具') =>
+    t('用 {tool}，以「{who}」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲。之後不斷重複：呼叫 wait_for_turn，輪到你時用 take_action 選擇最好的 action_id，直到遊戲結束。打牌要快，每次決定都有時間限制。可以用 send_chat 跟大家聊天。', { tool: t(tool), who });
+  const curlPrompt = $derived(t('請讀 {url} 的說明，用 curl 以「AI」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲，然後一直玩到遊戲結束。', { url: `${base}/llms.txt` }));
   const tunnelCmd = $derived(`cloudflared tunnel --url ${base.replace(/\/\/[^:]+:/, '//localhost:')}`);
 </script>
 
 <main class="concept-page lobby2">
   <header class="lobby-head">
     <div class="head-brand"><Brand compact /></div>
-    <OrnateHeading text="房間大廳" size="md" />
+    <OrnateHeading text={t('房間大廳')} size="md" />
     <div class="head-right">
-      <FancyButton variant="red" onclick={exitRoom}>⇦ 離開房間</FancyButton>
+      <FancyButton variant="red" onclick={exitRoom}>⇦ {t('離開房間')}</FancyButton>
     </div>
   </header>
 
   <div class="lobby-body">
     <!-- 左：座位 -->
-    <section class="seats-area" aria-label="入席玩家">
+    <section class="seats-area" aria-label={t('入席玩家')}>
       <div class="seat-count art-panel">
-        <span class="label">入席玩家</span>
-        <span class="count">{seated} / 4 已入席</span>
+        <span class="label">{t('入席玩家')}</span>
+        <span class="count">{t('{n} / 4 已入席', { n: seated })}</span>
       </div>
       {#each s.seats as seat, i}
         {@const [role, roleClass] = seat.name ? roleOf(seat, i) : ['', '']}
@@ -144,94 +148,94 @@
           </div>
           <div class="seat-info">
             {#if seat.name}
-              <b class="seat-name" title={seat.name}>{seat.name}</b>
+              <b class="seat-name" title={displayName(seat.name, seat.character)}>{displayName(seat.name, seat.character)}</b>
               <span class="role {roleClass}">{role}</span>
               <span class="status"><i class="dot" class:on={seat.kind === 'bot' || seat.connected}></i>{statusOf(seat)}</span>
               {#if i === net.seat}
-                <button type="button" class="seat-btn" onclick={() => (showCharacter = true)}>更換角色</button>
+                <button type="button" class="seat-btn" onclick={() => (showCharacter = true)}>{t('更換角色')}</button>
               {:else if isHost && s.host_seat !== i}
-                <button type="button" class="seat-btn" onclick={() => hostCmd('remove', { seat: i })}>移除</button>
+                <button type="button" class="seat-btn" onclick={() => hostCmd('remove', { seat: i })}>{t('移除')}</button>
               {/if}
             {:else}
-              <b class="seat-name wait">等待入席</b>
+              <b class="seat-name wait">{t('等待入席')}</b>
               {#if isHost}
-                <button type="button" class="seat-btn" onclick={() => hostCmd('add_bot', { seat: i })}>加入電腦</button>
+                <button type="button" class="seat-btn" onclick={() => hostCmd('add_bot', { seat: i })}>{t('加入電腦')}</button>
               {/if}
             {/if}
           </div>
         </div>
       {/each}
-      <p class="fill-note">空位會在開始時補上電腦。</p>
+      <p class="fill-note">{t('空位會在開始時補上電腦。')}</p>
     </section>
 
     <!-- 右：邀請／連線資訊＋聊天 -->
     <aside class="side">
       <section class="art-panel invite">
-        <h2 class="panel-title">{isHost ? '邀請入席' : '連線資訊'}</h2>
+        <h2 class="panel-title">{isHost ? t('邀請入席') : t('連線資訊')}</h2>
         {#if isHost && !net.room}
           <div class="tabs" role="tablist">
-            <button type="button" role="tab" class:sel={tab === 'friends'} aria-selected={tab === 'friends'} onclick={() => (tab = 'friends')}>朋友</button>
+            <button type="button" role="tab" class:sel={tab === 'friends'} aria-selected={tab === 'friends'} onclick={() => (tab = 'friends')}>{t('朋友')}</button>
             <button type="button" role="tab" class:sel={tab === 'ai'} aria-selected={tab === 'ai'} onclick={() => (tab = 'ai')}>AI</button>
-            <button type="button" role="tab" class:sel={tab === 'info'} aria-selected={tab === 'info'} onclick={() => (tab = 'info')}>連線資訊</button>
+            <button type="button" role="tab" class:sel={tab === 'info'} aria-selected={tab === 'info'} onclick={() => (tab = 'info')}>{t('連線資訊')}</button>
           </div>
         {/if}
 
         {#if !isHost || tab === 'friends'}
           {#if net.room}
-            {#if isHost}<p>把房號告訴朋友，在「加入牌局」輸入就能入席。</p>{/if}
+            {#if isHost}<p>{t('把房號告訴朋友，在「加入牌局」輸入就能入席。')}</p>{/if}
             <div class="copy-row">
               <code class="room-code">{net.room}</code>
-              <button type="button" class="copy-btn" onclick={() => copy(net.room)}>複製</button>
+              <button type="button" class="copy-btn" onclick={() => copy(net.room)}>{t('複製')}</button>
             </div>
-            <p class="small">或分享連結（不用裝 App）：</p>
+            <p class="small">{t('或分享連結（不用裝 App）：')}</p>
             <div class="copy-row">
               <code>{shareLink}</code>
-              <button type="button" class="copy-btn" onclick={() => copy(shareLink)}>複製</button>
+              <button type="button" class="copy-btn" onclick={() => copy(shareLink)}>{t('複製')}</button>
             </div>
             {#if net.signalDown}
-              <p class="warn">配對服務暫時連不上：已經在房間裡的人不受影響，但新的人暫時進不來。</p>
+              <p class="warn">{t('配對服務暫時連不上：已經在房間裡的人不受影響，但新的人暫時進不來。')}</p>
             {:else}
-              <p class="ok"><i class="dot on"></i>{isHost ? '線上房間已開啟' : '已連線'}</p>
+              <p class="ok"><i class="dot on"></i>{isHost ? t('線上房間已開啟') : t('已連線')}</p>
             {/if}
             {#if isHost}
-              <p class="muted small">牌局在你的電腦上跑：開局後請別關掉或重新整理這個頁面。想跟 AI 一起打請用桌面版的區網房間。</p>
+              <p class="muted small">{t('牌局在你的電腦上跑：開局後請別關掉或重新整理這個頁面。想跟 AI 一起打請用桌面版的區網房間。')}</p>
             {/if}
           {:else}
-            {#if isHost}<p>分享房間位址，邀請朋友加入。</p>{/if}
+            {#if isHost}<p>{t('分享房間位址，邀請朋友加入。')}</p>{/if}
             <div class="copy-row">
               <code>{address}</code>
-              <button type="button" class="copy-btn" onclick={() => copy(address)}>複製</button>
+              <button type="button" class="copy-btn" onclick={() => copy(address)}>{t('複製')}</button>
             </div>
-            <p class="ok"><i class="dot on"></i>{isHost ? '房間已開啟' : '已連線'}</p>
+            <p class="ok"><i class="dot on"></i>{isHost ? t('房間已開啟') : t('已連線')}</p>
             {#if isHost}
-              <p class="muted small">沒有 App 的朋友可直接用瀏覽器打開 <code>{base}/</code></p>
+              <p class="muted small">{t('沒有 App 的朋友可直接用瀏覽器打開')} <code>{base}/</code></p>
             {/if}
           {/if}
         {:else if tab === 'ai'}
           <div class="subtabs">
             <button type="button" class:sel={aiTab === 'claude'} onclick={() => (aiTab = 'claude')}>Claude Code</button>
             <button type="button" class:sel={aiTab === 'chatgpt'} onclick={() => (aiTab = 'chatgpt')}>ChatGPT</button>
-            <button type="button" class:sel={aiTab === 'other'} onclick={() => (aiTab = 'other')}>其他 AI</button>
+            <button type="button" class:sel={aiTab === 'other'} onclick={() => (aiTab = 'other')}>{t('其他 AI')}</button>
           </div>
           <div class="ai-body">
             {#if aiTab === 'claude'}
-              <p>1. 把麻將伺服器加成 MCP：</p>
-              <div class="copy-row"><code>{claudeCmd}</code><button type="button" class="copy-btn" onclick={() => copy(claudeCmd)}>複製</button></div>
-              <p>2. 開一個<b>新的</b> claude 工作階段，貼上：</p>
-              <div class="copy-row"><code class="wrap">{aiPrompt('Claude')}</code><button type="button" class="copy-btn" onclick={() => copy(aiPrompt('Claude'))}>複製</button></div>
+              <p>{t('1. 把麻將伺服器加成 MCP：')}</p>
+              <div class="copy-row"><code>{claudeCmd}</code><button type="button" class="copy-btn" onclick={() => copy(claudeCmd)}>{t('複製')}</button></div>
+              <p>{t('2. 開一個新的 claude 工作階段，貼上：')}</p>
+              <div class="copy-row"><code class="wrap">{aiPrompt('Claude')}</code><button type="button" class="copy-btn" onclick={() => copy(aiPrompt('Claude'))}>{t('複製')}</button></div>
             {:else if aiTab === 'chatgpt'}
               {#if net.room}
-                <p>線上房間已經是 https 網址，不用開通道。</p>
-                <div class="copy-row"><code>{base}/mcp</code><button type="button" class="copy-btn" onclick={() => copy(`${base}/mcp`)}>複製</button></div>
+                <p>{t('線上房間已經是 https 網址，不用開通道。')}</p>
+                <div class="copy-row"><code>{base}/mcp</code><button type="button" class="copy-btn" onclick={() => copy(`${base}/mcp`)}>{t('複製')}</button></div>
               {:else}
-                <p>ChatGPT 需要 https 公開網址，先開通道：</p>
-                <div class="copy-row"><code>{tunnelCmd}</code><button type="button" class="copy-btn" onclick={() => copy(tunnelCmd)}>複製</button></div>
+                <p>{t('ChatGPT 需要 https 公開網址，先開通道：')}</p>
+                <div class="copy-row"><code>{tunnelCmd}</code><button type="button" class="copy-btn" onclick={() => copy(tunnelCmd)}>{t('複製')}</button></div>
               {/if}
-              <p class="small">再把 <code>https://…/mcp</code> 加成 ChatGPT 的連接器（設定 → 應用程式與連接器 → 開發者模式），或在自訂 GPT 匯入 <code>/openapi.json</code>，然後貼上：</p>
-              <div class="copy-row"><code class="wrap">{aiPrompt('ChatGPT').replace('mahjong MCP 工具', '麻將工具')}</code><button type="button" class="copy-btn" onclick={() => copy(aiPrompt('ChatGPT').replace('mahjong MCP 工具', '麻將工具'))}>複製</button></div>
+              <p class="small">{t('再把 https://…/mcp 加成 ChatGPT 的連接器（設定 → 應用程式與連接器 → 開發者模式），或在自訂 GPT 匯入 /openapi.json，然後貼上：')}</p>
+              <div class="copy-row"><code class="wrap">{aiPrompt('ChatGPT', '麻將工具')}</code><button type="button" class="copy-btn" onclick={() => copy(aiPrompt('ChatGPT', '麻將工具'))}>{t('複製')}</button></div>
             {:else}
-              <p>任何能發 HTTP 請求的 AI 都能玩，給它這段話：</p>
-              <div class="copy-row"><code class="wrap">{curlPrompt}</code><button type="button" class="copy-btn" onclick={() => copy(curlPrompt)}>複製</button></div>
+              <p>{t('任何能發 HTTP 請求的 AI 都能玩，給它這段話：')}</p>
+              <div class="copy-row"><code class="wrap">{curlPrompt}</code><button type="button" class="copy-btn" onclick={() => copy(curlPrompt)}>{t('複製')}</button></div>
             {/if}
           </div>
         {:else}
@@ -243,76 +247,76 @@
             </div>
           {/if}
           <dl class="info">
-            <dt>網頁</dt><dd><code>{base}/</code></dd>
+            <dt>{t('網頁')}</dt><dd><code>{base}/</code></dd>
             <dt>MCP</dt><dd><code>{base}/mcp</code></dd>
-            <dt>AI 說明</dt><dd><code>{base}/llms.txt</code></dd>
+            <dt>{t('AI 說明')}</dt><dd><code>{base}/llms.txt</code></dd>
             <dt>OpenAPI</dt><dd><code>{base}/openapi.json</code></dd>
           </dl>
           {#if net.room}
-            <p class="muted small">線上房間：大家都連到線上伺服器。房間沒人連線 15 分鐘後會自動關閉。</p>
+            <p class="muted small">{t('線上房間：大家都連到線上伺服器。房間沒人連線 15 分鐘後會自動關閉。')}</p>
           {:else}
-            <p class="muted small">需在同一個區網，或房主的防火牆／路由器有開放這個埠。</p>
+            <p class="muted small">{t('需在同一個區網，或房主的防火牆／路由器有開放這個埠。')}</p>
           {/if}
         {/if}
       </section>
 
       <section class="art-panel chat">
-        <h2 class="panel-title">牌桌聊天</h2>
+        <h2 class="panel-title">{t('牌桌聊天')}</h2>
         <ol class="chat-list" bind:this={chatBox}>
           {#each chatLines as line}
             {#if line.sys}
-              <li><span class="sys">[系統]</span> {line.text}</li>
+              <li><span class="sys">{t('[系統]')}</span> {line.text}</li>
             {:else}
-              <li><span class="who" class:mine={line.seat === net.seat}>{line.name}</span>：{line.text}</li>
+              <li><span class="who" class:mine={line.seat === net.seat}>{nameOf(line)}</span>{t('：')}{line.text}</li>
             {/if}
           {/each}
         </ol>
         {#if net.seat != null}
           <form onsubmit={sendChat}>
-            <input bind:value={chatText} placeholder="說點什麼…" maxlength="300" />
-            <button type="submit" class="send" disabled={!chatText.trim()} aria-label="送出">➤</button>
+            <input bind:value={chatText} placeholder={t('說點什麼…')} maxlength="300" />
+            <button type="submit" class="send" disabled={!chatText.trim()} aria-label={t('送出')}>➤</button>
           </form>
         {/if}
       </section>
     </aside>
 
     <!-- 下：規則＋開始 -->
-    <section class="art-panel rules-bar" aria-label="本局規則">
-      <h2 class="rules-title">本局規則</h2>
+    <section class="art-panel rules-bar" aria-label={t('本局規則')}>
+      <h2 class="rules-title">{t('本局規則')}</h2>
       <ul class="rule-chips">
         {#each rules as r}<li>{r}</li>{/each}
       </ul>
       {#if isHost}
-        <button type="button" class="seat-btn adjust" onclick={() => (showRules = true)}>調整規則</button>
+        <button type="button" class="seat-btn adjust" onclick={() => (showRules = true)}>{t('調整規則')}</button>
       {/if}
     </section>
     <div class="start-area">
       {#if isHost}
-        <FancyButton variant="gold" tile="F" onclick={() => hostCmd('start')} class="start-btn">開始遊戲</FancyButton>
+        <FancyButton variant="gold" tile="F" onclick={() => hostCmd('start')} class="start-btn">{t('開始遊戲')}</FancyButton>
       {:else}
-        <div class="art-panel waiting"><span>等待房主開始遊戲…</span><span class="spinner" aria-hidden="true"></span></div>
+        <div class="art-panel waiting"><span>{t('等待房主開始遊戲…')}</span><span class="spinner" aria-hidden="true"></span></div>
       {/if}
     </div>
   </div>
 </main>
 
-<Modal bind:open={showCharacter} title="更換角色" width="760px">
+<Modal bind:open={showCharacter} title={t('更換角色')} width="760px">
   <PortraitGrid value={myCharacter} onpick={(id) => { setCharacter(id); showCharacter = false; }} taken={takenCharacters} />
 </Modal>
 
-<Modal bind:open={showRules} title="調整規則" width="620px">
+<Modal bind:open={showRules} title={t('調整規則')} width="620px">
   {#if settings}
     <div class="rule-form">
       {#each fields as [k, label, step]}
         <label>
-          <span>{label}</span>
+          <span>{t(label)}</span>
           <input type="number" min="0" {step} bind:value={settings[k]} />
         </label>
       {/each}
     </div>
     <div class="rule-actions">
-      <FancyButton variant="red" onclick={() => (showRules = false)}>取消</FancyButton>
-      <FancyButton variant="gold" onclick={applySettings}>套用</FancyButton>
+      <FancyButton variant="red" onclick={() => (showRules = false)}>{t('取消')}</FancyButton>
+      <FancyButton variant="gold" onclick={applySettings}>{t('套用')}</FancyButton>
     </div>
   {/if}
 </Modal>
@@ -465,6 +469,19 @@
   .rule-form label { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 14px; }
   .rule-form input { width: 100px; }
   .rule-actions { display: flex; justify-content: center; gap: 16px; margin-top: 20px; }
+
+  /* 英文：中文用的大字距會把英文字拉得太開、擠不下 */
+  :global(html[lang='en']) .seat-count .label,
+  :global(html[lang='en']) .panel-title,
+  :global(html[lang='en']) .rules-title,
+  :global(html[lang='en']) .waiting { letter-spacing: 0.04em; }
+  :global(html[lang='en']) .role,
+  :global(html[lang='en']) .tabs button,
+  :global(html[lang='en']) .copy-btn,
+  :global(html[lang='en']) .seat-btn,
+  :global(html[lang='en']) .seat-count .count,
+  :global(html[lang='en']) .rule-chips li,
+  :global(html[lang='en']) .fill-note { letter-spacing: 0.02em; }
 
   /* ── 窄螢幕：座位改成一般的兩欄，右側移到下面（1024 寬的橫向螢幕仍用四角排法，不用捲動） ── */
   @media (max-width: 900px) {

@@ -2,32 +2,36 @@
   import { SEAT_KIND_ICON } from './tiles.js';
   import Avatar from './Avatar.svelte';
   import { reactionFor } from './reactions.svelte.js';
+  import { t, displayName, isZh } from './i18n.svelte.js';
 
   let { seat, active = false, thinking = false, isMe = false, bubble = 'up' } = $props();
 
   const reaction = $derived(reactionFor(seat.seat));
+  // 英文介面的圓形風位標記只放得下一個字母
+  const WIND_EN = { 東: 'E', 南: 'S', 西: 'W', 北: 'N' };
+  const wind = $derived(seat.wind && !isZh() ? WIND_EN[seat.wind] ?? seat.wind : seat.wind);
 </script>
 
 <div class="plate" class:active class:thinking>
   {#if seat.character}
     <div class="av" class:pop={reaction}>
       <Avatar id={seat.character} expression={reaction?.expression ?? 'normal'} size={54} crop />
-      {#if seat.wind}<span class="wind badge" class:dealer={seat.is_dealer}>{seat.wind}</span>{/if}
+      {#if seat.wind}<span class="wind badge" class:dealer={seat.is_dealer}>{wind}</span>{/if}
     </div>
   {:else}
-    <span class="wind" class:dealer={seat.is_dealer}>{seat.wind ?? ''}</span>
+    <span class="wind" class:dealer={seat.is_dealer}>{wind ?? ''}</span>
   {/if}
   <div class="info">
     <div class="nm">
       <span>{SEAT_KIND_ICON[seat.kind] ?? ''}</span>
-      <b>{seat.name ?? '空位'}</b>
-      {#if isMe}<span class="me">你</span>{/if}
-      {#if seat.auto}<span class="auto">託管</span>{/if}
-      {#if !seat.connected && seat.kind !== 'bot'}<span class="off">離線</span>{/if}
+      <b>{seat.name ? displayName(seat.name, seat.character) : t('空位')}</b>
+      {#if isMe}<span class="me">{t('你')}</span>{/if}
+      {#if seat.auto}<span class="auto">{t('託管')}</span>{/if}
+      {#if !seat.connected && seat.kind !== 'bot'}<span class="off">{t('離線')}</span>{/if}
     </div>
     <div class="score" class:neg={seat.score < 0}>{seat.score > 0 ? '+' : ''}{seat.score}</div>
   </div>
-  {#if seat.is_dealer}<span class="dealer-tag">莊</span>{/if}
+  {#if seat.is_dealer}<span class="dealer-tag">{t('莊')}</span>{/if}
   {#if reaction?.text}
     {#key reaction.until}
       <div class="bubble {bubble}" class:big={reaction.kind === 'tsumo' || reaction.kind === 'ron'}>{reaction.text}</div>

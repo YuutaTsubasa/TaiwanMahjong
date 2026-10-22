@@ -2,6 +2,7 @@
 import { isTauri, invoke } from '@tauri-apps/api/core';
 import { SIGNAL_SERVER, ROOM_CODE_CHARS } from './site.js';
 import { P2PHost, P2PGuest, signalAvailable } from './p2p.js';
+import { t } from './i18n.svelte.js';
 
 export const inTauri = isTauri();
 
@@ -124,7 +125,7 @@ function openWs() {
   try {
     socket = new WebSocket(wsUrl);
   } catch (e) {
-    toast(`無法連線：${e}`);
+    toast(t('無法連線：{error}', { error: String(e) }));
     net.status = 'idle';
     return;
   }
@@ -177,7 +178,7 @@ export function hostRoom({ name, character, settings } = {}) {
     }
   };
   worker.onerror = (e) => {
-    toast(`牌局引擎載入失敗：${e.message || e}`);
+    toast(t('牌局引擎載入失敗：{error}', { error: e.message || String(e) }));
     disconnect();
   };
   worker.postMessage({ type: 'p2p-start', hostKey: key, settings });
@@ -239,10 +240,10 @@ function openGuest() {
       p2pGuest = null;
       scheduleRetry();
     },
-    onFatal: (message) => {
+    onFatal: (message, code) => {
       if (p2pGuest !== g) return;
       // 已經在房間裡卻找不到房主：房主關掉了頁面
-      toast(net.state && message.startsWith('找不到房號') ? '房主離開了，房間已經關閉' : message);
+      toast(net.state && code === 'no_host' ? t('房主離開了，房間已經關閉') : message);
       disconnect();
     },
   });
@@ -292,7 +293,7 @@ export function send(obj) {
     ws.send(JSON.stringify(obj));
     return true;
   }
-  toast('尚未連線');
+  toast(t('尚未連線'));
   return false;
 }
 
@@ -381,7 +382,7 @@ export function startLocal({ name, character, settings } = {}) {
     }
   };
   worker.onerror = (e) => {
-    toast(`單機引擎載入失敗：${e.message || e}`);
+    toast(t('單機引擎載入失敗：{error}', { error: e.message || String(e) }));
     disconnect();
   };
   worker.postMessage({ type: 'start', name, character, settings });

@@ -1,10 +1,11 @@
 <script>
   import { soundSettings, setVolume, toggleMute } from './audio/sound.svelte.js';
+  import { t } from './i18n.svelte.js';
 </script>
 
-<div class="sound" role="group" aria-label="聲音設定">
-  <label title="背景音樂">
-    <span>🎵 音樂</span>
+<div class="sound" role="group" aria-label={t('聲音設定')}>
+  <label title={t('背景音樂')}>
+    <span>🎵 {t('音樂')}</span>
     <input
       type="range"
       min="0"
@@ -14,8 +15,8 @@
       oninput={(e) => setVolume('bgm', Number(e.currentTarget.value))}
     />
   </label>
-  <label title="音效">
-    <span>🔔 音效</span>
+  <label title={t('音效')}>
+    <span>🔔 {t('音效')}</span>
     <input
       type="range"
       min="0"
@@ -26,7 +27,7 @@
     />
   </label>
   <button type="button" class:muted={soundSettings.muted} onclick={toggleMute} aria-pressed={soundSettings.muted}>
-    {soundSettings.muted ? '🔇 已靜音' : '🔊'}
+    {soundSettings.muted ? `🔇 ${t('已靜音')}` : '🔊'}
   </button>
 </div>
 

@@ -2,6 +2,7 @@
   import { onDestroy } from 'svelte';
   import { artStyle } from './art-style.js';
   import { asset } from './site.js';
+  import { t } from './i18n.svelte.js';
   let { compact = false } = $props();
   let trigger;
   let timer;
@@ -24,13 +25,13 @@
 </script>
 
 <button type="button" class="brand" class:compact bind:this={trigger}
-  aria-label="虛擬台麻館：長按開啟密技輸入"
+  aria-label={t('虛擬台麻館：長按開啟密技輸入')}
   onpointerdown={startHold} onpointermove={move} onpointerup={cancelHold}
   onpointercancel={cancelHold} onpointerleave={cancelHold} onblur={cancelHold}
   oncontextmenu={(event) => event.preventDefault()}
   onclick={(event) => { if (event.detail === 0) openSecret(); }}>
   <!-- 書法標誌（public/ui/<畫風>/logo.png，1400×420 透明 PNG） -->
-  <img class="logo" src={asset(`/ui/${$artStyle}/logo.png`)} alt="虛擬台麻館 Virtual Taiwan Mahjong Parlor" draggable="false" />
+  <img class="logo" src={asset(`/ui/${$artStyle}/logo.png`)} alt={t('虛擬台麻館 Virtual Taiwan Mahjong Parlor')} draggable="false" />
 </button>
 
 <style>

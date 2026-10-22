@@ -1,10 +1,11 @@
 <script>
   import { keyboardEdit, setControlValue } from './input-controls.js';
+  import { t } from './i18n.svelte.js';
 
   let dialog;
   let target;
   let draft = $state('');
-  let label = $state('輸入文字');
+  let label = $state('');
   let uppercase = $state(false);
   let password = $state(false);
   let maxLength = $state(-1);
@@ -17,7 +18,7 @@
     if (!element || element.disabled || element.readOnly || dialog.open) return;
     target = element;
     draft = element.value ?? '';
-    label = element.getAttribute('aria-label') || element.labels?.[0]?.textContent.trim() || element.placeholder || '輸入文字';
+    label = element.getAttribute('aria-label') || element.labels?.[0]?.textContent.trim() || element.placeholder || '';
     password = element.type === 'password';
     maxLength = element.maxLength ?? -1;
     uppercase = false;
@@ -33,7 +34,7 @@
   function apply() {
     if (target?.isConnected && !target.disabled && !target.readOnly) {
       if (target.type === 'number' && (draft.trim() === '' || !Number.isFinite(Number(draft)))) {
-        error = '請輸入有效的數字。';
+        error = t('請輸入有效的數字。');
         return;
       }
       setControlValue(target, draft);
@@ -48,15 +49,15 @@
 
 <dialog bind:this={dialog} class="keyboard" aria-labelledby="keyboard-title" onclose={restoreFocus}>
   <header>
-    <h2 id="keyboard-title">手把鍵盤 · {label}</h2>
-    <button type="button" aria-label="取消輸入" onclick={close}>✕</button>
+    <h2 id="keyboard-title">{t('手把鍵盤')} · {label || t('輸入文字')}</h2>
+    <button type="button" aria-label={t('取消輸入')} onclick={close}>✕</button>
   </header>
   <label class="draft-label">
-    <span>目前輸入</span>
+    <span>{t('目前輸入')}</span>
     <input data-gamepad-skip type={password ? 'password' : 'text'} bind:value={draft} maxlength={maxLength >= 0 ? maxLength : undefined} autocomplete="off" spellcheck="false" />
   </label>
-  <p class="help">方向鍵選字 · A 輸入 · B 取消。中文輸入可使用裝置鍵盤；原有中文暱稱會保留。</p>
-  <div class="keys" role="group" aria-label="英數與符號鍵盤">
+  <p class="help">{t('方向鍵選字 · A 輸入 · B 取消。中文輸入可使用裝置鍵盤；原有中文暱稱會保留。')}</p>
+  <div class="keys" role="group" aria-label={t('英數與符號鍵盤')}>
     {#each rows as row}
       <div class="key-row">
         {#each Array.from(row) as letter}
@@ -66,15 +67,15 @@
     {/each}
   </div>
   <div class="edit-actions">
-    <button type="button" aria-pressed={uppercase} onclick={() => (uppercase = !uppercase)}>{uppercase ? '大寫 ABC' : '小寫 abc'}</button>
-    <button type="button" onclick={() => press('SPACE')}>空白</button>
-    <button type="button" onclick={() => press('BACKSPACE')}>退格 ⌫</button>
-    <button type="button" onclick={() => press('CLEAR')}>清除</button>
+    <button type="button" aria-pressed={uppercase} onclick={() => (uppercase = !uppercase)}>{uppercase ? t('大寫 ABC') : t('小寫 abc')}</button>
+    <button type="button" onclick={() => press('SPACE')}>{t('空白')}</button>
+    <button type="button" onclick={() => press('BACKSPACE')}>{t('退格')} ⌫</button>
+    <button type="button" onclick={() => press('CLEAR')}>{t('清除')}</button>
   </div>
   <p class="error" role="status">{error}</p>
   <footer>
-    <button type="button" onclick={close}>取消</button>
-    <button type="button" class="primary" onclick={apply}>套用輸入</button>
+    <button type="button" onclick={close}>{t('取消')}</button>
+    <button type="button" class="primary" onclick={apply}>{t('套用輸入')}</button>
   </footer>
 </dialog>
 

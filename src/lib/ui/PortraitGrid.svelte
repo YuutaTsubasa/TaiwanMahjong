@@ -3,8 +3,9 @@
   import { CHARACTERS, getSelectableCharacters } from '../characters.js';
   import { ayiUnlocked } from '../unlocks.js';
   import Avatar from '../Avatar.svelte';
+  import { t } from '../i18n.svelte.js';
 
-  let { value = $bindable(), onpick = undefined, taken = [], columns = undefined, label = '選擇角色' } = $props();
+  let { value = $bindable(), onpick = undefined, taken = [], columns = undefined, label = undefined } = $props();
 
   // 隱藏角色一律列出：還沒解鎖時是黑色剪影、名字「???」、不能選
   const list = CHARACTERS;
@@ -18,7 +19,7 @@
   }
 </script>
 
-<div class="pgrid" role="radiogroup" aria-label={label} style:--cols={cols}>
+<div class="pgrid" role="radiogroup" aria-label={label ?? t('選擇角色')} style:--cols={cols}>
   {#each list as c}
     {@const locked = !unlocked.has(c.id)}
     {@const isTaken = taken.includes(c.id) && value !== c.id}
@@ -31,12 +32,12 @@
       class:locked
       aria-checked={value === c.id}
       aria-disabled={locked}
-      aria-label={locked ? '隱藏角色（尚未解鎖）' : c.name}
-      title={locked ? '隱藏角色：尚未解鎖' : `${c.name}：${c.intro}${isTaken ? '（已有人選）' : ''}`}
+      aria-label={locked ? t('隱藏角色（尚未解鎖）') : t(c.name)}
+      title={locked ? t('隱藏角色：尚未解鎖') : t(isTaken ? '{name}：{intro}（已有人選）' : '{name}：{intro}', { name: t(c.name), intro: t(c.intro) })}
       onclick={() => !locked && pick(c.id)}
     >
       <span class="pic"><Avatar id={c.id} expression={value === c.id ? 'happy' : 'normal'} size={220} /></span>
-      <span class="name">{locked ? '???' : c.name}</span>
+      <span class="name">{locked ? '???' : t(c.name)}</span>
       {#if value === c.id}<span class="diamond" aria-hidden="true"></span>{/if}
     </button>
   {/each}
@@ -83,6 +84,9 @@
     color: var(--text);
     border-top: 1px solid var(--art-line);
   }
+  /* 英文名字比較長：字距縮小，放不下就省略 */
+  /* 英文名字比較長：字縮小、不加字距 */
+  :global(html[lang='en']) .name { letter-spacing: 0; font-size: clamp(9px, min(0.95vw, 1.8vh), 15px); line-height: 1.15; overflow-wrap: anywhere; }
   .sel .name { color: var(--gold); }
   .taken { opacity: 0.5; }
   /* 未解鎖：整張壓成黑色剪影 */

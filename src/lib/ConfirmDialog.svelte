@@ -1,9 +1,11 @@
 <script>
+  import { t } from './i18n.svelte.js';
+
   let dialog;
   let trigger;
   let pendingAction;
   let message = $state('');
-  let confirmLabel = $state('確定');
+  let confirmLabel = $state('');
 
   // All input methods use these same real buttons. Closing (including Escape or
   // gamepad B through Controls) cancels; only the explicit confirm button acts.
@@ -11,7 +13,7 @@
     if (dialog.open) return;
     trigger = document.activeElement;
     message = options.message;
-    confirmLabel = options.confirmLabel ?? '確定';
+    confirmLabel = options.confirmLabel ?? '';
     pendingAction = options.onconfirm;
     dialog.showModal();
     dialog.querySelector('[data-cancel]')?.focus();
@@ -30,11 +32,11 @@
 </script>
 
 <dialog bind:this={dialog} class="confirmation" aria-labelledby="game-confirm-title" aria-describedby="game-confirm-message" onclose={closed}>
-  <h2 id="game-confirm-title">確認操作</h2>
+  <h2 id="game-confirm-title">{t('確認操作')}</h2>
   <p id="game-confirm-message">{message}</p>
   <div class="buttons">
-    <button type="button" data-cancel onclick={() => dialog.close('cancel')}>取消</button>
-    <button type="button" class="danger" onclick={confirmAction}>{confirmLabel}</button>
+    <button type="button" data-cancel onclick={() => dialog.close('cancel')}>{t('取消')}</button>
+    <button type="button" class="danger" onclick={confirmAction}>{confirmLabel || t('確定')}</button>
   </div>
 </dialog>
 

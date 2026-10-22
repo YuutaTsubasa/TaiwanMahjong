@@ -1,5 +1,6 @@
 <script>
   import { net, send } from './net.svelte.js';
+  import { t, displayName } from './i18n.svelte.js';
 
   let { showLog = false } = $props();
   let text = $state('');
@@ -32,14 +33,14 @@
       {#if it.kind === 'log'}
         <div class="log">{it.text}</div>
       {:else}
-        <div class="msg"><b class:me={it.seat === net.seat}>{it.name}</b>：{it.text}</div>
+        <div class="msg"><b class:me={it.seat === net.seat}>{displayName(it.name, net.state?.seats[it.seat]?.character)}</b>{t('：')}{it.text}</div>
       {/if}
     {/each}
   </div>
   {#if net.seat != null}
     <form onsubmit={submit}>
-      <input bind:value={text} placeholder="說點什麼…" maxlength="300" />
-      <button type="submit" disabled={!text.trim()}>送出</button>
+      <input bind:value={text} placeholder={t('說點什麼…')} maxlength="300" />
+      <button type="submit" disabled={!text.trim()}>{t('送出')}</button>
     </form>
   {/if}
 </div>

@@ -1,0 +1,101 @@
+// 房間大廳、連線訊息、聊天（英文）
+export default {
+  // 標題、座位
+  房間大廳: 'Room Lobby',
+  離開房間: 'Leave room',
+  入席玩家: 'Players',
+  '{n} / 4 已入席': '{n} / 4 seated',
+  房主: 'Host',
+  你: 'You',
+  電腦: 'CPU',
+  玩家: 'Player',
+  已入席: 'Seated',
+  在線: 'Online',
+  離線: 'Offline',
+  更換角色: 'Change character',
+  移除: 'Remove',
+  等待入席: 'Empty seat',
+  加入電腦: 'Add CPU',
+  '空位會在開始時補上電腦。': 'Empty seats are filled with CPUs when the game starts.',
+
+  // 邀請／連線資訊
+  邀請入席: 'Invite',
+  連線資訊: 'Connection',
+  朋友: 'Friends',
+  '把房號告訴朋友，在「加入牌局」輸入就能入席。': 'Give your friends the room code — they enter it under "Join a game" to take a seat.',
+  複製: 'Copy',
+  已複製: 'Copied',
+  '複製失敗，請手動選取': 'Copy failed. Please select and copy it manually.',
+  '或分享連結（不用裝 App）：': 'Or share the link (no app needed):',
+  '配對服務暫時連不上：已經在房間裡的人不受影響，但新的人暫時進不來。':
+    "Can't reach the matchmaking service right now. Players already in the room are fine, but new players can't join for the moment.",
+  線上房間已開啟: 'Online room is open',
+  已連線: 'Connected',
+  '牌局在你的電腦上跑：開局後請別關掉或重新整理這個頁面。想跟 AI 一起打請用桌面版的區網房間。':
+    "The game runs on your computer: don't close or reload this page once it starts. To play with AI, use a LAN room in the desktop app.",
+  '分享房間位址，邀請朋友加入。': 'Share the room address to invite friends.',
+  房間已開啟: 'Room is open',
+  '沒有 App 的朋友可直接用瀏覽器打開': 'Friends without the app can just open this in a browser:',
+  '其他 AI': 'Other AI',
+  '1. 把麻將伺服器加成 MCP：': '1. Add the mahjong server as an MCP server:',
+  '2. 開一個新的 claude 工作階段，貼上：': '2. Start a new claude session and paste:',
+  '線上房間已經是 https 網址，不用開通道。': 'Online rooms already use an https URL, so no tunnel is needed.',
+  'ChatGPT 需要 https 公開網址，先開通道：': 'ChatGPT needs a public https URL. Open a tunnel first:',
+  '再把 https://…/mcp 加成 ChatGPT 的連接器（設定 → 應用程式與連接器 → 開發者模式），或在自訂 GPT 匯入 /openapi.json，然後貼上：':
+    'Then add https://…/mcp as a ChatGPT connector (Settings → Apps & Connectors → Developer mode), or import /openapi.json into a custom GPT, and paste:',
+  '任何能發 HTTP 請求的 AI 都能玩，給它這段話：': 'Any AI that can make HTTP requests can play. Give it this:',
+  'mahjong MCP 工具': 'mahjong MCP tools',
+  麻將工具: 'mahjong tools',
+  '用 {tool}，以「{who}」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲。之後不斷重複：呼叫 wait_for_turn，輪到你時用 take_action 選擇最好的 action_id，直到遊戲結束。打牌要快，每次決定都有時間限制。可以用 send_chat 跟大家聊天。':
+    'Use the {tool} to join the Taiwanese 16-tile mahjong game at "Virtual Taiwan Mahjong Parlor" under the name "{who}". Then repeat: call wait_for_turn, and when it is your turn, use take_action to choose the best action_id, until the game ends. Play quickly — every decision has a time limit. You can chat with everyone using send_chat.',
+  '請讀 {url} 的說明，用 curl 以「AI」的名字加入「虛擬台麻館」的台灣十六張麻將遊戲，然後一直玩到遊戲結束。':
+    'Read the instructions at {url}, then use curl to join the Taiwanese 16-tile mahjong game at "Virtual Taiwan Mahjong Parlor" under the name "AI", and keep playing until the game ends.',
+  網頁: 'Web',
+  'AI 說明': 'AI guide',
+  '線上房間：大家都連到線上伺服器。房間沒人連線 15 分鐘後會自動關閉。':
+    'Online room: everyone connects through the online server. The room closes automatically after 15 minutes with nobody connected.',
+  '需在同一個區網，或房主的防火牆／路由器有開放這個埠。':
+    "Players must be on the same LAN, or the host's firewall/router must allow this port.",
+
+  // 聊天
+  牌桌聊天: 'Table Chat',
+  '[系統]': '[System]',
+  '：': ': ',
+  '說點什麼…': 'Say something…',
+  送出: 'Send',
+  '{name}：{intro}': '{name}: {intro}',
+
+  // 規則
+  本局規則: 'Rules',
+  '底 {n}': 'Base {n}',
+  '每台 {n}': '{n} per tai',
+  東風圈: 'East round',
+  東南圈: 'East & South rounds',
+  一將: 'Full game (4 rounds)',
+  '{n} 圈': '{n} rounds',
+  '出牌 {n} 秒': '{n}s per turn',
+  '出牌 不限': 'No turn limit',
+  技能模式: 'Skill mode',
+  調整規則: 'Edit rules',
+  規則已更新: 'Rules updated',
+  開始遊戲: 'Start game',
+  '等待房主開始遊戲…': 'Waiting for the host to start…',
+  底: 'Base',
+  每台: 'Per tai',
+  '圈數（1=東風圈 4=一將）': 'Rounds (1 = East round, 4 = full game)',
+  '出牌秒數（0=不限）': 'Turn time, sec (0 = no limit)',
+  '吃碰胡秒數（0=不限）': 'Chow/Pung/Win time, sec (0 = no limit)',
+  下一局自動開始秒數: 'Next hand auto-start, sec',
+  電腦思考毫秒: 'CPU think time, ms',
+  '技能模式（0=關 1=開）': 'Skill mode (0 = off, 1 = on)',
+  取消: 'Cancel',
+  套用: 'Apply',
+
+  // 連線訊息
+  '無法連線：{error}': 'Unable to connect: {error}',
+  '牌局引擎載入失敗：{error}': 'Failed to load the game engine: {error}',
+  '單機引擎載入失敗：{error}': 'Failed to load the single-player engine: {error}',
+  '房主離開了，房間已經關閉': 'The host left. The room has been closed.',
+  尚未連線: 'Not connected',
+  '找不到房號 {code}（房間可能已經關閉了）': 'Room {code} not found (it may have been closed).',
+};

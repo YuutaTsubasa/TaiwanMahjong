@@ -2,8 +2,10 @@
   // 對局右側：牌桌紀錄（每行帶出手者頭像、牌名標紅）＋聊天＋離開按鈕
   import { net, send } from '../net.svelte.js';
   import Avatar from '../Avatar.svelte';
+  import { t } from '../i18n.svelte.js';
+  import { seatName } from '../tiles.js';
 
-  let { onclose, onleave, onend, leaveLabel = '離開房局' } = $props();
+  let { onclose, onleave, onend, leaveLabel = t('離開房局') } = $props();
 
   const s = $derived(net.state);
   let text = $state('');
@@ -55,8 +57,8 @@
 <aside class="sidelog">
   <section class="log-sec">
     <header>
-      <h2>牌桌紀錄</h2>
-      <button type="button" class="small" onclick={onclose}>收起 ›</button>
+      <h2>{t('牌桌紀錄')}</h2>
+      <button type="button" class="small" onclick={onclose}>{t('收起 ›')}</button>
     </header>
     <ol class="log" bind:this={logBox}>
       {#each logItems as it}
@@ -84,7 +86,7 @@
   </section>
 
   <section class="chat-sec">
-    <header><h2>聊天</h2></header>
+    <header><h2>{t('聊天')}</h2></header>
     <ol class="chat" bind:this={chatBox}>
       {#each chatItems as c}
         {@const seat = c.seat != null ? s.seats[c.seat] : null}
@@ -94,23 +96,23 @@
           {:else}
             <span class="av sys">●</span>
           {/if}
-          <span class="who">{c.name}</span>：<span class="txt">{c.text}</span>
+          <span class="who">{seat && seat.name === c.name ? seatName(seat) : c.name}</span>{t('：')}<span class="txt">{c.text}</span>
         </li>
       {:else}
-        <li class="empty">還沒有人說話</li>
+        <li class="empty">{t('還沒有人說話')}</li>
       {/each}
     </ol>
     {#if net.seat != null}
       <form onsubmit={submit}>
-        <input bind:value={text} placeholder="說點什麼…" maxlength="300" />
-        <button type="submit" disabled={!text.trim()} aria-label="送出">➤</button>
+        <input bind:value={text} placeholder={t('說點什麼…')} maxlength="300" />
+        <button type="submit" disabled={!text.trim()} aria-label={t('送出')}>➤</button>
       </form>
     {/if}
   </section>
 
   <div class="leave">
     {#if onend}
-      <button type="button" class="end" onclick={onend}>結束牌局</button>
+      <button type="button" class="end" onclick={onend}>{t('結束牌局')}</button>
     {/if}
     <button type="button" class="exit" onclick={onleave}>⇦ {leaveLabel}</button>
   </div>

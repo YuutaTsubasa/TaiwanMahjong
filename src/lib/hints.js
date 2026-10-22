@@ -3,6 +3,7 @@
 // 「自動彈出提示」開著時，每次輪到你做決定就自動打開。這個開關記在這台電腦上，預設開啟，
 // 在「遊戲設定」或提示框下方都可以切換。
 import { writable } from 'svelte/store';
+import { t, isZh } from './i18n.svelte.js';
 
 const STORAGE_KEY = 'mj_hints';
 
@@ -60,6 +61,26 @@ const TAI_INFO = {
 };
 
 export function taiInfo(name) {
-  if (/^連\d+拉\d+/.test(name)) return '莊家連莊時，每連一次多加 2 台（連幾拉幾）。';
-  return TAI_INFO[name.replace(/[（(].*$/, '')] ?? '';
+  if (/^連\d+拉\d+/.test(name)) return t('莊家連莊時，每連一次多加 2 台（連幾拉幾）。');
+  const info = TAI_INFO[taiBase(name)];
+  return info ? t(info) : '';
+}
+
+// 台數名稱：去掉括號的部分（例如「正花(梅)」→「正花」）
+const taiBase = (name) => name.replace(/[（(].*$/, '');
+
+/**
+ * 台數項目的顯示名稱：中文介面就是原名；英文介面保留中文名、後面加英文說明，
+ * 例如「門清 (Concealed hand)」「正花(梅) (Seat flower: Plum)」「連2拉2 (Dealer streak ×2)」。
+ */
+export function taiLabel(name) {
+  if (!name || isZh()) return name;
+  const streak = /^連(\d+)拉\d+/.exec(name);
+  if (streak) return `${name} (${t('連莊 ×{n}', { n: streak[1] })})`;
+  const base = taiBase(name);
+  const gloss = t(base);
+  if (gloss === base) return name;
+  const inner = /[（(](.*)[）)]/.exec(name)?.[1];
+  const detail = inner ? t(inner) : '';
+  return detail && detail !== inner ? `${name} (${gloss}: ${detail})` : `${name} (${gloss})`;
 }

@@ -4,6 +4,7 @@
   import Avatar from '../Avatar.svelte';
   import { reactionFor } from '../reactions.svelte.js';
   import { getCharacter } from '../characters.js';
+  import { t, isZh, displayName } from '../i18n.svelte.js';
 
   let { seat, variant = 'side', active = false, thinking = false, isMe = false, bubble = 'down' } = $props();
 
@@ -11,7 +12,14 @@
   const offline = $derived(!seat.connected && seat.kind !== 'bot');
   // 電腦的名字是「角色名(電腦)」，名牌太窄會被切掉；改成只顯示角色名，再加一個「電腦」標籤
   const isBot = $derived(seat.kind === 'bot');
-  const shownName = $derived(isBot ? seat.name?.replace(/\(電腦\)$/, '') : seat.name);
+  const shownName = $derived(displayName(isBot ? seat.name?.replace(/\(電腦\)$/, '') : seat.name, seat.character));
+  // 技能名稱與說明（引擎送來中文，用角色字典翻）
+  const skillName = $derived(seat.skill ? t(seat.skill.name) : '');
+  const skillTip = $derived(
+    seat.skill ? t(seat.skill.used ? '技能「{name}」：{desc}（已用過）' : '技能「{name}」：{desc}', { name: skillName, desc: t(seat.skill.desc) }) : '',
+  );
+  // 門風：英文介面放不下整個字，只放第一個字母（E/S/W/N）
+  const windText = $derived(seat.wind ? (isZh() ? seat.wind : t(seat.wind).slice(0, 1)) : '');
 </script>
 
 <div class="pcard v-{variant}" class:active class:thinking class:empty={!seat.name}>
@@ -22,23 +30,23 @@
     {/if}
     {#if seat.skill}
       <!-- 技能：名牌小的時候只放一個「技」字，滑鼠移上去看說明；用過變灰 -->
-      <span class="skill-badge" class:used={seat.skill.used} title="技能「{seat.skill.name}」：{seat.skill.desc}{seat.skill.used ? '（已用過）' : ''}">技</span>
+      <span class="skill-badge" class:used={seat.skill.used} title={skillTip}>{t('技')}</span>
     {/if}
   </div>
   <div class="meta">
     <div class="line1">
-      <b class="nm" title={seat.name}>{shownName ?? '空位'}</b>
-      {#if seat.wind}<span class="wind" class:dealer={seat.is_dealer}>{seat.wind}</span>{/if}
+      <b class="nm" title={shownName}>{shownName ?? t('空位')}</b>
+      {#if seat.wind}<span class="wind" class:dealer={seat.is_dealer} title={t('{wind}風', { wind: t(seat.wind) })}>{windText}</span>{/if}
     </div>
     <div class="line2">
-      <span class="score" class:neg={seat.score < 0}>{seat.score > 0 ? '+' : ''}{seat.score} 分</span>
-      {#if isMe}<span class="tag me">你</span>{/if}
-      {#if seat.is_dealer}<span class="tag dealer">莊</span>{/if}
-      {#if isBot}<span class="tag bot">電腦</span>{/if}
+      <span class="score" class:neg={seat.score < 0}>{seat.score > 0 ? '+' : ''}{t('{score} 分', { score: seat.score })}</span>
+      {#if isMe}<span class="tag me">{t('你')}</span>{/if}
+      {#if seat.is_dealer}<span class="tag dealer">{t('莊')}</span>{/if}
+      {#if isBot}<span class="tag bot">{t('電腦')}</span>{/if}
       {#if seat.kind === 'agent'}<span class="tag ai">AI</span>{/if}
-      {#if seat.skill}<span class="tag skill" class:used={seat.skill.used} title="{seat.skill.name}：{seat.skill.desc}{seat.skill.used ? '（已用過）' : ''}">{seat.skill.name}</span>{/if}
-      {#if seat.auto}<span class="tag auto">託管</span>{/if}
-      {#if offline}<span class="tag off">離線</span>{/if}
+      {#if seat.skill}<span class="tag skill" class:used={seat.skill.used} title={skillTip}>{skillName}</span>{/if}
+      {#if seat.auto}<span class="tag auto">{t('託管')}</span>{/if}
+      {#if offline}<span class="tag off">{t('離線')}</span>{/if}
     </div>
   </div>
   {#if reaction?.text}

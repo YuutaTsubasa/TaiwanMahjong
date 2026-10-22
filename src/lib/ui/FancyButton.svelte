@@ -29,3 +29,8 @@
     {#if chevron}<span class="chev" aria-hidden="true">›</span>{/if}
   </button>
 {/if}
+
+<style>
+  /* 英文：按鈕的大字距只適合中文 */
+  :global(html[lang='en']) .fancy { letter-spacing: .04em; }
+</style>

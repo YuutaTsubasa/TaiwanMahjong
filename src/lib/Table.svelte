@@ -16,6 +16,8 @@
   import Avatar from './Avatar.svelte';
   import { autoHints, setAutoHints } from './hints.js';
   import { get } from 'svelte/store';
+  import { t, isZh } from './i18n.svelte.js';
+  import { seatName, tileName } from './tiles.js';
 
   let confirmation;
 
@@ -54,7 +56,7 @@
   });
   const hint = $derived(hintOpen && !auto ? s.hint : null);
   function toggleHint() {
-    if (!s.hint) return toast('輪到你做決定時才有提示喔', 'info');
+    if (!s.hint) return toast(t('輪到你做決定時才有提示喔'), 'info');
     hintOpen = !hintOpen;
   }
 
@@ -133,19 +135,26 @@
 
   const btnClass = { tsumo: 'win', ron: 'win', pung: 'claim', kong: 'claim', chow: 'claim', concealed_kong: 'claim', added_kong: 'claim', pass: 'pass', skill: 'skill' };
   const btnText = { tsumo: '自摸', ron: '胡', pung: '碰', kong: '槓', chow: '吃', concealed_kong: '暗槓', added_kong: '加槓', pass: '過' };
+  // 按鈕上的字：引擎送來的 label 是中文，技能按鈕改成「技能：<翻譯後的技能名>」
+  function actText(a) {
+    if (a.type !== 'skill') return t(btnText[a.type]);
+    const m = /^技能：(.+)$/.exec(a.label ?? '');
+    return m ? t('技能：{name}', { name: t(m[1]) }) : t('技能');
+  }
+  const chowLabel = (a) => t('吃 {tiles}', { tiles: (a.tiles ?? []).map(tileName).join(isZh() ? '' : ', ') });
 
   // 技能模式：月華看穿的聽牌、蘭姐偷看的牌（只有自己看得到）
-  const relName = (seat) => ['', '下家', '對家', '上家'][(seat - me + 4) % 4];
+  const relName = (seat) => t(['', '下家', '對家', '上家'][(seat - me + 4) % 4]);
   const seen = $derived(s.skill_info?.see_waits);
   const peek = $derived(s.skill_info?.peek);
   const mind = $derived(s.skill_info?.read_mind);
 
   const waitingText = $derived.by(() => {
     if (s.phase !== 'playing') return '';
-    const name = (i) => s.seats[i]?.name;
-    if (s.step === 'turn') return s.turn === s.you ? '' : `${name(s.turn)} 思考中…`;
+    const name = (i) => seatName(s.seats[i]);
+    if (s.step === 'turn') return s.turn === s.you ? '' : t('{name} 思考中…', { name: name(s.turn) });
     const who = s.waiting_on.filter((i) => i !== s.you).map(name);
-    return who.length ? `等待 ${who.join('、')} 決定…` : '';
+    return who.length ? t('等待 {names} 決定…', { names: who.join(t('、')) }) : '';
   });
 
   const keyFor = (t, i) => `${t}-${i}`;
@@ -188,12 +197,12 @@
     if (!isPlayer) return disconnect();
     // 單機：沒有別人在等，離開就是整場結束；連線：座位交給電腦代打
     if (net.mode === 'local') {
-      return confirmation.ask({ message: '單機牌局會直接結束、不會保留（沒有電腦代打），確定要離開嗎？', confirmLabel: '離開牌局', onconfirm: leave });
+      return confirmation.ask({ message: t('單機牌局會直接結束、不會保留（沒有電腦代打），確定要離開嗎？'), confirmLabel: t('離開牌局'), onconfirm: leave });
     }
-    confirmation.ask({ message: '離開後由電腦代打，確定？', confirmLabel: '離開房局', onconfirm: leave });
+    confirmation.ask({ message: t('離開後由電腦代打，確定？'), confirmLabel: t('離開房局'), onconfirm: leave });
   }
   function askEnd() {
-    confirmation.ask({ message: '結束這場遊戲並回到大廳？', confirmLabel: '結束牌局', onconfirm: () => hostCmd('reset') });
+    confirmation.ask({ message: t('結束這場遊戲並回到大廳？'), confirmLabel: t('結束牌局'), onconfirm: () => hostCmd('reset') });
   }
 </script>
 
@@ -267,10 +276,10 @@
 
           <!-- 中央資訊 -->
           <div class="center-panel">
-            <div class="round"><span>{s.round_wind}風圈</span><span>第 {s.hand_no} 局{#if s.streak > 0}<span class="streak">連{s.streak}</span>{/if}</span></div>
-            <div class="left-count"><small>剩餘</small><b>{s.wall_count ?? '-'}</b></div>
+            <div class="round"><span>{t('{wind}風圈', { wind: t(s.round_wind) })}</span><span>{t('第 {n} 局', { n: s.hand_no })}{#if s.streak > 0}<span class="streak" title={t('連莊 {n} 次', { n: s.streak })}>{t('連{n}', { n: s.streak })}</span>{/if}</span></div>
+            <div class="left-count"><small>{t('剩餘')}</small><b>{s.wall_count ?? '-'}</b></div>
             <div class="timer" class:urgent={remaining != null && remaining <= 5}>
-              {remaining != null && s.phase === 'playing' ? `${remaining} 秒` : ' '}
+              {remaining != null && s.phase === 'playing' ? t('{n} 秒', { n: remaining }) : ' '}
             </div>
           </div>
         </div>
@@ -286,14 +295,14 @@
         <div class="prompt-main">
         {#if auto && s.phase === 'playing'}
           <div class="banner auto-banner">
-            <b>託管中</b><span class="sep"></span><span>電腦正在幫你打</span>
+            <b>{t('託管中')}</b><span class="sep"></span><span>{t('電腦正在幫你打')}</span>
           </div>
         {:else if special.length}
           <div class="actions">
             <!-- 順序：胡、槓、碰（自摸、暗槓、技能…）→ 吃 → 過 -->
             {#each special.filter((a) => a.type !== 'chow' && a.type !== 'pass') as a (a.id)}
               <button class="act {btnClass[a.type]}" class:recommended={recommended(a)} onclick={() => act(a.id)}>
-                <span>{a.type === 'skill' ? a.label : btnText[a.type]}</span>
+                <span>{actText(a)}</span>
                 {#if a.tile}
                   <span class="mini"><Tile code={a.tile} size="xs" /></span>
                 {/if}
@@ -301,55 +310,55 @@
             {/each}
             {#if chows.length}
               <!-- 吃有好幾種組合時併成一組：「吃」後面每個組合各是一顆按鈕 -->
-              <div class="act claim chow-group" role="group" aria-label="吃">
-                <span>吃</span>
+              <div class="act claim chow-group" role="group" aria-label={t('吃')}>
+                <span>{t('吃')}</span>
                 {#each chows as a (a.id)}
-                  <button class="chow-opt" class:recommended={recommended(a)} onclick={() => act(a.id)} aria-label="吃 {a.label ?? ''}">
+                  <button class="chow-opt" class:recommended={recommended(a)} onclick={() => act(a.id)} aria-label={chowLabel(a)}>
                     {#each a.tiles as t}<Tile code={t} size="xs" />{/each}
                   </button>
                 {/each}
               </div>
             {/if}
             {#each special.filter((a) => a.type === 'pass') as a (a.id)}
-              <button class="act pass" class:recommended={recommended(a)} onclick={() => act(a.id)}><span>{btnText.pass}</span></button>
+              <button class="act pass" class:recommended={recommended(a)} onclick={() => act(a.id)}><span>{t(btnText.pass)}</span></button>
             {/each}
             {#if remaining != null}<span class="cd" class:urgent={remaining <= 5}>{remaining}s</span>{/if}
           </div>
         {:else if canDiscard}
-          <div class="banner turn" title="鍵盤／手把：方向鍵選牌 · Enter／A 確認 · Esc／B 取消">
-            <b>輪到你出牌</b><span class="sep"></span><span>點一下選牌，再點一下打出</span>
+          <div class="banner turn" title={t('鍵盤／手把：方向鍵選牌 · Enter／A 確認 · Esc／B 取消')}>
+            <b>{t('輪到你出牌')}</b><span class="sep"></span><span>{t('點一下選牌，再點一下打出')}</span>
           </div>
         {:else if waitingText}
           <div class="banner quiet"><span>{waitingText}</span></div>
         {:else if !isPlayer}
-          <div class="banner quiet"><span>觀戰中</span></div>
+          <div class="banner quiet"><span>{t('觀戰中')}</span></div>
         {/if}
 
         {#if seen}
-          <div class="waits skill-info" title="看穿：其他三家聽的牌（還能看 {seen.left} 張）">
-            <b>看穿</b>
+          <div class="waits skill-info" title={t('看穿：其他三家聽的牌（還能看 {n} 張）', { n: seen.left })}>
+            <b>{t('看穿')}</b>
             {#each seen.seats as x}
               <span class="who">{relName(x.seat)}</span>
-              {#if x.waits == null}<span class="muted">？</span>
+              {#if x.waits == null}<span class="muted">{t('？')}</span>
               {:else if x.waits.length}{#each x.waits as w}<Tile code={w} size="xs" />{/each}
-              {:else}<span class="muted">沒聽</span>{/if}
+              {:else}<span class="muted">{t('沒聽')}</span>{/if}
             {/each}
           </div>
         {/if}
         {#if mind}
-          <div class="waits skill-info" title="鎖定獵物：這家的整副手牌（還能看 {mind.left} 張）">
-            <b>讀心</b><span class="who">{relName(mind.seat)}</span>{#each mind.tiles as t}<Tile code={t} size="xs" />{/each}
+          <div class="waits skill-info" title={t('鎖定獵物：這家的整副手牌（還能看 {n} 張）', { n: mind.left })}>
+            <b>{t('讀心')}</b><span class="who">{relName(mind.seat)}</span>{#each mind.tiles as t}<Tile code={t} size="xs" />{/each}
           </div>
         {/if}
         {#if peek?.length}
-          <div class="waits skill-info" title="牌牆接下來會被摸走的牌">
-            <b>牌牆</b>{#each peek as t}<Tile code={t} size="xs" />{/each}
+          <div class="waits skill-info" title={t('牌牆接下來會被摸走的牌')}>
+            <b>{t('牌牆')}</b>{#each peek as t}<Tile code={t} size="xs" />{/each}
           </div>
         {/if}
 
         {#if s.my_waits?.length && !auto}
-          <div class="waits" title="聽的牌，以及各還剩幾張沒出現">
-            聽 {#each s.my_waits as w, i}<Tile code={w} size="xs" />{#if s.my_waits_left}<small class="left" class:none={!s.my_waits_left[i]}>×{s.my_waits_left[i]}</small>{/if}{/each}
+          <div class="waits" title={t('聽的牌，以及各還剩幾張沒出現')}>
+            {t('聽')} {#each s.my_waits as w, i}<Tile code={w} size="xs" />{#if s.my_waits_left}<small class="left" class:none={!s.my_waits_left[i]}>×{s.my_waits_left[i]}</small>{/if}{/each}
           </div>
         {/if}
 
@@ -357,13 +366,13 @@
         <div class="prompt-tools">
         {#if isPlayer && s.phase === 'playing'}
           {#if hintsSupported}
-            <button bind:this={hintBtn} class="hint-btn" class:on={hintOpen} class:ready={!!s.hint && !hintOpen && !auto} onclick={toggleHint} title={hintOpen ? '關上提示' : '看提示：建議打哪張、要不要吃碰'} aria-expanded={hintOpen}>提示</button>
+            <button bind:this={hintBtn} class="hint-btn" class:on={hintOpen} class:ready={!!s.hint && !hintOpen && !auto} onclick={toggleHint} title={hintOpen ? t('關上提示') : t('看提示：建議打哪張、要不要吃碰')} aria-expanded={hintOpen}>{t('提示')}</button>
           {:else}
             <!-- 提示由房主的伺服器計算；0.3.0 以前的版本沒有這個功能 -->
-            <button class="hint-btn" onclick={() => toast('房主的伺服器版本較舊（0.3.0 以前），沒有提供新手提示；請房主更新 App。', 'info')} title="房主的伺服器版本較舊，沒有提供新手提示">提示？</button>
+            <button class="hint-btn" onclick={() => toast(t('房主的伺服器版本較舊（0.3.0 以前），沒有提供新手提示；請房主更新 App。'), 'info')} title={t('房主的伺服器版本較舊，沒有提供新手提示')}>{t('提示？')}</button>
           {/if}
-          <button class="auto-btn" class:on={auto} onclick={() => setAuto(!auto)} title="讓電腦幫你打，隨時可以取消">
-            {auto ? '我要自己打' : '託管'}
+          <button class="auto-btn" class:on={auto} onclick={() => setAuto(!auto)} title={t('讓電腦幫你打，隨時可以取消')}>
+            {auto ? t('我要自己打') : t('託管')}
           </button>
         {/if}
         </div>
@@ -371,19 +380,19 @@
 
       {#if hint}
         <!-- 浮在畫面上的提示框（不佔排版）：放在整個提示列上方，不會蓋到按鈕；箭頭指向「提示」 -->
-        <div class="hint-pop" role="dialog" aria-label="提示" style:left="{hintPos.left}px" style:width="{hintPos.width}px" style:--arrow="{hintPos.arrow}px">
+        <div class="hint-pop" role="dialog" aria-label={t('提示')} style:left="{hintPos.left}px" style:width="{hintPos.width}px" style:--arrow="{hintPos.arrow}px">
           <div class="hint-body">
             <Avatar id={mine.character} size={34} crop />
             <div class="hint-text">
               <p>{hint.text}</p>
               {#if hint.skill}<p class="hint-skill">{hint.skill}</p>{/if}
             </div>
-            <button type="button" class="hint-close" onclick={() => (hintOpen = false)} aria-label="關上提示">×</button>
+            <button type="button" class="hint-close" onclick={() => (hintOpen = false)} aria-label={t('關上提示')}>×</button>
           </div>
           <label class="hint-foot">
             <input type="checkbox" checked={$autoHints} onchange={(e) => setAutoHints(e.currentTarget.checked)} />
-            <span>每次輪到我時自動彈出提示</span>
-            <small>（不要自動彈出的話，也可以到「遊戲設定」關閉）</small>
+            <span>{t('每次輪到我時自動彈出提示')}</span>
+            <small>{t('（不要自動彈出的話，也可以到「遊戲設定」關閉）')}</small>
           </label>
         </div>
       {/if}
@@ -410,11 +419,11 @@
     <SideLog
       onclose={() => (showSide = false)}
       onleave={askLeave}
-      leaveLabel={net.mode === 'local' ? '離開牌局' : '離開房局'}
+      leaveLabel={net.mode === 'local' ? t('離開牌局') : t('離開房局')}
       onend={net.isHost && net.mode !== 'local' ? askEnd : null}
     />
   {:else}
-    <button class="open-side" onclick={() => (showSide = true)}>‹ 紀錄</button>
+    <button class="open-side" onclick={() => (showSide = true)}>{t('‹ 紀錄')}</button>
   {/if}
 </div>
 
@@ -765,5 +774,11 @@
   @media (max-width: 379px) { .strip .auto-banner { display: none; } }
   /* 「紀錄」按鈕移到牌桌右上角，不擋到下家的名牌 */
   .strip .open-side { top: 62px; right: 10px; }
+
+  /* 英文：中文用的大字距會把英文拉得太開 */
+  :global(html[lang='en']) .banner b,
+  :global(html[lang='en']) .auto-btn,
+  :global(html[lang='en']) .hint-btn { letter-spacing: 0.02em; }
+  :global(html[lang='en']) .auto-btn { min-width: 0; }
 
 </style>

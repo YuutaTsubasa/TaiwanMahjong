@@ -1,6 +1,7 @@
 <script>
   // 置中的對話框（大廳的「更換角色」「調整規則」）。按背景或 Esc 關閉。
   import OrnateHeading from './OrnateHeading.svelte';
+  import { t } from '../i18n.svelte.js';
 
   let { open = $bindable(false), title, children, width = '720px' } = $props();
 
@@ -16,7 +17,7 @@
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="backdrop" onclick={(e) => e.target === e.currentTarget && (open = false)}>
     <div class="art-panel dialog" role="dialog" aria-modal="true" aria-label={title} style:width>
-      <button type="button" class="close" aria-label="關閉" onclick={() => (open = false)}>✕</button>
+      <button type="button" class="close" aria-label={t('關閉')} onclick={() => (open = false)}>✕</button>
       <OrnateHeading text={title} size="md" tag="h2" />
       <div class="content">{@render children()}</div>
     </div>

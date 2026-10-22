@@ -1,12 +1,13 @@
 <script>
   import Tile from './Tile.svelte';
+  import { t } from './i18n.svelte.js';
   // turn：左右兩家的副露橫躺著擺（left 是上家、right 是下家），牌面朝向該家
   let { melds = [], flowers = [], size = 'md', turn = '' } = $props();
 </script>
 
 <div class="melds" class:turned={turn} class:turn-left={turn === 'left'} class:turn-right={turn === 'right'}>
   {#each melds as m}
-    <div class="meld" title={{ chow: '吃', pung: '碰', kong: '明槓', concealed_kong: '暗槓' }[m.kind]}>
+    <div class="meld" title={t({ chow: '吃', pung: '碰', kong: '明槓', concealed_kong: '暗槓' }[m.kind])}>
       {#each m.tiles as t, i}
         {#if turn}
           <span class="lay"><Tile code={t} {size} back={t === '?' || (m.kind === 'concealed_kong' && (i === 0 || i === 3))} /></span>

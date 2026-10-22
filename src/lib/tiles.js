@@ -1,3 +1,5 @@
+import { t, isZh, displayName } from './i18n.svelte.js';
+
 export const NUM_ZH = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
 const HONOR = { E: '東', S: '南', W: '西', N: '北', C: '中', F: '發', P: '白' };
 const FLOWERS = '春夏秋冬梅蘭竹菊';
@@ -11,12 +13,27 @@ export function parseCode(c) {
   return { kind: 'back' };
 }
 
+/** 牌的名稱（無障礙朗讀、滑鼠提示用；牌面本身維持中文） */
 export function tileName(c) {
-  const t = parseCode(c);
-  if (t.kind === 'm' || t.kind === 'p' || t.kind === 's') return NUM_ZH[t.n - 1] + SUIT_ZH[t.kind];
-  if (t.kind === 'z' || t.kind === 'f') return t.ch;
-  return '牌背';
+  const p = parseCode(c);
+  if (p.kind === 'm' || p.kind === 'p' || p.kind === 's') {
+    return isZh() ? NUM_ZH[p.n - 1] + SUIT_ZH[p.kind] : t(`{n}${SUIT_ZH[p.kind]}`, { n: p.n });
+  }
+  if (p.kind === 'z' || p.kind === 'f') return t(p.ch);
+  return t('牌背');
 }
 
 export const SEAT_KIND_ICON = { human: '👤', agent: '🤖', bot: '💻' };
 export const SEAT_KIND_LABEL = { human: '玩家', agent: 'AI', bot: '電腦' };
+
+/**
+ * 牌桌上玩家的顯示名稱。電腦的名字是「角色名(電腦)」，角色名換成該語言的名字；
+ * 玩家自己取的名字不翻。
+ */
+export function seatName(seat) {
+  const name = seat?.name;
+  if (!name) return name;
+  const m = /^(.*)\(電腦\)$/.exec(name);
+  if (m) return t('{name}(電腦)', { name: displayName(m[1], seat.character) });
+  return displayName(name, seat.character);
+}

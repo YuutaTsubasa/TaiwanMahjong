@@ -6,7 +6,9 @@
   import FinalRanking from './FinalRanking.svelte';
   import { reactions } from './reactions.svelte.js';
   import { getCharacter, pickLine } from './characters.js';
-  import { autoHints, taiInfo } from './hints.js';
+  import { autoHints, taiInfo, taiLabel } from './hints.js';
+  import { t, isZh } from './i18n.svelte.js';
+  import { seatName } from './tiles.js';
 
   let openTai = $state(null);
   const toggleTai = (name) => (openTai = openTai === name ? null : name);
@@ -21,6 +23,26 @@
   const dealerInvolved = $derived(r && r.payments.some((p) => p.from === s.dealer || p.to === s.dealer));
   const winIdx = $derived(winner?.hand ? winner.hand.indexOf(r.win_tile) : -1);
   const loser = $derived(r?.loser != null ? s.seats[r.loser] : null);
+  // 胡牌的一句話：中文直接用引擎的 summary；其他語言用結構化欄位自己組（台數取付款中最高的那筆，含莊家台）
+  const summary = $derived.by(() => {
+    if (!r || r.draw) return '';
+    if (isZh()) return r.summary;
+    const tai = r.payments.length ? Math.max(...r.payments.map((p) => p.tai)) : r.hand_tai;
+    const name = seatName(winner);
+    let text = r.self_draw
+      ? t('{name} 自摸！{tai} 台', { name, tai })
+      : loser
+        ? t('{name} 胡 {loser} 放的槍！{tai} 台', { name, loser: seatName(loser), tai })
+        : t('{name} 胡牌！{tai} 台', { name, tai });
+    // 阿翼的銀之盾、阿烈的身經百戰：那家這次不用付
+    for (const p of r.payments) {
+      if (p.amount !== 0) continue;
+      const who = seatName(s.seats[p.from]);
+      if (!r.self_draw && r.summary?.includes('銀之盾')) text += t('（{name} 的銀之盾擋下了付款）', { name: who });
+      else if (r.self_draw && r.summary?.includes('身經百戰')) text += t('（{name} 的身經百戰：這次不用付）', { name: who });
+    }
+    return text;
+  });
   // 贏家的台詞：沿用剛剛泡泡講的那句，沒有就再抽一句
   const winLine = $derived(
     winner ? reactions[r.winner]?.text ?? pickLine(winner.character, r.self_draw ? 'tsumo' : 'ron') : '',
@@ -33,24 +55,24 @@
   {:else if r}
     <div class="card box hand-result">
       {#if r.draw}
-        <h2>🌊 流局</h2>
-        <p class="muted">牌摸完了，莊家連莊。</p>
+        <h2>🌊 {t('流局')}</h2>
+        <p class="muted">{t('牌摸完了，莊家連莊。')}</p>
       {:else}
         {#if winner?.character}
           <div class="cutin">
             <div class="portrait"><Avatar id={winner.character} expression="win" size={170} /></div>
             <div class="say">
-              <div class="who">{getCharacter(winner.character).name}</div>
+              <div class="who">{t(getCharacter(winner.character).name)}</div>
               <div class="line">「{winLine}」</div>
             </div>
             {#if loser?.character}
-              <div class="loser" title="{loser.name} 放槍">
+              <div class="loser" title={t('{name} 放槍', { name: seatName(loser) })}>
                 <Avatar id={loser.character} expression="sad" size={64} crop />
               </div>
             {/if}
           </div>
         {/if}
-        <h2>🀄 {r.summary}</h2>
+        <h2>🀄 {summary}</h2>
         {#if winner}
           <div class="hand">
             {#each winner.hand ?? [] as t, i}
@@ -60,37 +82,37 @@
             <Melds melds={winner.melds} flowers={winner.flowers} size="md" />
           </div>
           {#if r.win_tile}
-            <p class="muted wt">胡：<Tile code={r.win_tile} size="sm" /> {r.self_draw ? '（自摸）' : ''}</p>
+            <p class="muted wt">{t('胡：')}<Tile code={r.win_tile} size="sm" /> {r.self_draw ? t('（自摸）') : ''}</p>
           {/if}
         {/if}
         <!-- 台數：點一下看說明 -->
         <div class="items">
           {#each r.items as it}
-            <button type="button" class="item" class:open={openTai === it.name} title={taiInfo(it.name)} onclick={() => toggleTai(it.name)}><span>{it.name}</span><b>{it.tai} 台</b></button>
+            <button type="button" class="item" class:open={openTai === it.name} title={taiInfo(it.name)} onclick={() => toggleTai(it.name)}><span>{taiLabel(it.name)}</span><b>{t('{n} 台', { n: it.tai })}</b></button>
           {/each}
           {#if dealerInvolved}
             {#each r.dealer_items as it}
-              <button type="button" class="item dealer" class:open={openTai === it.name} title={taiInfo(it.name)} onclick={() => toggleTai(it.name)}><span>{it.name}<small>（莊家相關）</small></span><b>{it.tai} 台</b></button>
+              <button type="button" class="item dealer" class:open={openTai === it.name} title={taiInfo(it.name)} onclick={() => toggleTai(it.name)}><span>{taiLabel(it.name)}<small>{t('（莊家相關）')}</small></span><b>{t('{n} 台', { n: it.tai })}</b></button>
             {/each}
           {/if}
           {#if r.items.length === 0}
-            <div class="item"><span>屁胡</span><b>0 台</b></div>
+            <div class="item"><span>{taiLabel('屁胡')}</span><b>{t('{n} 台', { n: 0 })}</b></div>
           {/if}
         </div>
         <div class="pay">
           {#if openTai && taiInfo(openTai)}
             <!-- 說明浮在下面的內容上，不撐高結果視窗；再點一下關掉 -->
-            <button type="button" class="tai-info" onclick={() => (openTai = null)}><b>{openTai}</b>：{taiInfo(openTai)}</button>
+            <button type="button" class="tai-info" onclick={() => (openTai = null)}><b>{taiLabel(openTai)}</b>{t('：')}{taiInfo(openTai)}</button>
           {/if}
           {#each r.payments as p, i}
-            <div>{s.seats[p.from].name} → {s.seats[p.to].name}：{p.tai} 台，{p.amount}{#if $autoHints && i === r.payments.length - 1}<span class="tai-tip">（點台數看說明）</span>{/if}</div>
+            <div>{t('{from} → {to}：{tai} 台，{amount}', { from: seatName(s.seats[p.from]), to: seatName(s.seats[p.to]), tai: p.tai, amount: p.amount })}{#if $autoHints && i === r.payments.length - 1}<span class="tai-tip">{t('（點台數看說明）')}</span>{/if}</div>
           {/each}
         </div>
       {/if}
       <div class="deltas">
         {#each s.seats as p, i}
           <div class="d" class:me={i === net.seat}>
-            <span>{p.name}</span>
+            <span>{seatName(p)}</span>
             <b class:neg={r.deltas[i] < 0} class:pos={r.deltas[i] > 0}>{r.deltas[i] > 0 ? '+' : ''}{r.deltas[i]}</b>
             <small>{p.score}</small>
           </div>
@@ -98,9 +120,9 @@
       </div>
       <div class="btns">
         {#if nextAct}
-          <button class="primary" onclick={() => act(nextAct.id)}>下一局{remaining != null ? `（${remaining}）` : ''}</button>
+          <button class="primary" onclick={() => act(nextAct.id)}>{remaining != null ? t('下一局（{n}）', { n: remaining }) : t('下一局')}</button>
         {:else}
-          <span class="muted">等待其他玩家…{remaining != null ? `（${remaining}）` : ''}</span>
+          <span class="muted">{remaining != null ? t('等待其他玩家…（{n}）', { n: remaining }) : t('等待其他玩家…')}</span>
         {/if}
       </div>
     </div>
@@ -153,6 +175,10 @@
   .tai-info b { color: var(--gold); }
   .tai-tip { margin-left: 6px; color: var(--muted); font-size: 11px; }
   .item.dealer { background: rgba(193, 18, 31, 0.18); }
+  /* 英文：台數名稱後面加了英文說明，格子放寬一點 */
+  :global(html[lang='en']) .items { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  :global(html[lang='en']) .item { gap: 8px; text-align: left; }
+  :global(html[lang='en']) .item b { flex: none; }
   .item small { color: var(--muted); font-size: 11px; }
   .pay { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
   .deltas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: clamp(6px, 1.4vh, 12px) 0; }

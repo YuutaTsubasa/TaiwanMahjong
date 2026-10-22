@@ -7,6 +7,7 @@
   import OrnateHeading from './ui/OrnateHeading.svelte';
   import PortraitGrid from './ui/PortraitGrid.svelte';
   import FancyButton from './ui/FancyButton.svelte';
+  import { t } from './i18n.svelte.js';
 
   const MENU = [
     ['#solo', '單機遊玩'],
@@ -35,6 +36,12 @@
     skills: [[0, '關閉'], [1, '開啟']],
   };
   const SOLO_LABELS = { rounds: '圈數', turn_timeout: '出牌時間', bot_delay_ms: '電腦速度', skills: '技能模式' };
+  // 選項按鈕很窄：先找「（短）」版本的翻譯（例如「東南圈」在別處是較長的說法、「關閉」在別處是「關掉」），沒有再用一般翻譯
+  function optionLabel(label) {
+    const short = `${label}（短）`;
+    const out = t(short);
+    return out === short ? t(label) : out;
+  }
   let solo = $state(
     (() => {
       try {
@@ -77,7 +84,7 @@
   const selected = $derived(getCharacter(character));
   const connecting = $derived(!net.state && (net.status === 'connecting' || net.status === 'open'));
   onMount(() => { setCharacter(character); hostStatus().catch(() => {}); checkOnline(); });
-  const playerName = () => name.trim() || '玩家';
+  const playerName = () => name.trim() || t('玩家');
 
   async function host() {
     save('mj_name', name);
@@ -94,12 +101,12 @@
   }
   function join(spectate = false) {
     if (!isHostPage && isRoomCode(address.trim())) {
-      if (net.online === false) return toast('線上房間暫時無法使用，請稍後再試');
+      if (net.online === false) return toast(t('線上房間暫時無法使用，請稍後再試'));
       save('mj_name', name);
       return joinRoom(address, { name: playerName(), spectate });
     }
-    if (!address.trim()) return toast(staticSite ? '請輸入房號，例如 K7QX2' : '請輸入房號，或房主的位址（例如 192.168.1.5:7777）');
-    if (isHostPage && !hostKey.trim()) return toast('請輸入伺服器顯示的房主金鑰');
+    if (!address.trim()) return toast(staticSite ? t('請輸入房號，例如 K7QX2') : t('請輸入房號，或房主的位址（例如 192.168.1.5:7777）'));
+    if (isHostPage && !hostKey.trim()) return toast(t('請輸入伺服器顯示的房主金鑰'));
     save('mj_name', name);
     if (!servedByServer) save('mj_address', address);
     connect(address, { name: playerName(), hostKey: isHostPage ? hostKey.trim() : undefined, spectate });
@@ -128,13 +135,13 @@
 
 {#if page === 'title'}
   <main class="concept-page title-page">
-    <section class="title-content" aria-label="虛擬台麻館主選單">
+    <section class="title-content" aria-label={t('虛擬台麻館主選單')}>
       <h1 class="title-logo"><Brand /></h1>
-      <nav class="title-menu" aria-label="主選單">
+      <nav class="title-menu" aria-label={t('主選單')}>
         {#each menu as [href, label]}
           <a class="menu-item" {href}>
             <span class="mark" aria-hidden="true"><Tile code="C" size="sm" /></span>
-            <span class="label">{label}</span>
+            <span class="label">{t(label)}</span>
           </a>
         {/each}
       </nav>
@@ -143,23 +150,23 @@
 {:else}
   <main class="concept-page room-page">
     <header class="page-header">
-      <a class="back-link" href="#title" onclick={back}>← 返回標題</a>
+      <a class="back-link" href="#title" onclick={back}>← {t('返回標題')}</a>
       <div class="header-brand"><Brand compact /></div>
     </header>
     <div class="room-layout">
       <section class="art-panel room-panel">
         <OrnateHeading
-          text={isSolo ? '單機遊玩' : isHostPage ? '開設牌局' : '加入牌局'}
-          sub={isSolo ? '三位電腦陪你開一桌。' : isHostPage ? '選好角色，準備入席。' : '找張好位子，今晚一起打牌。'}
+          text={isSolo ? t('單機遊玩') : isHostPage ? t('開設牌局') : t('加入牌局')}
+          sub={isSolo ? t('三位電腦陪你開一桌。') : isHostPage ? t('選好角色，準備入席。') : t('找張好位子，今晚一起打牌。')}
         />
         <form id="room-entry" onsubmit={submit}>
           <label class="field name-field">
-            <span>玩家名稱</span>
-            <input bind:value={name} placeholder="玩家" maxlength="16" autocomplete="nickname" />
+            <span>{t('玩家名稱')}</span>
+            <input bind:value={name} placeholder={t('玩家')} maxlength="16" autocomplete="nickname" />
           </label>
         </form>
         <div class="field character-field">
-          <span>選擇角色</span>
+          <span>{t('選擇角色')}</span>
           <PortraitGrid bind:value={character} onpick={setCharacter} />
         </div>
         <!-- 手機橫向時這一塊放在右欄 -->
@@ -169,90 +176,90 @@
           <div class="solo-grid">
           {#each Object.entries(SOLO_OPTIONS) as [key, options]}
             <div class="field">
-              <span>{SOLO_LABELS[key]}</span>
-              <div class="seg" role="radiogroup" aria-label={SOLO_LABELS[key]}>
+              <span>{t(SOLO_LABELS[key])}</span>
+              <div class="seg" role="radiogroup" aria-label={t(SOLO_LABELS[key])}>
                 {#each options as [v, label]}
-                  <button type="button" role="radio" aria-checked={solo[key] === v} class:sel={solo[key] === v} onclick={() => (solo[key] = v)}>{label}</button>
+                  <button type="button" role="radio" aria-checked={solo[key] === v} class:sel={solo[key] === v} onclick={() => (solo[key] = v)}>{optionLabel(label)}</button>
                 {/each}
               </div>
             </div>
           {/each}
           </div>
-          <p class="hint">不用連線，也不用開伺服器；牌局在這台電腦上跑。</p>
+          <p class="hint">{t('不用連線，也不用開伺服器；牌局在這台電腦上跑。')}</p>
           <div class="actions">
-            <FancyButton variant="red" href="#title">取消</FancyButton>
-            <FancyButton variant="gold" tile="F" type="submit" form="room-entry">開始遊戲</FancyButton>
+            <FancyButton variant="red" href="#title">{t('取消')}</FancyButton>
+            <FancyButton variant="gold" tile="F" type="submit" form="room-entry">{t('開始遊戲')}</FancyButton>
           </div>
         {:else if connecting}
           <div class="connection-status" role="status">
-            <span>{net.room ? `連線到房間 ${net.room} 中…` : `連線到 ${net.address} 中…`}</span>
-            <button type="button" onclick={disconnect}>取消連線</button>
+            <span>{net.room ? t('連線到房間 {room} 中…', { room: net.room }) : t('連線到 {address} 中…', { address: net.address })}</span>
+            <button type="button" onclick={disconnect}>{t('取消連線')}</button>
           </div>
         {:else}
           {#if isHostPage && canLan && net.online}
             <div class="field">
-              <span>開房方式</span>
-              <div class="seg" role="radiogroup" aria-label="開房方式">
-                <button type="button" role="radio" aria-checked={hostMode === 'online'} class:sel={hostMode === 'online'} onclick={() => (hostMode = 'online')}>線上</button>
-                <button type="button" role="radio" aria-checked={hostMode === 'lan'} class:sel={hostMode === 'lan'} onclick={() => (hostMode = 'lan')}>{inTauri ? '區網' : '自架伺服器'}</button>
+              <span>{t('開房方式')}</span>
+              <div class="seg" role="radiogroup" aria-label={t('開房方式')}>
+                <button type="button" role="radio" aria-checked={hostMode === 'online'} class:sel={hostMode === 'online'} onclick={() => (hostMode = 'online')}>{t('線上')}</button>
+                <button type="button" role="radio" aria-checked={hostMode === 'lan'} class:sel={hostMode === 'lan'} onclick={() => (hostMode = 'lan')}>{inTauri ? t('區網') : t('自架伺服器')}</button>
               </div>
             </div>
           {/if}
           {#if isHostPage && online}
-            <p class="hint">拿到房號後分享給朋友就能一起打，不用開通訊埠。牌局在你的電腦上跑，開局後請別關掉這個頁面。</p>
+            <p class="hint">{t('拿到房號後分享給朋友就能一起打，不用開通訊埠。牌局在你的電腦上跑，開局後請別關掉這個頁面。')}</p>
           {:else if isHostPage && !canLan}
-            <p class="hint">{net.online === null ? '檢查線上房間中…' : '線上房間暫時無法使用，請稍後再試。'}</p>
+            <p class="hint">{net.online === null ? t('檢查線上房間中…') : t('線上房間暫時無法使用，請稍後再試。')}</p>
           {:else if isHostPage && inTauri}
             {#if net.hostInfo}
-              <p class="hint">房間已在通訊埠 <strong>{net.hostInfo.port}</strong> 運作中。</p>
+              <p class="hint">{t('房間已在通訊埠 {port} 運作中。', { port: net.hostInfo.port })}</p>
             {:else}
               <label class="field">
-                <span>通訊埠</span>
+                <span>{t('通訊埠')}</span>
                 <input form="room-entry" class="port-input" bind:value={port} type="number" min="1" max="65535" required />
               </label>
-              <p class="hint">建立後可在大廳邀請朋友與 AI。</p>
+              <p class="hint">{t('建立後可在大廳邀請朋友與 AI。')}</p>
             {/if}
           {:else}
             <label class="field">
-              <span>{isHostPage ? '伺服器位址' : !net.online ? '房間地址' : staticSite ? '房號' : '房號或位址'}</span>
-              <input form="room-entry" bind:value={address} placeholder={isHostPage || !net.online ? '192.168.1.5:7777' : staticSite ? '例如 K7QX2' : 'K7QX2 或 192.168.1.5:7777'} required spellcheck="false" autocapitalize={net.online ? 'characters' : 'none'} />
+              <span>{isHostPage ? t('伺服器位址') : !net.online ? t('房間地址') : staticSite ? t('房號') : t('房號或位址')}</span>
+              <input form="room-entry" bind:value={address} placeholder={isHostPage || !net.online ? '192.168.1.5:7777' : staticSite ? t('例如 K7QX2') : t('K7QX2 或 192.168.1.5:7777')} required spellcheck="false" autocapitalize={net.online ? 'characters' : 'none'} />
             </label>
             {#if isHostPage}
               <label class="field">
-                <span>房主金鑰</span>
-                <input form="room-entry" bind:value={hostKey} type="password" placeholder="伺服器終端機顯示的金鑰" required autocomplete="off" />
+                <span>{t('房主金鑰')}</span>
+                <input form="room-entry" bind:value={hostKey} type="password" placeholder={t('伺服器終端機顯示的金鑰')} required autocomplete="off" />
               </label>
-              <p class="hint">瀏覽器可管理已啟動的伺服器；在桌面版可直接建立房間。</p>
+              <p class="hint">{t('瀏覽器可管理已啟動的伺服器；在桌面版可直接建立房間。')}</p>
             {:else if staticSite && net.online}
-              <p class="hint">輸入房主給你的 5 碼房號。也可以填 https 通道位址（例如 xxx.trycloudflare.com）；區網 IP 請改用桌面版。</p>
+              <p class="hint">{t('輸入房主給你的 5 碼房號。也可以填 https 通道位址（例如 xxx.trycloudflare.com）；區網 IP 請改用桌面版。')}</p>
             {:else if staticSite}
-              <p class="hint">網頁版只能連到 https 通道位址（例如 xxx.trycloudflare.com）；區網 IP 請改用桌面版。</p>
+              <p class="hint">{t('網頁版只能連到 https 通道位址（例如 xxx.trycloudflare.com）；區網 IP 請改用桌面版。')}</p>
             {:else if net.online}
-              <p class="hint">輸入房主給你的 5 碼房號；區網房間則輸入房主的 IP 與通訊埠。</p>
+              <p class="hint">{t('輸入房主給你的 5 碼房號；區網房間則輸入房主的 IP 與通訊埠。')}</p>
             {:else}
-              <p class="hint">輸入房主提供的 IP 與通訊埠。</p>
+              <p class="hint">{t('輸入房主提供的 IP 與通訊埠。')}</p>
             {/if}
           {/if}
           <div class="actions">
             {#if isHostPage && !online && inTauri && net.hostInfo}
-              <FancyButton variant="red" disabled={busy} onclick={closeRoom}>關閉房間</FancyButton>
+              <FancyButton variant="red" disabled={busy} onclick={closeRoom}>{t('關閉房間')}</FancyButton>
             {:else if isHostPage}
-              <FancyButton variant="red" href="#title">取消</FancyButton>
+              <FancyButton variant="red" href="#title">{t('取消')}</FancyButton>
             {:else}
-              <FancyButton variant="red" onclick={() => join(true)}>觀戰</FancyButton>
+              <FancyButton variant="red" onclick={() => join(true)}>{t('觀戰')}</FancyButton>
             {/if}
             <FancyButton variant="gold" tile="C" type="submit" form="room-entry" disabled={busy || (isHostPage && !canLan && !online)}>
-              {busy ? '處理中…' : isHostPage ? (online ? '開設牌局' : inTauri ? (net.hostInfo ? '回到房間' : '開設牌局') : '以房主連線') : '加入牌局'}
+              {busy ? t('處理中…') : isHostPage ? (online ? t('開設牌局') : inTauri ? (net.hostInfo ? t('回到房間') : t('開設牌局')) : t('以房主連線')) : t('加入牌局')}
             </FancyButton>
           </div>
         {/if}
         </div>
       </section>
-      <aside class="character-stage" aria-label="所選角色">
+      <aside class="character-stage" aria-label={t('所選角色')}>
         <div class="large-portrait"><Avatar id={character} size={540} /></div>
         <div class="art-panel portrait-caption">
-          <strong>{selected.name}</strong>
-          <p>{isSolo ? '一個人也能開一桌，我們陪你打！' : isHostPage ? '牌桌準備好了，一起來玩吧！' : '今晚也來摸幾圈吧。'}</p>
+          <strong>{t(selected.name)}</strong>
+          <p>{isSolo ? t('一個人也能開一桌，我們陪你打！') : isHostPage ? t('牌桌準備好了，一起來玩吧！') : t('今晚也來摸幾圈吧。')}</p>
         </div>
       </aside>
     </div>
@@ -406,4 +413,11 @@
     .hint { margin-left: 0; }
     .actions { grid-template-columns: 1fr; }
   }
+  /* 英文：書法字的大字距會把英文撐得太寬 */
+  :global(html[lang='en']) .menu-item { letter-spacing: .03em; width: auto; min-width: clamp(280px, 22vw, 380px); white-space: nowrap; }
+  :global(html[lang='en']) .back-link { letter-spacing: .02em; }
+  :global(html[lang='en']) .field > span { letter-spacing: .02em; }
+  :global(html[lang='en']) .seg button { letter-spacing: .02em; }
+  :global(html[lang='en']) .solo-grid .seg button { white-space: normal; line-height: 1.1; }
+  :global(html[lang='en']) .portrait-caption strong, :global(html[lang='en']) .portrait-caption p { letter-spacing: .02em; }
 </style>

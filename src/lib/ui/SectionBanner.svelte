@@ -25,5 +25,6 @@
   }
   :global(html[data-ui-style='pc98']) .ribbon { background: #4b365b; }
   :global(html[data-ui-style='msdos']) .ribbon { background: #00aaaa; color: #001717; }
+  :global(html[lang='en']) .ribbon { letter-spacing: .06em; }
   .rule { flex: 1; height: 1px; background: linear-gradient(90deg, var(--art-line), transparent); }
 </style>

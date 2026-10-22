@@ -175,3 +175,12 @@ html[data-ui-style='gameboy'] .gamescreen .pcard.active { box-shadow: inset 0 0 
 html[data-ui-style='gameboy'] .gamescreen .pcard.thinking { box-shadow: 0 0 0 2px #9bbc0f; }
 html[data-ui-style='gameboy'] .gamescreen button.exit { background: #306230; color: #9bbc0f; box-shadow: 2px 2px 0 #0f380f; }
 html[data-ui-style='gameboy'] .gamescreen .tname { color: #9bbc0f; }
+
+/* 英文介面：楷書字型裡的英文字母像打字機，標題改用襯線體（中文字仍然落到楷書）。像素風格維持原本的字型。 */
+:root[lang='en'][data-ui-style='anime90'],
+:root[lang='en']:not([data-ui-style]) {
+  --heading-font: Georgia, 'Palatino Linotype', 'Book Antiqua', 'DFKai-SB', '標楷體', 'Kaiti TC', serif;
+}
+:root[lang='en'][data-ui-style='taiwan-print'] {
+  --heading-font: Georgia, 'Palatino Linotype', 'Book Antiqua', 'DFKai-SB', '標楷體', serif;
+}

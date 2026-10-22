@@ -2,6 +2,8 @@
 // 第一次連線時透過配對服務（workers/signal，Cloudflare）交換 offer / answer / ICE，之後牌局資料只走 WebRTC。
 // 傳的訊息跟 WebSocket 伺服器一模一樣（JSON），所以 net.svelte.js 只要換掉傳輸層。
 
+import { t } from './i18n.svelte.js';
+
 const ICE_SERVERS = [{ urls: ['stun:stun.cloudflare.com:3478', 'stun:stun.l.google.com:19302'] }];
 const CONNECT_TIMEOUT = 20000;
 
@@ -132,7 +134,7 @@ export class P2PHost {
 
 /**
  * 加入的人：透過配對服務找到房主，建立 WebRTC 資料通道。連上之後就關掉配對服務的連線。
- * onOpen() 連上；onMessage(obj)；onClose() 斷線（可以重連）；onFatal(訊息) 不用再試了（例如房間不存在）。
+ * onOpen() 連上；onMessage(obj)；onClose() 斷線（可以重連）；onFatal(訊息, 代碼) 不用再試了（例如房間不存在，代碼 'no_host'）。
  */
 export class P2PGuest {
   constructor({ signal, code, onOpen, onMessage, onClose, onFatal }) {
@@ -144,10 +146,10 @@ export class P2PGuest {
     const ws = signalSocket(this.signal, `/r/${this.code}/guest`);
     this.ws = ws;
     let opened = false;
-    const fail = (fatal) => {
+    const fail = (fatal, code) => {
       if (this.closed || opened) return;
       this.cleanup();
-      if (fatal) this.onFatal(fatal);
+      if (fatal) this.onFatal(fatal, code);
       else this.onClose();
     };
     this.timer = setTimeout(() => fail(), CONNECT_TIMEOUT);
@@ -159,7 +161,8 @@ export class P2PGuest {
         return;
       }
       if (m.type === 'error') {
-        fail(m.message === 'no_host' ? `找不到房號 ${this.code}（房間可能已經關閉了）` : m.message);
+        if (m.message === 'no_host') fail(t('找不到房號 {code}（房間可能已經關閉了）', { code: this.code }), 'no_host');
+        else fail(m.message);
       } else if (m.type === 'welcome') {
         const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
         this.pc = pc;

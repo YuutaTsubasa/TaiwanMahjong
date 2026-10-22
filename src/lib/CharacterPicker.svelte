@@ -2,6 +2,7 @@
   import { getSelectableCharacters } from './characters.js';
   import { ayiUnlocked } from './unlocks.js';
   import Avatar from './Avatar.svelte';
+  import { t } from './i18n.svelte.js';
 
   let { value = $bindable(), onpick = undefined, size = 72, taken = [] } = $props();
 
@@ -17,13 +18,13 @@
       class="opt"
       class:sel={value === c.id}
       class:taken={taken.includes(c.id) && value !== c.id}
-      title="{c.name}：{c.intro}"
+      title={t('{name}：{intro}', { name: t(c.name), intro: t(c.intro) })}
       type="button"
       aria-pressed={value === c.id}
       onclick={() => pick(c.id)}
     >
       <Avatar id={c.id} expression={value === c.id ? 'happy' : 'normal'} {size} crop />
-      <span>{c.name}</span>
+      <span>{t(c.name)}</span>
     </button>
   {/each}
 </div>

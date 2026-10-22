@@ -9,49 +9,50 @@
   import ToggleSwitch from './ui/ToggleSwitch.svelte';
   import { autoHints, setAutoHints } from './hints.js';
   import FancyButton from './ui/FancyButton.svelte';
+  import { t } from './i18n.svelte.js';
 </script>
 
 <main class="concept-page settings-page">
   <header class="page-header">
     <Brand compact />
-    <a class="back-link" href="#title">← 返回標題</a>
+    <a class="back-link" href="#title">← {t('返回標題')}</a>
   </header>
   <div class="settings-layout">
     <section class="art-panel settings-panel" aria-labelledby="settings-heading">
-      <OrnateHeading text="遊戲設定" id="settings-heading" />
-      <SectionBanner text="畫面風格" />
-      <div class="style-options" role="group" aria-label="畫面風格">
+      <OrnateHeading text={t('遊戲設定')} id="settings-heading" />
+      <SectionBanner text={t('畫面風格')} />
+      <div class="style-options" role="group" aria-label={t('畫面風格')}>
         {#each ART_STYLES as style}
           <button type="button" class="style-option" class:selected={$artStyle === style.id} aria-pressed={$artStyle === style.id} onclick={() => setArtStyle(style.id)}>
-            <img src={asset(`/ui/${style.id}/parlor.png`)} alt="{style.name}麻將館預覽" class:pixel={isPixelStyle(style.id)} />
-            <span>{style.name}</span>
+            <img src={asset(`/ui/${style.id}/parlor.png`)} alt={t('{style}麻將館預覽', { style: t(style.name) })} class:pixel={isPixelStyle(style.id)} />
+            <span>{t(style.name)}</span>
             {#if $artStyle === style.id}<b class="check" aria-hidden="true">✓</b>{/if}
           </button>
         {/each}
       </div>
-      <SectionBanner text="聲音與輔助" />
+      <SectionBanner text={t('聲音與輔助')} />
       <div class="audio-settings">
         <label class="volume-row">
-          <span>音樂音量</span>
+          <span>{t('音樂音量')}</span>
           <input type="range" min="0" max="1" step="0.05" value={soundSettings.bgm} oninput={(event) => setVolume('bgm', Number(event.currentTarget.value))} />
           <output>{Math.round(soundSettings.bgm * 100)}%</output>
         </label>
         <label class="volume-row">
-          <span>音效音量</span>
+          <span>{t('音效音量')}</span>
           <input type="range" min="0" max="1" step="0.05" value={soundSettings.sfx} oninput={(event) => setVolume('sfx', Number(event.currentTarget.value))} />
           <output>{Math.round(soundSettings.sfx * 100)}%</output>
         </label>
         <div class="toggle-pair">
-          <div class="mute-row"><span>靜音</span><ToggleSwitch label="靜音" checked={soundSettings.muted} onchange={toggleMute} /></div>
-          <div class="mute-row" title="輪到你做決定時，自動彈出提示框（建議打哪張、要不要吃碰）；牌桌上的「提示」按鈕隨時可以打開"><span>自動提示</span><ToggleSwitch label="自動彈出提示" checked={$autoHints} onchange={setAutoHints} /></div>
+          <div class="mute-row"><span>{t('靜音')}</span><ToggleSwitch label={t('靜音')} checked={soundSettings.muted} onchange={toggleMute} /></div>
+          <div class="mute-row" title={t('輪到你做決定時，自動彈出提示框（建議打哪張、要不要吃碰）；牌桌上的「提示」按鈕隨時可以打開')}><span>{t('自動提示')}</span><ToggleSwitch label={t('自動彈出提示')} checked={$autoHints} onchange={setAutoHints} /></div>
         </div>
       </div>
-      <p class="save-note">— 設定會自動儲存。—</p>
-      <div class="done"><FancyButton variant="red" href="#title">完　成</FancyButton></div>
+      <p class="save-note">— {t('設定會自動儲存。')} —</p>
+      <div class="done"><FancyButton variant="red" href="#title">{t('完　成')}</FancyButton></div>
     </section>
-    <aside class="settings-host" aria-label="麻將館老闆娘蘭姐">
+    <aside class="settings-host" aria-label={t('麻將館老闆娘蘭姐')}>
       <Avatar id="lanjie" size={540} />
-      <p class="art-panel">調好喜歡的風格，喝杯茶再來。</p>
+      <p class="art-panel">{t('調好喜歡的風格，喝杯茶再來。')}</p>
     </aside>
   </div>
 </main>

@@ -3,6 +3,7 @@
   import { ayiUnlocked, isWinningMatch, unlockAyi } from './unlocks.js';
   import { createCheatTracker, gamepadCommands, isEditableTarget, keyToControl, chooseDirectionalTarget, steppedValue, setControlValue, nextSelectIndex } from './input-controls.js';
   import ControlsKeyboard from './ControlsKeyboard.svelte';
+  import { t } from './i18n.svelte.js';
 
   let { state: gameState = null, onback = () => {} } = $props();
   let pad;
@@ -16,7 +17,7 @@
 
   function announceUnlock() {
     if (unlockAyi()) {
-      notice = '隱藏角色「阿翼」已解鎖！可在角色選擇與角色圖鑑中查看。';
+      notice = t('隱藏角色「{name}」已解鎖！可在角色選擇與角色圖鑑中查看。', { name: t('阿翼') });
       clearTimeout(noticeTimer);
       noticeTimer = setTimeout(() => (notice = ''), 6500);
     }
@@ -33,7 +34,7 @@
   function feedSecret(token) {
     if (gameState) return false;
     const complete = cheat.feed(token);
-    if (pad?.open) entered = complete ? '秘技成功！' : Array.from({ length: cheat.progress }, (_, i) => symbols[['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'B', 'A'][i]]).join(' ');
+    if (pad?.open) entered = complete ? t('秘技成功！') : Array.from({ length: cheat.progress }, (_, i) => symbols[['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'B', 'A'][i]]).join(' ');
     if (complete) announceUnlock();
     return complete;
   }
@@ -184,20 +185,20 @@
 
 <dialog bind:this={pad} class="secret-pad" aria-labelledby="secret-title" onclose={restoreFocus}>
   <div class="pad-header">
-    <h2 id="secret-title">復古秘技手把</h2>
-    <button type="button" aria-label="關閉秘技手把" onclick={() => pad.close()}>✕</button>
+    <h2 id="secret-title">{t('復古秘技手把')}</h2>
+    <button type="button" aria-label={t('關閉秘技手把')} onclick={() => pad.close()}>✕</button>
   </div>
-  <p>點選方向與 B、A 按鈕，輸入你記得的那串秘技。</p>
-  <div class="pad-buttons" role="group" aria-label="秘技輸入">
-    <button type="button" class="up" aria-label="上" onclick={() => feedSecret('ArrowUp')}>↑</button>
-    <button type="button" class="left" aria-label="左" onclick={() => feedSecret('ArrowLeft')}>←</button>
-    <button type="button" class="down" aria-label="下" onclick={() => feedSecret('ArrowDown')}>↓</button>
-    <button type="button" class="right" aria-label="右" onclick={() => feedSecret('ArrowRight')}>→</button>
+  <p>{t('點選方向與 B、A 按鈕，輸入你記得的那串秘技。')}</p>
+  <div class="pad-buttons" role="group" aria-label={t('秘技輸入')}>
+    <button type="button" class="up" aria-label={t('上')} onclick={() => feedSecret('ArrowUp')}>↑</button>
+    <button type="button" class="left" aria-label={t('左')} onclick={() => feedSecret('ArrowLeft')}>←</button>
+    <button type="button" class="down" aria-label={t('下')} onclick={() => feedSecret('ArrowDown')}>↓</button>
+    <button type="button" class="right" aria-label={t('右')} onclick={() => feedSecret('ArrowRight')}>→</button>
     <button type="button" class="b" aria-label="B" onclick={() => feedSecret('B')}>B</button>
     <button type="button" class="a" aria-label="A" onclick={() => feedSecret('A')}>A</button>
   </div>
-  <output class="entered" aria-live="polite">{entered || '等待輸入…'}</output>
-  {#if $ayiUnlocked}<p class="unlocked">阿翼已解鎖，歡迎來到雀館！</p>{/if}
+  <output class="entered" aria-live="polite">{entered || t('等待輸入…')}</output>
+  {#if $ayiUnlocked}<p class="unlocked">{t('{name}已解鎖，歡迎來到雀館！', { name: t('阿翼') })}</p>{/if}
 </dialog>
 <ControlsKeyboard bind:this={keyboard} />
 <div class="unlock-notice" class:shown={!!notice} role="status" aria-live="polite">{notice}</div>
