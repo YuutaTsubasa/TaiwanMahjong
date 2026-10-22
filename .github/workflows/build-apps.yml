@@ -52,11 +52,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 套件鏡像偶爾會卡住不動：每次最多等 5 分鐘，失敗就重試（最多 3 次）
       - name: Linux 相依套件
         if: runner.os == 'Linux'
+        timeout-minutes: 16
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
+          for i in 1 2 3; do
+            timeout 300 sudo apt-get update &&             timeout 300 sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf && exit 0
+            echo "apt-get 失敗或逾時，重試第 $i 次"; sleep 10
+          done
+          exit 1
 
       - uses: actions/setup-node@v4
         with:
