@@ -24,7 +24,8 @@
 {/if}
 
 <style>
-  .backdrop { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; background: #000a; padding: 16px; }
+  /* 欄寬固定是視窗寬度，對話框指定的寬度（例如 620px）在手機上才會被 max-width 縮到放得下 */
+  .backdrop { position: fixed; inset: 0; z-index: 60; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; background: #000a; padding: 16px; }
   .dialog { position: relative; max-width: 100%; max-height: 92vh; overflow: auto; }
   .content { margin-top: 16px; }
   .close { position: absolute; top: 10px; right: 10px; width: 40px; height: 40px; min-height: 0; padding: 0; z-index: 2; }
