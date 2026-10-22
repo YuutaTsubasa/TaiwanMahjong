@@ -7,7 +7,7 @@
     "build:wasm": "wasm-pack build crates/mahjong-wasm --target web --release --out-dir ../../src/lib/local/pkg --no-pack",
     "predev": "npm run build:wasm",
     "prebuild": "npm run build:wasm",
-    "test": "node --test tests/art-style.test.js tests/music.test.js tests/menu.test.js tests/unlocks.test.js tests/input-controls.test.js",
+    "test": "node --test tests/art-style.test.js tests/music.test.js tests/menu.test.js tests/unlocks.test.js tests/input-controls.test.js tests/dialogue-i18n.test.js",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",

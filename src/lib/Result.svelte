@@ -65,7 +65,7 @@
             <div class="portrait"><Avatar id={winner.character} expression="win" size={170} /></div>
             <div class="say">
               <div class="who">{t(getCharacter(winner.character).name)}</div>
-              <div class="line">「{winLine}」</div>
+              <div class="line">{t('「{line}」', { line: t(winLine) })}</div>
             </div>
             {#if loser?.character}
               <div class="loser" title={t('{name} 放槍', { name: seatName(loser) })}>

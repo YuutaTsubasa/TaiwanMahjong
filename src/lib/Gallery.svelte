@@ -24,7 +24,7 @@
   const selected = $derived(getCharacter(character));
   const preview = $derived(EXPRESSIONS.find((item) => item.id === expression));
   const skill = $derived(SKILLS[character]);
-  const line = $derived(selected.lines[preview.line]?.[0] ?? '');
+  const line = $derived(t(selected.lines[preview.line]?.[0] ?? ''));
 </script>
 
 <main class="concept-page gallery-page">
@@ -88,6 +88,8 @@
   /* 選中的那格各畫風會換底色，字色跟著畫風的按鈕走 */
   .expression-option.selected span { color: inherit; }
   blockquote { margin: 0; min-height: 94px; display: grid; place-items: center; border: 1px solid var(--line); background: #0005; padding: 14px; font: 20px/1.7 'DFKai-SB', '標楷體', serif; color: #ffecc5; }
+  /* 英文台詞：楷書的英文字母像打字機，改用標題字型（英文時是襯線體） */
+  :global(html[lang='en']) blockquote { font-family: var(--heading-font); font-size: 18px; line-height: 1.5; }
   @media (max-width: 900px) {
     .gallery-layout { grid-template-columns: minmax(220px, 32%) minmax(0, 1fr); }
     .gallery-portrait { grid-column: 2; grid-row: 1; max-width: 400px; justify-self: center; margin: 0; }

@@ -34,7 +34,7 @@
   {#if seat.is_dealer}<span class="dealer-tag">{t('莊')}</span>{/if}
   {#if reaction?.text}
     {#key reaction.until}
-      <div class="bubble {bubble}" class:big={reaction.kind === 'tsumo' || reaction.kind === 'ron'}>{reaction.text}</div>
+      <div class="bubble {bubble}" class:big={reaction.kind === 'tsumo' || reaction.kind === 'ron'}>{t(reaction.text)}</div>
     {/key}
   {/if}
 </div>

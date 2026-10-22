@@ -51,7 +51,7 @@
   </div>
   {#if reaction?.text}
     {#key reaction.until}
-      <div class="bubble {bubble}" class:big={reaction.kind === 'tsumo' || reaction.kind === 'ron' || reaction.kind === 'skill'}>{reaction.text}</div>
+      <div class="bubble {bubble}" class:big={reaction.kind === 'tsumo' || reaction.kind === 'ron' || reaction.kind === 'skill'}>{t(reaction.text)}</div>
     {/key}
   {/if}
 </div>
