@@ -9,7 +9,10 @@ export const staticSite = !!env.VITE_STATIC_SITE;
 
 // 線上房間的配對服務（workers/signal，Cloudflare）。空字串 = 不提供線上房間，介面上相關的選項都會藏起來。
 // 開發時可以在 .env.development.local 寫 VITE_SIGNAL_SERVER=http://localhost:8787 用本機的 wrangler dev。
-export const SIGNAL_SERVER = (env.VITE_SIGNAL_SERVER ?? '').replace(/\/$/, '');
+export const SIGNAL_SERVER = (env.VITE_SIGNAL_SERVER ?? 'https://taiwan-mahjong-signal.taiwan-mahjong-signal.workers.dev').replace(
+  /\/$/,
+  '',
+);
 
 // 網頁版的網址：分享房間連結用（https://…/#join/房號）
 export const WEB_URL = env.VITE_WEB_URL || 'https://yuuta-tsubasa.studio/TaiwanMahjong/';
