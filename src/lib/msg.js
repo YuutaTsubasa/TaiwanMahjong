@@ -32,3 +32,29 @@ export function formatMsg(m, seats, overrides = {}) {
 
 /** 訊息裡的主角（{name} 參數）是哪個座位 */
 export const msgSeat = (m) => (m?.a?.name && typeof m.a.name === 'object' && 'p' in m.a.name ? m.a.name.p : null);
+
+/**
+ * 跟 formatMsg 一樣，但把牌拆出來：回傳 [{ text }, { tile: '3m' }, ...]，
+ * 介面可以把牌畫成小牌（英文的牌名跟牌面對不起來，看圖比較直覺）。
+ */
+export function msgParts(m, seats) {
+  if (!m) return [];
+  if (typeof m === 'string') return [{ text: m }];
+  const out = [];
+  const push = (p) => {
+    const last = out[out.length - 1];
+    if (p.text != null && last?.text != null) last.text += p.text;
+    else if (p.text !== '') out.push(p);
+  };
+  const template = t(m.k);
+  const pieces = template.split(/\{(\w+)\}/);
+  pieces.forEach((piece, i) => {
+    if (i % 2 === 0) return push({ text: piece });
+    const v = m.a?.[piece];
+    if (v && typeof v === 'object' && 'tile' in v) push({ tile: v.tile });
+    else if (v && typeof v === 'object' && 'tiles' in v) v.tiles.forEach((c, j) => { if (j) push({ text: t('、') }); push({ tile: c }); });
+    else if (v && typeof v === 'object' && 'm' in v) msgParts(v.m, seats).forEach(push);
+    else push({ text: v === undefined ? `{${piece}}` : formatArg(v, seats) });
+  });
+  return out;
+}

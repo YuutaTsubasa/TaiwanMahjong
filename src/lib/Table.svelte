@@ -1,4 +1,5 @@
 <script>
+  import MsgText from './MsgText.svelte';
   import { formatMsg } from './msg.js';
   // 對局畫面，依 docs/art/concepts/gameplay-anime90-v2.png 排版：
   //   中間是俯視牌桌（public/ui/<畫風>/table.png），四家各有半身立繪名牌；
@@ -385,7 +386,7 @@
           <div class="hint-body">
             <Avatar id={mine.character} size={34} crop />
             <div class="hint-text">
-              <p>{hint.msg ? formatMsg(hint.msg, s.seats) : hint.text}</p>
+              <p>{#if hint.msg}<MsgText msg={hint.msg} seats={s.seats} />{:else}{hint.text}{/if}</p>
               {#if hint.skill}<p class="hint-skill">{hint.skill_msg ? formatMsg(hint.skill_msg, s.seats) : hint.skill}</p>{/if}
             </div>
             <button type="button" class="hint-close" onclick={() => (hintOpen = false)} aria-label={t('關上提示')}>×</button>

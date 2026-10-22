@@ -1,10 +1,11 @@
 <script>
+  import Tile from '../Tile.svelte';
   import { formatMsg, msgSeat } from '../msg.js';
   import { tileName } from '../tiles.js';
   // 對局右側：牌桌紀錄（每行帶出手者頭像、牌名標紅）＋聊天＋離開按鈕
   import { net, send } from '../net.svelte.js';
   import Avatar from '../Avatar.svelte';
-  import { t } from '../i18n.svelte.js';
+  import { t, isZh } from '../i18n.svelte.js';
   import { seatName } from '../tiles.js';
 
   let { onclose, onleave, onend, leaveLabel = t('離開房局') } = $props();
@@ -46,6 +47,7 @@
           seat,
           verb: t(LOG_ACTS[m.k]),
           tile: tileName(m.a.tile.tile),
+          code: m.a.tile.tile,
           note: m.k.endsWith('（可搶槓）') ? t('（可搶槓）') : '',
         };
       }
@@ -107,7 +109,7 @@
               {#if it.kind === 'act'}
                 <span class="who">{it.seat.name}</span>
                 <span class="verb">{it.verb}</span>
-                <b class="tname">{it.tile}</b>{#if it.note}<small>{it.note}</small>{/if}
+                {#if it.code && !isZh()}<span class="tile-ref"><Tile code={it.code} size="xs" /><b class="tname">({it.tile})</b></span>{:else}<b class="tname">{it.tile}</b>{/if}{#if it.note}<small>{it.note}</small>{/if}
               {:else}
                 {#if it.seat && !it.hideWho}<span class="who">{it.seat.name}</span>{/if}
                 <span class="txt">{it.text}</span>
@@ -198,6 +200,9 @@
   .av { flex: none; display: grid; place-items: center; width: 34px; }
   .av.sys { color: var(--muted); font-size: 10px; }
   .line { flex: 1; min-width: 0; }
+  .tile-ref { display: inline-flex; align-items: center; gap: 3px; vertical-align: middle; }
+  .tile-ref :global(.tile) { --w: 18px; margin-bottom: 2px; }
+  .tile-ref .tname { font-size: 13px; }
   .line > * + * { margin-left: 0.35em; }
   .who { color: var(--text); font-weight: 600; white-space: nowrap; }
   .verb { color: var(--muted); }
