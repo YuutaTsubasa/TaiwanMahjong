@@ -106,7 +106,7 @@ function receive(m) {
     net.isHost = m.is_host;
     if (m.token) store(tokenKey(net.address), m.token);
   } else if (m.type === 'error') {
-    toast(m.message);
+    toast(t(m.message));
   }
 }
 
@@ -174,7 +174,7 @@ export function hostRoom({ name, character, settings } = {}) {
       if (m.id === 0) receive(m.msg);
       else p2pHost?.send(m.id, m.msg);
     } else if (m.type === 'error') {
-      toast(m.message);
+      toast(t(m.message));
     }
   };
   worker.onerror = (e) => {
@@ -378,7 +378,7 @@ export function startLocal({ name, character, settings } = {}) {
       net.receivedAt = performance.now();
       net.seat = m.state.you;
     } else if (m.type === 'error') {
-      toast(m.message);
+      toast(t(m.message));
     }
   };
   worker.onerror = (e) => {

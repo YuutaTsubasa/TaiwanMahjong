@@ -1,4 +1,6 @@
 <script>
+  import { formatMsg, msgSeat } from '../msg.js';
+  import { tileName } from '../tiles.js';
   // 對局右側：牌桌紀錄（每行帶出手者頭像、牌名標紅）＋聊天＋離開按鈕
   import { net, send } from '../net.svelte.js';
   import Avatar from '../Avatar.svelte';
@@ -23,8 +25,37 @@
 
   const ACTION = /^(打出|碰|槓|吃|加槓|補花|要加槓)\s+(.+?)(（.*）)?$/;
 
+  // 新版引擎送 log_msgs（可翻譯）；連到舊版伺服器時只有中文的 log，照舊解析
+  const LOG_ACTS = {
+    '{name} 打出 {tile}': '（紀錄）打出',
+    '{name} 碰 {tile}': '（紀錄）碰',
+    '{name} 槓 {tile}': '（紀錄）槓',
+    '{name} 吃 {tile}': '（紀錄）吃',
+    '{name} 加槓 {tile}': '（紀錄）加槓',
+    '{name} 補花 {tile}': '（紀錄）補花',
+    '{name} 要加槓 {tile}（可搶槓）': '（紀錄）要加槓',
+  };
+  const fromMsgs = (msgs) =>
+    msgs.slice(-40).map((m) => {
+      if (m.k.startsWith('──')) return { kind: 'sep', text: formatMsg(m, s.seats).replace(/─/g, '').trim() };
+      const p = msgSeat(m);
+      const seat = p != null ? { ...s.seats[p], name: formatMsg({ k: '{name}', a: { name: m.a.name } }, s.seats) } : null;
+      if (seat && LOG_ACTS[m.k]) {
+        return {
+          kind: 'act',
+          seat,
+          verb: t(LOG_ACTS[m.k]),
+          tile: tileName(m.a.tile.tile),
+          note: m.k.endsWith('（可搶槓）') ? t('（可搶槓）') : '',
+        };
+      }
+      // 名字在句首時拆出來（跟頭像排在一起）；在句中就整句照原樣顯示
+      const lead = seat && m.k.startsWith('{name}');
+      return { kind: 'text', seat, hideWho: !lead, text: lead ? formatMsg(m, s.seats, { name: '' }).trim() : formatMsg(m, s.seats) };
+    });
+
   const logItems = $derived(
-    (s?.log ?? []).slice(-40).map((line) => {
+    s?.log_msgs ? fromMsgs(s.log_msgs) : (s?.log ?? []).slice(-40).map((line) => {
       if (line.startsWith('──')) return { kind: 'sep', text: line.replace(/─/g, '').trim() };
       const seat = seatOf(line);
       const rest = seat ? line.slice(seat.name.length).trim() : line;
@@ -71,14 +102,17 @@
             {:else}
               <span class="av sys">●</span>
             {/if}
-            {#if it.kind === 'act'}
-              <span class="who">{it.seat.name}</span>
-              <span class="verb">{it.verb}</span>
-              <b class="tname">{it.tile}</b>{#if it.note}<small>{it.note}</small>{/if}
-            {:else}
-              {#if it.seat}<span class="who">{it.seat.name}</span>{/if}
-              <span class="txt">{it.text}</span>
-            {/if}
+            <!-- 一整行文字自然換行（英文的牌名比較長，不會被擠掉） -->
+            <span class="line">
+              {#if it.kind === 'act'}
+                <span class="who">{it.seat.name}</span>
+                <span class="verb">{it.verb}</span>
+                <b class="tname">{it.tile}</b>{#if it.note}<small>{it.note}</small>{/if}
+              {:else}
+                {#if it.seat && !it.hideWho}<span class="who">{it.seat.name}</span>{/if}
+                <span class="txt">{it.text}</span>
+              {/if}
+            </span>
           </li>
         {/if}
       {/each}
@@ -163,6 +197,8 @@
   }
   .av { flex: none; display: grid; place-items: center; width: 34px; }
   .av.sys { color: var(--muted); font-size: 10px; }
+  .line { flex: 1; min-width: 0; }
+  .line > * + * { margin-left: 0.35em; }
   .who { color: var(--text); font-weight: 600; white-space: nowrap; }
   .verb { color: var(--muted); }
   .tname { color: #ff6b6b; font-family: var(--heading-font); font-size: 16px; }

@@ -2,6 +2,7 @@
 
 use super::bot;
 use super::hints;
+use super::msg::Msg;
 use super::rules::*;
 use super::scoring::*;
 use super::skills::{bool_or_number, Skill};
@@ -216,6 +217,8 @@ pub struct HandResult {
     pub deltas: [i64; 4],
     pub dealer_stays: bool,
     pub summary: String,
+    /// summary 的翻譯用版本（見 msg.rs）
+    pub summary_msg: Value,
 }
 
 #[derive(Clone, Debug, Serialize)]
@@ -257,6 +260,8 @@ pub struct Room {
     pub decision_started: Instant,
     pub deadline: Option<Instant>,
     pub log: VecDeque<String>,
+    /// log 的翻譯用版本（見 msg.rs），跟 log 一一對應
+    pub log_msgs: VecDeque<Value>,
     pub chat: VecDeque<ChatMsg>,
     pub events: VecDeque<GameEvent>,
     event_seq: u64,
@@ -293,6 +298,7 @@ impl Room {
             decision_started: Instant::now(),
             deadline: None,
             log: VecDeque::new(),
+            log_msgs: VecDeque::new(),
             chat: VecDeque::new(),
             events: VecDeque::new(),
             event_seq: 0,
@@ -344,11 +350,20 @@ impl Room {
         Ok(())
     }
 
-    fn push_log(&mut self, s: String) {
-        self.log.push_back(s);
+    fn push_log(&mut self, m: Msg) {
+        self.log.push_back(m.zh());
+        self.log_msgs.push_back(m.json());
         while self.log.len() > 60 {
             self.log.pop_front();
         }
+        while self.log_msgs.len() > 60 {
+            self.log_msgs.pop_front();
+        }
+    }
+
+    /// 訊息裡的玩家
+    fn who(&self, seat: usize) -> (usize, String) {
+        (seat, self.name(seat))
     }
 
     pub fn push_chat(&mut self, seat: Option<usize>, text: &str) {
@@ -384,7 +399,7 @@ impl Room {
         }
         self.auto[seat] = on;
         let name = self.name(seat);
-        self.push_log(format!("{} {}", name, if on { "開啟託管" } else { "取消託管" }));
+        self.push_log(Msg::new(if on { "{name} 開啟託管" } else { "{name} 取消託管" }).player("name", seat, name));
     }
 
     pub fn is_bot(&self, seat: usize) -> bool {
@@ -449,8 +464,8 @@ impl Room {
             last_seen: Instant::now(),
         });
         match replaced {
-            Some(r) => self.push_log(format!("{} 接手了 {} 的座位", name, r)),
-            None => self.push_log(format!("{} 加入了座位 {}", name, seat)),
+            Some(r) => self.push_log(Msg::new("{name} 接手了 {old} 的座位").player("name", seat, name).player("old", seat, r)),
+            None => self.push_log(Msg::new("{name} 加入了座位 {seat}").player("name", seat, name).raw("seat", seat)),
         }
         Ok((seat, token))
     }
@@ -489,7 +504,7 @@ impl Room {
             if self.host_seat == Some(seat) {
                 self.host_seat = None;
             }
-            self.push_log(format!("{} 離開了座位", n));
+            self.push_log(Msg::new("{name} 離開了座位").player("name", seat, n));
         } else if let Some(i) = self.seats[seat].as_mut() {
             if i.kind != SeatKind::Bot {
                 i.kind = SeatKind::Bot;
@@ -497,7 +512,7 @@ impl Room {
                 i.token = gen_token();
                 i.name = format!("{}(電腦代打)", i.name);
                 let n = i.name.clone();
-                self.push_log(format!("{} 改由電腦代打", n));
+                self.push_log(Msg::new("{name} 改由電腦代打").player("name", seat, n));
             }
         }
         Ok(())
@@ -527,7 +542,8 @@ impl Room {
         self.hand_no = 0;
         self.dealer = rand::thread_rng().gen_range(0..4);
         self.start_dealer = self.dealer;
-        self.push_log(format!("遊戲開始！起莊：{}", self.name(self.dealer)));
+        let (d, dn) = self.who(self.dealer);
+        self.push_log(Msg::new("遊戲開始！起莊：{name}").player("name", d, dn));
         self.start_hand();
         Ok(())
     }
@@ -540,7 +556,7 @@ impl Room {
         self.deadline = None;
         self.scores = [0; 4];
         self.new_decision(0);
-        self.push_log("回到大廳".into());
+        self.push_log(Msg::new("回到大廳"));
     }
 
     fn new_decision(&mut self, timeout_secs: u64) {
@@ -590,13 +606,13 @@ impl Room {
             front_drawn: 0,
         });
         self.phase = Phase::Playing;
-        self.push_log(format!(
-            "── 第 {} 局 {}風圈 莊家 {}{} ──",
-            self.hand_no,
-            WIND_ZH[self.round_wind as usize],
-            self.name(self.dealer),
-            if self.streak > 0 { format!(" 連{}", self.streak) } else { String::new() }
-        ));
+        let (d, dn) = self.who(self.dealer);
+        let start = Msg::new(if self.streak > 0 { "── 第 {n} 局 {wind}風圈 莊家 {name} 連{streak} ──" } else { "── 第 {n} 局 {wind}風圈 莊家 {name} ──" })
+            .raw("n", self.hand_no)
+            .text("wind", WIND_ZH[self.round_wind as usize])
+            .player("name", d, dn)
+            .raw("streak", self.streak);
+        self.push_log(start);
         for k in 0..4 {
             let s = (self.dealer + k) % 4;
             self.replace_flowers(s);
@@ -674,7 +690,7 @@ impl Room {
             }
             if is_flower(t) {
                 h.players[seat].flowers.push(t);
-                self.push_log(format!("{} 補花 {}", name, zh(t)));
+                self.push_log(Msg::new("{name} 補花 {tile}").player("name", seat, name.clone()).tile("tile", t));
                 self.push_event(seat, "flower", Some(t));
                 if self.check_flower_win() {
                     return;
@@ -698,7 +714,7 @@ impl Room {
     }
 
     fn exhaustive_draw(&mut self) {
-        self.push_log("流局（海底）".into());
+        self.push_log(Msg::new("流局（海底）"));
         for s in 0..4 {
             self.push_event(s, "draw", None);
         }
@@ -715,6 +731,7 @@ impl Room {
             deltas: [0; 4],
             dealer_stays: true,
             summary: "流局，莊家連莊".into(),
+            summary_msg: Msg::new("流局，莊家連莊").json(),
         });
         self.phase = Phase::HandOver;
         self.new_decision(self.settings.next_hand_delay);
@@ -903,7 +920,7 @@ impl Room {
                 responses: Default::default(),
             };
         }
-        self.push_log(format!("{} 打出 {}", name, zh(t)));
+        self.push_log(Msg::new("{name} 打出 {tile}").player("name", seat, name).tile("tile", t));
         self.push_event(seat, "discard", Some(t));
         if nobody {
             self.draw((seat + 1) % 4, false, false);
@@ -937,7 +954,7 @@ impl Room {
 
     fn announce_skill(&mut self, seat: usize, skill: Skill) {
         let name = self.name(seat);
-        self.push_log(format!("{} 發動技能「{}」", name, skill.name()));
+        self.push_log(Msg::new("{name} 發動技能「{skill}」").player("name", seat, name).text("skill", skill.name()));
         self.push_event(seat, "skill", None);
     }
 
@@ -1116,7 +1133,7 @@ impl Room {
                     tiles: vec![tile; if is_kong { 4 } else { 3 }],
                     from: Some(origin),
                 });
-                self.push_log(format!("{} {} {}", name, if is_kong { "槓" } else { "碰" }, zh(tile)));
+                self.push_log(Msg::new(if is_kong { "{name} 槓 {tile}" } else { "{name} 碰 {tile}" }).player("name", s, name).tile("tile", tile));
                 self.push_event(s, if is_kong { "kong" } else { "pung" }, Some(tile));
                 if is_kong {
                     self.draw(s, true, true);
@@ -1148,7 +1165,7 @@ impl Room {
                     from: Some(origin),
                 });
                 h.step = Step::Turn { seat: s, drawn: None, after_kong: false, claimed: true };
-                self.push_log(format!("{} 吃 {}", name, zh(tile)));
+                self.push_log(Msg::new("{name} 吃 {tile}").player("name", s, name).tile("tile", tile));
                 self.push_event(s, "chow", Some(tile));
                 self.new_decision(self.settings.turn_timeout);
             }
@@ -1179,7 +1196,7 @@ impl Room {
         let p = &mut h.players[seat];
         Self::remove_tiles(&mut p.concealed, t, 4);
         p.melds.push(Meld { kind: MeldKind::ConcealedKong, tiles: vec![t; 4], from: None });
-        self.push_log(format!("{} 暗槓", name));
+        self.push_log(Msg::new("{name} 暗槓").player("name", seat, name));
         self.push_event(seat, "kong", None);
         self.draw(seat, true, true);
     }
@@ -1203,7 +1220,7 @@ impl Room {
         } else {
             h.step = Step::RobKong { seat, tile: t, options, responses: Default::default() };
             let name = self.name(seat);
-            self.push_log(format!("{} 要加槓 {}（可搶槓）", name, zh(t)));
+            self.push_log(Msg::new("{name} 要加槓 {tile}（可搶槓）").player("name", seat, name).tile("tile", t));
             self.new_decision(self.settings.claim_timeout);
         }
     }
@@ -1218,7 +1235,7 @@ impl Room {
             m.kind = MeldKind::Kong;
             m.tiles.push(t);
         }
-        self.push_log(format!("{} 加槓 {}", name, zh(t)));
+        self.push_log(Msg::new("{name} 加槓 {tile}").player("name", seat, name).tile("tile", t));
         self.push_event(seat, "kong", Some(t));
         self.draw(seat, true, true);
     }
@@ -1287,25 +1304,31 @@ impl Room {
         // 顯示含莊家台的台數（自摸時取最高的那家）
         let shown_tai = payments.iter().map(|p| p.tai).max().unwrap_or(hand_tai);
         let mut summary = match (payer, f.self_draw) {
-            (_, true) => format!("{} 自摸！{} 台", wname, shown_tai),
-            (Some(l), false) => format!("{} 胡 {} 放的槍！{} 台", wname, self.name(l), shown_tai),
-            (None, false) => format!("{} 胡牌！{} 台", wname, shown_tai),
-        };
+            (_, true) => Msg::new("{name} 自摸！{tai} 台"),
+            (Some(l), false) => Msg::new("{name} 胡 {loser} 放的槍！{tai} 台").player("loser", l, self.name(l)),
+            (None, false) => Msg::new("{name} 胡牌！{tai} 台"),
+        }
+        .player("name", w, wname)
+        .raw("tai", shown_tai);
+        let mut notes: Vec<Msg> = Vec::new();
         if let Some(l) = shielded {
             self.shield_used[l] = true;
             self.hand.as_mut().unwrap().players[l].skill_used = true;
-            summary.push_str(&format!("（{} 的銀之盾擋下了付款）", self.name(l)));
+            notes.push(Msg::new("（{name} 的銀之盾擋下了付款）").player("name", l, self.name(l)));
             self.announce_skill(l, Skill::Shield);
         }
         for &s in &sturdy {
             self.shield_used[s] = true;
             self.hand.as_mut().unwrap().players[s].skill_used = true;
-            summary.push_str(&format!("（{} 的身經百戰：這次不用付）", self.name(s)));
+            notes.push(Msg::new("（{name} 的身經百戰：這次不用付）").player("name", s, self.name(s)));
             self.announce_skill(s, Skill::Sturdy);
         }
         if foreshadow {
             self.hand.as_mut().unwrap().players[w].skill_used = true;
             self.announce_skill(w, Skill::Foreshadow);
+        }
+        if !notes.is_empty() {
+            summary = Msg::new("{main}{notes}").msg("main", summary).list("notes", notes, "");
         }
         self.push_log(summary.clone());
         self.push_event(w, if f.self_draw { "tsumo" } else { "ron" }, win_tile);
@@ -1324,7 +1347,8 @@ impl Room {
             payments,
             deltas,
             dealer_stays: w == self.dealer,
-            summary,
+            summary: summary.zh(),
+            summary_msg: summary.json(),
         });
         self.phase = Phase::HandOver;
         self.new_decision(self.settings.next_hand_delay);
@@ -1347,11 +1371,11 @@ impl Room {
             self.new_decision(0);
             let mut order: Vec<usize> = (0..4).collect();
             order.sort_by_key(|&s| -self.scores[s]);
-            let rank: Vec<String> = order
+            let rank: Vec<Msg> = order
                 .iter()
-                .map(|&s| format!("{} {:+}", self.name(s), self.scores[s]))
+                .map(|&s| Msg::new("{name} {score}").player("name", s, self.name(s)).raw("score", format!("{:+}", self.scores[s])))
                 .collect();
-            self.push_log(format!("遊戲結束！{}", rank.join("、")));
+            self.push_log(Msg::new("遊戲結束！{ranking}").list("ranking", rank, "、"));
             return;
         }
         self.start_hand();
@@ -1396,7 +1420,7 @@ impl Room {
                     let a = self.timeout_action(s, &legal);
                     let name = self.name(s);
                     if self.phase == Phase::Playing {
-                        self.push_log(format!("{} 逾時，自動處理", name));
+                        self.push_log(Msg::new("{name} 逾時，自動處理").player("name", s, name.clone()));
                     }
                     let _ = self.act(s, a);
                     acted = true;
@@ -1696,6 +1720,7 @@ impl Room {
             "hint": hint_v,
             "result": self.result,
             "log": self.log.iter().rev().take(30).rev().collect::<Vec<_>>(),
+            "log_msgs": self.log_msgs.iter().rev().take(30).rev().collect::<Vec<_>>(),
             "chat": self.chat,
             "events": self.events,
             "settings": self.settings,

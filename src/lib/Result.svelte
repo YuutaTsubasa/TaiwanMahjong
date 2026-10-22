@@ -1,4 +1,5 @@
 <script>
+  import { formatMsg } from './msg.js';
   import { net, act, hostCmd, disconnect, clock } from './net.svelte.js';
   import Tile from './Tile.svelte';
   import Melds from './Melds.svelte';
@@ -26,6 +27,7 @@
   // 胡牌的一句話：中文直接用引擎的 summary；其他語言用結構化欄位自己組（台數取付款中最高的那筆，含莊家台）
   const summary = $derived.by(() => {
     if (!r || r.draw) return '';
+    if (r.summary_msg) return formatMsg(r.summary_msg, s.seats);
     if (isZh()) return r.summary;
     const tai = r.payments.length ? Math.max(...r.payments.map((p) => p.tai)) : r.hand_tai;
     const name = seatName(winner);

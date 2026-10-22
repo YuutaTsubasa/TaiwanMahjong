@@ -4,6 +4,7 @@
 //! 判斷方式跟內建電腦一樣：向聽數（離聽牌還差幾張）+ 進張數（有幾張牌能讓手牌變好）。
 
 use super::bot::{best_discard, visible_counts};
+use super::msg::Msg;
 use super::room::{Action, Hand, Room, Step};
 use super::rules::*;
 use super::tiles::*;
@@ -29,27 +30,30 @@ pub fn waits_left(h: &Hand, seat: usize) -> Vec<(Tile, u8)> {
     waits(&c).into_iter().map(|w| (w, 4u8.saturating_sub(visible[w as usize]))).collect()
 }
 
-fn tiles_text(ts: &[Tile]) -> String {
-    ts.iter().map(|&t| zh(t)).collect::<Vec<_>>().join("、")
-}
-
 /// 只有吃碰明槓會破門清（暗槓不算）
 fn is_menqing(h: &Hand, seat: usize) -> bool {
     h.players[seat].melds.iter().all(|m| m.kind == super::scoring::MeldKind::ConcealedKong)
 }
 
 /// 「離聽牌還差 N 張」或「就聽牌了」
-fn distance(s: i32) -> String {
+fn distance(s: i32) -> Msg {
     if s <= 0 {
-        "就聽牌了".into()
+        Msg::new("就聽牌了")
     } else {
-        format!("離聽牌還差 {} 張", s)
+        Msg::new("離聽牌還差 {n} 張").raw("n", s)
     }
+}
+
+/// 提示的 JSON：text 是中文句子，msg 給介面翻譯
+fn with_msg(mut v: Value, m: Msg) -> Value {
+    v["text"] = json!(m.zh());
+    v["msg"] = m.json();
+    v
 }
 
 fn discard_hint(room: &Room, h: &Hand, seat: usize, legal: &[Action]) -> Value {
     if legal.contains(&Action::Tsumo) {
-        return json!({ "type": "tsumo", "text": "自摸了！按「自摸」胡牌。" });
+        return with_msg(json!({ "type": "tsumo" }), Msg::new("自摸了！按「自摸」胡牌。"));
     }
     let p = &h.players[seat];
     let n = 5 - p.melds.len() as i32;
@@ -74,13 +78,13 @@ fn discard_hint(room: &Room, h: &Hand, seat: usize, legal: &[Action]) -> Value {
         let w = waits(&c2);
         let left: u32 = w.iter().map(|&t| 4u32.saturating_sub(visible[t as usize] as u32)).sum();
         if w.is_empty() {
-            format!("建議打{}。", zh(out))
+            Msg::new("建議打{tile}。").tile("tile", out)
         } else if was_ready && drawn == Some(out) {
-            format!("繼續聽 {}（還剩 {} 張）：摸到的{}用不到，打掉就好。", tiles_text(&w), left, zh(out))
+            Msg::new("繼續聽 {waits}（還剩 {left} 張）：摸到的{tile}用不到，打掉就好。").tiles("waits", &w).raw("left", left).tile("tile", out)
         } else if was_ready {
-            format!("打{}，改聽 {}（還剩 {} 張）。", zh(out), tiles_text(&w), left)
+            Msg::new("打{tile}，改聽 {waits}（還剩 {left} 張）。").tile("tile", out).tiles("waits", &w).raw("left", left)
         } else {
-            format!("打{}就聽牌了，聽 {}（還剩 {} 張）。", zh(out), tiles_text(&w), left)
+            Msg::new("打{tile}就聽牌了，聽 {waits}（還剩 {left} 張）。").tile("tile", out).tiles("waits", &w).raw("left", left)
         }
     } else {
         // 進張：打完之後摸到哪些牌會更接近聽牌
@@ -110,13 +114,19 @@ fn discard_hint(room: &Room, h: &Hand, seat: usize, legal: &[Action]) -> Value {
             }
         };
         let _ = kinds;
-        let why = if lonely { "（孤張，用處不大）" } else { "" };
-        format!("建議打{}{}：打完{}，有 {} 張牌能讓手牌變好。", zh(out), why, distance(s), total)
+        let m = if lonely {
+            Msg::new("建議打{tile}（孤張，用處不大）：打完{distance}，有 {total} 張牌能讓手牌變好。")
+        } else {
+            Msg::new("建議打{tile}：打完{distance}，有 {total} 張牌能讓手牌變好。")
+        };
+        m.tile("tile", out).msg("distance", distance(s)).raw("total", total)
     };
-    let mut v = json!({ "type": "discard", "tile": code(out), "text": text });
+    let mut v = with_msg(json!({ "type": "discard", "tile": code(out) }), text);
     if legal.contains(&Action::Skill) {
         if let Some(k) = room.skill_of(seat) {
-            v["skill"] = json!(format!("也可以發動技能「{}」：{}", k.name(), k.desc()));
+            let m = Msg::new("也可以發動技能「{name}」：{desc}").text("name", k.name()).text("desc", k.desc());
+            v["skill"] = json!(m.zh());
+            v["skill_msg"] = m.json();
         }
     }
     v
@@ -124,7 +134,7 @@ fn discard_hint(room: &Room, h: &Hand, seat: usize, legal: &[Action]) -> Value {
 
 fn claim_hint(room: &Room, h: &Hand, seat: usize, legal: &[Action]) -> Value {
     if legal.contains(&Action::Ron) {
-        return json!({ "type": "claim", "advice": "ron", "text": "胡！這張就是你在等的牌。" });
+        return with_msg(json!({ "type": "claim", "advice": "ron" }), Msg::new("胡！這張就是你在等的牌。"));
     }
     let tile = match h.step {
         Step::Claims { tile, .. } | Step::RobKong { tile, .. } => tile,
@@ -174,32 +184,39 @@ fn claim_hint(room: &Room, h: &Hand, seat: usize, legal: &[Action]) -> Value {
         Action::Pung => "碰",
         _ => "吃",
     };
-    let lose_menqing = if is_menqing(h, seat) { "不過會失去門清（1 台）。" } else { "" };
+    let lose_menqing = if is_menqing(h, seat) { Msg::new("不過會失去門清（1 台）。") } else { Msg::new("") };
     match best {
         Some((a, s1)) if s1 < s0 || (matches!(a, Action::Pung | Action::Kong) && honor_value && s1 <= s0) => {
-            let mut v = json!({
-                "type": "claim",
-                "advice": match a { Action::Kong => "kong", Action::Pung => "pung", _ => "chow" },
-                "text": format!(
-                    "建議{}：{}之後{}{}{}",
-                    name(a),
-                    name(a),
-                    distance(s1),
-                    if honor_value && !matches!(a, Action::Chow(_)) { format!("，而且{}是有台的字牌。", zh(tile)) } else { "。".into() },
-                    lose_menqing
-                ),
-            });
+            let honor = if honor_value && !matches!(a, Action::Chow(_)) {
+                Msg::new("，而且{tile}是有台的字牌。").tile("tile", tile)
+            } else {
+                Msg::new("。")
+            };
+            let m = Msg::new("建議{act}：{act}之後{distance}{honor}{menqing}")
+                .text("act", name(a))
+                .msg("distance", distance(s1))
+                .msg("honor", honor)
+                .msg("menqing", lose_menqing);
+            let mut v = with_msg(
+                json!({ "type": "claim", "advice": match a { Action::Kong => "kong", Action::Pung => "pung", _ => "chow" } }),
+                m,
+            );
             if let Action::Chow(st) = a {
                 v["start"] = json!(code(*st));
             }
             v
         }
-        Some((a, _)) => json!({
-            "type": "claim",
-            "advice": "pass",
-            "text": format!("建議過：{}了也沒有比較快聽牌（現在{}）{}", name(a), distance(s0), if is_menqing(h, seat) { "，留著門清比較好。" } else { "。" }),
-        }),
-        None => json!({ "type": "claim", "advice": "pass", "text": "建議過。" }),
+        Some((a, _)) => {
+            let m = Msg::new(if is_menqing(h, seat) {
+                "建議過：{act}了也沒有比較快聽牌（現在{distance}），留著門清比較好。"
+            } else {
+                "建議過：{act}了也沒有比較快聽牌（現在{distance}）。"
+            })
+            .text("act", name(a))
+            .msg("distance", distance(s0));
+            with_msg(json!({ "type": "claim", "advice": "pass" }), m)
+        }
+        None => with_msg(json!({ "type": "claim", "advice": "pass" }), Msg::new("建議過。")),
     }
 }
 

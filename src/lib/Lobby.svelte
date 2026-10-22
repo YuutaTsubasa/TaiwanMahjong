@@ -1,4 +1,5 @@
 <script>
+  import { formatMsg } from './msg.js';
   // 房間大廳，依 docs/art/concepts/lobby-host-anime90.png（房主）與 lobby-guest-anime90.png（訪客）排版。
   import { net, hostCmd, leave, disconnect, serverUrls, toast, send, setCharacter, inTauri } from './net.svelte.js';
   import { WEB_URL } from './site.js';
@@ -87,7 +88,7 @@
 
   // 聊天：系統訊息（加入、離開…）與玩家聊天混在一起，依時間順序
   const chatLines = $derived([
-    ...s.log.slice(-6).map((t) => ({ sys: true, text: t })),
+    ...(s.log_msgs ? s.log_msgs.slice(-6).map((m) => ({ sys: true, text: formatMsg(m, s.seats) })) : s.log.slice(-6).map((text) => ({ sys: true, text }))),
     ...s.chat.slice(-20).map((c) => ({ sys: false, ...c })),
   ]);
   let chatText = $state('');
