@@ -178,9 +178,9 @@
   .tai-tip { margin-left: 6px; color: var(--muted); font-size: 11px; }
   .item.dealer { background: rgba(193, 18, 31, 0.18); }
   /* 英文：台數名稱後面加了英文說明，格子放寬一點 */
-  :global(html[lang='en']) .items { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
-  :global(html[lang='en']) .item { gap: 8px; text-align: left; }
-  :global(html[lang='en']) .item b { flex: none; }
+  :global(html:not([lang^='zh'])) .items { grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+  :global(html:not([lang^='zh'])) .item { gap: 8px; text-align: left; }
+  :global(html:not([lang^='zh'])) .item b { flex: none; }
   .item small { color: var(--muted); font-size: 11px; }
   .pay { font-size: 13px; color: var(--muted); margin-bottom: 10px; }
   .deltas { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: clamp(6px, 1.4vh, 12px) 0; }

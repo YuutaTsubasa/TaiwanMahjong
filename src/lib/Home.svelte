@@ -414,10 +414,10 @@
     .actions { grid-template-columns: 1fr; }
   }
   /* 英文：書法字的大字距會把英文撐得太寬 */
-  :global(html[lang='en']) .menu-item { letter-spacing: .03em; width: auto; min-width: clamp(280px, 22vw, 380px); white-space: nowrap; }
-  :global(html[lang='en']) .back-link { letter-spacing: .02em; }
-  :global(html[lang='en']) .field > span { letter-spacing: .02em; }
-  :global(html[lang='en']) .seg button { letter-spacing: .02em; }
-  :global(html[lang='en']) .solo-grid .seg button { white-space: normal; line-height: 1.1; }
-  :global(html[lang='en']) .portrait-caption strong, :global(html[lang='en']) .portrait-caption p { letter-spacing: .02em; }
+  :global(html:not([lang^='zh'])) .menu-item { letter-spacing: .03em; width: auto; min-width: clamp(280px, 22vw, 380px); white-space: nowrap; }
+  :global(html:not([lang^='zh'])) .back-link { letter-spacing: .02em; }
+  :global(html:not([lang^='zh'])) .field > span { letter-spacing: .02em; }
+  :global(html:not([lang^='zh'])) .seg button { letter-spacing: .02em; }
+  :global(html:not([lang^='zh'])) .solo-grid .seg button { white-space: normal; line-height: 1.1; }
+  :global(html:not([lang^='zh'])) .portrait-caption strong, :global(html:not([lang^='zh'])) .portrait-caption p { letter-spacing: .02em; }
 </style>

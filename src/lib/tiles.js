@@ -1,4 +1,4 @@
-import { t, isZh, displayName } from './i18n.svelte.js';
+import { t, isZh, displayName, usesKanji, i18n } from './i18n.svelte.js';
 
 export const NUM_ZH = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
 const HONOR = { E: '東', S: '南', W: '西', N: '北', C: '中', F: '發', P: '白' };
@@ -17,7 +17,9 @@ export function parseCode(c) {
 export function tileName(c) {
   const p = parseCode(c);
   if (p.kind === 'm' || p.kind === 'p' || p.kind === 's') {
-    return isZh() ? NUM_ZH[p.n - 1] + SUIT_ZH[p.kind] : t(`{n}${SUIT_ZH[p.kind]}`, { n: p.n });
+    // 日文的條子叫「索子」：七條 → 七索
+    if (usesKanji()) return NUM_ZH[p.n - 1] + (i18n.lang === 'ja' && p.kind === 's' ? '索' : SUIT_ZH[p.kind]);
+    return t(`{n}${SUIT_ZH[p.kind]}`, { n: p.n });
   }
   if (p.kind === 'z' || p.kind === 'f') return t(p.ch);
   return t('牌背');

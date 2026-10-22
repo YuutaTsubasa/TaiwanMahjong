@@ -50,6 +50,6 @@
     color: var(--text);
   }
   /* 英文：字距縮小，太長時可以換行 */
-  :global(html[lang='en']) .text { letter-spacing: .04em; white-space: normal; text-align: center; }
-  :global(html[lang='en']) .sub { letter-spacing: .03em; }
+  :global(html:not([lang^='zh'])) .text { letter-spacing: .04em; white-space: normal; text-align: center; }
+  :global(html:not([lang^='zh'])) .sub { letter-spacing: .03em; }
 </style>

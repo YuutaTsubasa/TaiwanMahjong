@@ -2,14 +2,14 @@
   import { SEAT_KIND_ICON } from './tiles.js';
   import Avatar from './Avatar.svelte';
   import { reactionFor } from './reactions.svelte.js';
-  import { t, displayName, isZh } from './i18n.svelte.js';
+  import { t, displayName, isZh, usesKanji } from './i18n.svelte.js';
 
   let { seat, active = false, thinking = false, isMe = false, bubble = 'up' } = $props();
 
   const reaction = $derived(reactionFor(seat.seat));
   // 英文介面的圓形風位標記只放得下一個字母
   const WIND_EN = { 東: 'E', 南: 'S', 西: 'W', 北: 'N' };
-  const wind = $derived(seat.wind && !isZh() ? WIND_EN[seat.wind] ?? seat.wind : seat.wind);
+  const wind = $derived(seat.wind && !usesKanji() ? WIND_EN[seat.wind] ?? seat.wind : seat.wind);
 </script>
 
 <div class="plate" class:active class:thinking>
@@ -66,7 +66,7 @@
     background: #f6efdc;
     color: #1d3557;
     font-weight: 700;
-    font-family: 'DFKai-SB', '標楷體', serif;
+    font-family: var(--kai-font);
     font-size: 16px;
     flex: none;
   }

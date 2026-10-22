@@ -14,6 +14,7 @@ const CHARACTER_NAMES = Object.fromEntries(CHARACTERS.map((c) => [c.id, c.name])
 export const LANGUAGES = [
   { id: 'zh-TW', name: '中文', htmlLang: 'zh-Hant-TW' },
   { id: 'en', name: 'English', htmlLang: 'en' },
+  { id: 'ja', name: '日本語', htmlLang: 'ja' },
 ];
 
 const modules = import.meta.glob('./i18n/*/*.js', { eager: true });
@@ -30,9 +31,15 @@ function initial() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (isLang(saved)) return saved;
   } catch {}
-  // 沒選過就看瀏覽器：中文（任何地區）用中文，其他用英文
+  // 沒選過就看瀏覽器：第一個認得的語言（中文任何地區都用中文），都不認得就用英文
   const nav = typeof navigator !== 'undefined' ? navigator.languages ?? [navigator.language] : [];
-  return nav.some((l) => /^zh/i.test(l ?? '')) || nav.length === 0 ? 'zh-TW' : 'en';
+  if (nav.length === 0) return 'zh-TW';
+  for (const l of nav) {
+    if (/^zh/i.test(l ?? '')) return 'zh-TW';
+    if (/^ja/i.test(l ?? '')) return 'ja';
+    if (/^en/i.test(l ?? '')) return 'en';
+  }
+  return 'en';
 }
 
 export const i18n = $state({ lang: initial() });
@@ -66,6 +73,9 @@ export function displayName(name, characterId) {
   const zh = CHARACTER_NAMES[characterId];
   return zh && zh === name ? t(name) : name;
 }
+
+/** 牌名、風向直接用漢字的語言（中文、日文）；其他語言用翻譯的名字、牌畫成小牌 */
+export const usesKanji = () => i18n.lang === 'zh-TW' || i18n.lang === 'ja';
 
 /** 現在是不是中文介面（有些地方中文、英文排法不一樣） */
 export const isZh = () => i18n.lang === 'zh-TW';

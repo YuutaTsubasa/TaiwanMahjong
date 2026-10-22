@@ -86,7 +86,7 @@
   }
   /* 英文名字比較長：字距縮小，放不下就省略 */
   /* 英文名字比較長：字縮小、不加字距 */
-  :global(html[lang='en']) .name { letter-spacing: 0; font-size: clamp(9px, min(0.95vw, 1.8vh), 15px); line-height: 1.15; overflow-wrap: anywhere; }
+  :global(html:not([lang^='zh'])) .name { letter-spacing: 0; font-size: clamp(9px, min(0.95vw, 1.8vh), 15px); line-height: 1.15; overflow-wrap: anywhere; }
   .sel .name { color: var(--gold); }
   .taken { opacity: 0.5; }
   /* 未解鎖：整張壓成黑色剪影 */

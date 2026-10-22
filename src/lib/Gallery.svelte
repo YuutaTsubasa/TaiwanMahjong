@@ -24,6 +24,12 @@
   const selected = $derived(getCharacter(character));
   const preview = $derived(EXPRESSIONS.find((item) => item.id === expression));
   const skill = $derived(SKILLS[character]);
+  // 名字的讀音（日文介面才有，例如 小翠 → シャオツイ）
+  const reading = $derived.by(() => {
+    const key = `讀音：${selected.name}`;
+    const r = t(key);
+    return r === key ? '' : r;
+  });
   const line = $derived(t(selected.lines[preview.line]?.[0] ?? ''));
 </script>
 
@@ -42,6 +48,7 @@
     </div>
     <section class="art-panel detail-panel" aria-label={t('角色介紹')}>
       <OrnateHeading text={t(selected.name)} tag="h2" />
+      {#if reading}<p class="reading">{reading}</p>{/if}
       <p class="intro">{t('{intro}。', { intro: t(selected.intro) })}</p>
       {#if skill}<p class="skill-line" title={t('技能模式開啟時可以使用')}><b>{t('技能「{name}」', { name: t(skill.name) })}</b>{t(skill.desc)}</p>{/if}
       <h3>{t('表情預覽')}</h3>
@@ -68,7 +75,7 @@
   .characters { margin-top: clamp(6px, 1.4vh, 16px); --pic-h: clamp(52px, 10vh, 120px); }
   .character-option, .expression-option { display: flex; flex-direction: column; align-items: center; overflow: hidden; padding: 0; border: 1px solid #9a7839; border-radius: 2px; background: #001f1b; min-width: 0; }
   .character-option :global(.avatar), .expression-option :global(.avatar) { width: 100% !important; height: auto !important; aspect-ratio: 1; background: #795d3c55; }
-  .character-option span { display: block; padding: 6px; font: 600 19px 'DFKai-SB', '標楷體', serif; letter-spacing: .16em; color: var(--gold); }
+  .character-option span { display: block; padding: 6px; font: 600 19px var(--kai-font); letter-spacing: .16em; color: var(--gold); }
   button.selected { border-color: #ffe995; box-shadow: 0 0 0 2px #caa344, 0 0 12px #e8c45e88; }
   .gallery-portrait { align-self: end; min-width: 0; margin: 0 -55px 0 -35px; filter: drop-shadow(0 6px 14px #0008); }
   /* 立繪寬度也受視窗高度限制，不然寬螢幕時會比畫面還高 */
@@ -77,19 +84,20 @@
   .detail-panel { padding: clamp(18px, 2.2vw, 34px); position: relative; }
   .detail-panel :global(.ornate) { margin: 4px 0 6px; }
   .intro { text-align: center; line-height: 1.8; font-size: 16px; }
+  .reading { margin: -6px 0 2px; text-align: center; font-size: 14px; letter-spacing: .12em; color: var(--muted); }
   .skill-line { margin: 4px 0 0; text-align: center; font-size: 14px; line-height: 1.6; color: var(--text); }
   .skill-line b { color: var(--gold); margin-right: 6px; }
-  h3 { display: flex; align-items: center; gap: 14px; color: var(--gold); font: 600 20px 'DFKai-SB', '標楷體', serif; letter-spacing: .16em; text-align: center; margin: clamp(10px, 2.4vh, 26px) 0 clamp(8px, 1.8vh, 18px); }
-  :global(html[lang='en']) h3 { letter-spacing: .04em; }
+  h3 { display: flex; align-items: center; gap: 14px; color: var(--gold); font: 600 20px var(--kai-font); letter-spacing: .16em; text-align: center; margin: clamp(10px, 2.4vh, 26px) 0 clamp(8px, 1.8vh, 18px); }
+  :global(html:not([lang^='zh'])) h3 { letter-spacing: .04em; }
   h3::before, h3::after { content: ''; flex: 1; height: 1px; background: var(--line); }
   .expressions { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
   /* 文字顏色要自己指定：有些畫風（MS-DOS）的按鈕預設是深色字，會跟深色底融在一起 */
   .expression-option span { font-size: 12px; padding: 6px 2px; white-space: nowrap; color: var(--gold); }
   /* 選中的那格各畫風會換底色，字色跟著畫風的按鈕走 */
   .expression-option.selected span { color: inherit; }
-  blockquote { margin: 0; min-height: 94px; display: grid; place-items: center; border: 1px solid var(--line); background: #0005; padding: 14px; font: 20px/1.7 'DFKai-SB', '標楷體', serif; color: #ffecc5; }
+  blockquote { margin: 0; min-height: 94px; display: grid; place-items: center; border: 1px solid var(--line); background: #0005; padding: 14px; font: 20px/1.7 var(--kai-font); color: #ffecc5; }
   /* 英文台詞：楷書的英文字母像打字機，改用標題字型（英文時是襯線體） */
-  :global(html[lang='en']) blockquote { font-family: var(--heading-font); font-size: 18px; line-height: 1.5; }
+  :global(html:not([lang^='zh'])) blockquote { font-family: var(--heading-font); font-size: 18px; line-height: 1.5; }
   @media (max-width: 900px) {
     .gallery-layout { grid-template-columns: minmax(220px, 32%) minmax(0, 1fr); }
     .gallery-portrait { grid-column: 2; grid-row: 1; max-width: 400px; justify-self: center; margin: 0; }

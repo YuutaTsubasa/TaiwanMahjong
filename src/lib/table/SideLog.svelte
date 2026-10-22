@@ -5,7 +5,7 @@
   // 對局右側：牌桌紀錄（每行帶出手者頭像、牌名標紅）＋聊天＋離開按鈕
   import { net, send } from '../net.svelte.js';
   import Avatar from '../Avatar.svelte';
-  import { t, isZh } from '../i18n.svelte.js';
+  import { t, isZh, usesKanji } from '../i18n.svelte.js';
   import { seatName } from '../tiles.js';
 
   let { onclose, onleave, onend, leaveLabel = t('離開房局') } = $props();
@@ -109,7 +109,7 @@
               {#if it.kind === 'act'}
                 <span class="who">{it.seat.name}</span>
                 <span class="verb">{it.verb}</span>
-                {#if it.code && !isZh()}<span class="tile-ref"><Tile code={it.code} size="xs" /><b class="tname">({it.tile})</b></span>{:else}<b class="tname">{it.tile}</b>{/if}{#if it.note}<small>{it.note}</small>{/if}
+                {#if it.code && !usesKanji()}<span class="tile-ref"><Tile code={it.code} size="xs" /><b class="tname">({it.tile})</b></span>{:else}<b class="tname">{it.tile}</b>{/if}{#if it.note}<small>{it.note}</small>{/if}
               {:else}
                 {#if it.seat && !it.hideWho}<span class="who">{it.seat.name}</span>{/if}
                 <span class="txt">{it.text}</span>

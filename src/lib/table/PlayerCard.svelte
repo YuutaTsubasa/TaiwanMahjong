@@ -4,7 +4,7 @@
   import Avatar from '../Avatar.svelte';
   import { reactionFor } from '../reactions.svelte.js';
   import { getCharacter } from '../characters.js';
-  import { t, isZh, displayName } from '../i18n.svelte.js';
+  import { t, isZh, displayName, usesKanji } from '../i18n.svelte.js';
 
   let { seat, variant = 'side', active = false, thinking = false, isMe = false, bubble = 'down' } = $props();
 
@@ -19,7 +19,7 @@
     seat.skill ? t(seat.skill.used ? '技能「{name}」：{desc}（已用過）' : '技能「{name}」：{desc}', { name: skillName, desc: t(seat.skill.desc) }) : '',
   );
   // 門風：英文介面放不下整個字，只放第一個字母（E/S/W/N）
-  const windText = $derived(seat.wind ? (isZh() ? seat.wind : t(seat.wind).slice(0, 1)) : '');
+  const windText = $derived(seat.wind ? (usesKanji() ? seat.wind : t(seat.wind).slice(0, 1)) : '');
 </script>
 
 <div class="pcard v-{variant}" class:active class:thinking class:empty={!seat.name}>

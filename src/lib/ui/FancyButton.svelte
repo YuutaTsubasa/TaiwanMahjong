@@ -32,5 +32,5 @@
 
 <style>
   /* 英文：按鈕的大字距只適合中文 */
-  :global(html[lang='en']) .fancy { letter-spacing: .04em; }
+  :global(html:not([lang^='zh'])) .fancy { letter-spacing: .04em; }
 </style>

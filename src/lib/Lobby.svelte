@@ -472,17 +472,17 @@
   .rule-actions { display: flex; justify-content: center; gap: 16px; margin-top: 20px; }
 
   /* 英文：中文用的大字距會把英文字拉得太開、擠不下 */
-  :global(html[lang='en']) .seat-count .label,
-  :global(html[lang='en']) .panel-title,
-  :global(html[lang='en']) .rules-title,
-  :global(html[lang='en']) .waiting { letter-spacing: 0.04em; }
-  :global(html[lang='en']) .role,
-  :global(html[lang='en']) .tabs button,
-  :global(html[lang='en']) .copy-btn,
-  :global(html[lang='en']) .seat-btn,
-  :global(html[lang='en']) .seat-count .count,
-  :global(html[lang='en']) .rule-chips li,
-  :global(html[lang='en']) .fill-note { letter-spacing: 0.02em; }
+  :global(html:not([lang^='zh'])) .seat-count .label,
+  :global(html:not([lang^='zh'])) .panel-title,
+  :global(html:not([lang^='zh'])) .rules-title,
+  :global(html:not([lang^='zh'])) .waiting { letter-spacing: 0.04em; }
+  :global(html:not([lang^='zh'])) .role,
+  :global(html:not([lang^='zh'])) .tabs button,
+  :global(html:not([lang^='zh'])) .copy-btn,
+  :global(html:not([lang^='zh'])) .seat-btn,
+  :global(html:not([lang^='zh'])) .seat-count .count,
+  :global(html:not([lang^='zh'])) .rule-chips li,
+  :global(html:not([lang^='zh'])) .fill-note { letter-spacing: 0.02em; }
 
   /* ── 窄螢幕：座位改成一般的兩欄，右側移到下面（1024 寬的橫向螢幕仍用四角排法，不用捲動） ── */
   @media (max-width: 900px) {

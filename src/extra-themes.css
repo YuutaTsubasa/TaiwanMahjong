@@ -184,3 +184,24 @@ html[data-ui-style='gameboy'] .gamescreen .tname { color: #9bbc0f; }
 :root[lang='en'][data-ui-style='taiwan-print'] {
   --heading-font: Georgia, 'Palatino Linotype', 'Book Antiqua', 'DFKai-SB', '標楷體', serif;
 }
+
+/* 標楷體字型（中文介面的標題、名牌等）。英文、日文換成有對應字母／假名的字型 */
+:root { --kai-font: 'DFKai-SB', '標楷體', serif; }
+:root[lang='en'] { --kai-font: Georgia, 'Palatino Linotype', 'DFKai-SB', '標楷體', serif; }
+:root[lang='ja'] { --kai-font: 'Yu Mincho', YuMincho, 'Hiragino Mincho ProN', 'MS PMincho', 'DFKai-SB', serif; }
+
+/* 日文介面：楷書沒有假名，標題改用明朝體、內文用日文黑體。像素風格維持原本的字型（假名會落到 MS Gothic） */
+:root[lang='ja'][data-ui-style='anime90'],
+:root[lang='ja']:not([data-ui-style]),
+:root[lang='ja'][data-ui-style='taiwan-print'] {
+  --heading-font: 'Yu Mincho', YuMincho, 'Hiragino Mincho ProN', 'MS PMincho', 'DFKai-SB', serif;
+  --ui-font: 'Yu Gothic UI', 'Yu Gothic', 'Hiragino Sans', Meiryo, 'Microsoft JhengHei', sans-serif;
+}
+:root[lang='ja'][data-ui-style='modern-paint'] {
+  --heading-font: 'Yu Gothic UI', 'Yu Gothic', 'Hiragino Sans', Meiryo, sans-serif;
+  --ui-font: 'Yu Gothic UI', 'Yu Gothic', 'Hiragino Sans', Meiryo, sans-serif;
+}
+
+/* 日文字型（游明朝、游ゴシック）預設行高很高，整頁會變長；先給一個一般的行高（:where 不提高權重，元件自己有設的照用） */
+:where(html[lang='ja']) { line-height: 1.35; }
+:where(html[lang='ja']) :where(button, input, select, h1, h2, h3, h4, strong, b, span, a, label, p) { line-height: 1.2; }

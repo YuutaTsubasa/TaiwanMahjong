@@ -18,7 +18,7 @@
   import Avatar from './Avatar.svelte';
   import { autoHints, setAutoHints } from './hints.js';
   import { get } from 'svelte/store';
-  import { t, isZh } from './i18n.svelte.js';
+  import { t, isZh, usesKanji } from './i18n.svelte.js';
   import { seatName, tileName } from './tiles.js';
 
   let confirmation;
@@ -143,7 +143,7 @@
     const m = /^技能：(.+)$/.exec(a.label ?? '');
     return m ? t('技能：{name}', { name: t(m[1]) }) : t('技能');
   }
-  const chowLabel = (a) => t('吃 {tiles}', { tiles: (a.tiles ?? []).map(tileName).join(isZh() ? '' : ', ') });
+  const chowLabel = (a) => t('吃 {tiles}', { tiles: (a.tiles ?? []).map(tileName).join(usesKanji() ? '' : ', ') });
 
   // 技能模式：月華看穿的聽牌、蘭姐偷看的牌（只有自己看得到）
   const relName = (seat) => t(['', '下家', '對家', '上家'][(seat - me + 4) % 4]);
@@ -778,9 +778,9 @@
   .strip .open-side { top: 62px; right: 10px; }
 
   /* 英文：中文用的大字距會把英文拉得太開 */
-  :global(html[lang='en']) .banner b,
-  :global(html[lang='en']) .auto-btn,
-  :global(html[lang='en']) .hint-btn { letter-spacing: 0.02em; }
-  :global(html[lang='en']) .auto-btn { min-width: 0; }
+  :global(html:not([lang^='zh'])) .banner b,
+  :global(html:not([lang^='zh'])) .auto-btn,
+  :global(html:not([lang^='zh'])) .hint-btn { letter-spacing: 0.02em; }
+  :global(html:not([lang^='zh'])) .auto-btn { min-width: 0; }
 
 </style>
