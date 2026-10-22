@@ -122,7 +122,7 @@
       </div>
       <div class="btns">
         {#if nextAct}
-          <button class="primary" onclick={() => act(nextAct.id)}>{remaining != null ? t('下一局（{n}）', { n: remaining }) : t('下一局')}</button>
+          <button class="primary" data-gamepad-start onclick={() => act(nextAct.id)}>{remaining != null ? t('下一局（{n}）', { n: remaining }) : t('下一局')}</button>
         {:else}
           <span class="muted">{remaining != null ? t('等待其他玩家…（{n}）', { n: remaining }) : t('等待其他玩家…')}</span>
         {/if}

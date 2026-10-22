@@ -138,8 +138,8 @@
     <section class="title-content" aria-label={t('虛擬台麻館主選單')}>
       <h1 class="title-logo"><Brand /></h1>
       <nav class="title-menu" aria-label={t('主選單')}>
-        {#each menu as [href, label]}
-          <a class="menu-item" {href}>
+        {#each menu as [href, label], i}
+          <a class="menu-item" {href} data-gamepad-start={i === 0 ? '' : undefined}>
             <span class="mark" aria-hidden="true"><Tile code="C" size="sm" /></span>
             <span class="label">{t(label)}</span>
           </a>

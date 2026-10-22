@@ -12,18 +12,20 @@
     disabled = false,
     onclick = undefined,
     class: extra = '',
+    /** 手把：這個畫面還沒有焦點時，第一次按方向鍵先跳到這顆 */
+    gamepadStart = false,
     children,
   } = $props();
 </script>
 
 {#if href}
-  <a class="fancy {variant} {extra}" {href} {onclick}>
+  <a class="fancy {variant} {extra}" {href} {onclick} data-gamepad-start={gamepadStart ? '' : undefined}>
     <span class="label">{@render children()}</span>
     {#if tile}<span class="tile-ico" aria-hidden="true"><Tile code={tile} size="sm" /></span>{/if}
     {#if chevron}<span class="chev" aria-hidden="true">›</span>{/if}
   </a>
 {:else}
-  <button class="fancy {variant} {extra}" {type} {form} {disabled} {onclick}>
+  <button class="fancy {variant} {extra}" {type} {form} {disabled} {onclick} data-gamepad-start={gamepadStart ? '' : undefined}>
     <span class="label">{@render children()}</span>
     {#if tile}<span class="tile-ico" aria-hidden="true"><Tile code={tile} size="sm" /></span>{/if}
     {#if chevron}<span class="chev" aria-hidden="true">›</span>{/if}

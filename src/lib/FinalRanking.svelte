@@ -53,9 +53,9 @@
   <div class="btns">
     {#if net.isHost}
       <FancyButton variant="red" onclick={() => hostCmd('reset')}>{local ? t('回標題') : t('回大廳')}</FancyButton>
-      <FancyButton variant="gold" tile="F" onclick={() => hostCmd('start')}>{t('再來一場')}</FancyButton>
+      <FancyButton variant="gold" tile="F" gamepadStart onclick={() => hostCmd('start')}>{t('再來一場')}</FancyButton>
     {:else}
-      <FancyButton variant="red" onclick={disconnect}>{t('回首頁')}</FancyButton>
+      <FancyButton variant="red" gamepadStart onclick={disconnect}>{t('回首頁')}</FancyButton>
     {/if}
   </div>
 </div>

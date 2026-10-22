@@ -64,7 +64,8 @@
   // and gamepad A all follow the same action path. No alternate discard shortcut is used.
   function controls() {
     const dialogs = [...document.querySelectorAll('dialog[open]')].filter(visible);
-    const overlays = [...document.querySelectorAll('[role="dialog"], [aria-modal="true"], .overlay')].filter(visible);
+    // 只有真正的對話框才把焦點關在裡面（提示泡泡這種非 modal 的 role="dialog" 不算）
+    const overlays = [...document.querySelectorAll('[aria-modal="true"], .overlay')].filter(visible);
     // Native modal dialogs take precedence over page overlays regardless of DOM order.
     // The regular scope spans the whole app so focus can leave the audio/style footer.
     const scope = dialogs.at(-1) ?? overlays.at(-1) ?? document.querySelector('.app-shell') ?? document;
@@ -78,6 +79,18 @@
     // Horizontal movement stays inside the player's hand; up/down can reach action buttons.
     if (active?.matches('[data-hand-tile]') && (direction === 'ArrowLeft' || direction === 'ArrowRight')) {
       candidates = candidates.filter(element => element.matches('[data-hand-tile]'));
+    }
+    // 還沒有焦點時，先跳到這個畫面最常用的地方，而不是左上角的工具列：
+    // 要吃碰胡時是動作按鈕、輪到出牌時是手牌（剛摸的那張）、選單頁是第一個選項
+    if (!candidates.includes(active)) {
+      const start = candidates.find(element => element.closest('.actions')) ??
+        candidates.filter(element => element.matches('[data-hand-tile]')).at(-1) ??
+        candidates.find(element => element.matches('[data-gamepad-start]'));
+      if (start) {
+        start.focus({ preventScroll: true });
+        start.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        return true;
+      }
     }
     const next = chooseDirectionalTarget(candidates.map(element => element.getBoundingClientRect()), candidates.indexOf(active), direction);
     if (next < 0) return false;
