@@ -119,6 +119,7 @@ export default {
   畫面風格: 'Art Style',
   '{style}麻將館預覽': '{style} parlor preview',
   聲音與輔助: 'Sound & Assists',
+  偏好設定: 'Preferences',
   音樂音量: 'Music',
   音效音量: 'Sound FX',
   靜音: 'Mute',

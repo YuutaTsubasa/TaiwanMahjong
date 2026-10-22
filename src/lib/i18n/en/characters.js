@@ -11,7 +11,7 @@ export default {
   金爺: 'Uncle Jin',
   雷歐: 'Leo',
   阿烈: 'Ah-Lieh',
-  阿翼: 'Ah-Yi',
+  阿翼: 'Tsubasa',
 
   // 介紹
   綠色雙馬尾的元氣少女: 'A bubbly girl with green twin tails',

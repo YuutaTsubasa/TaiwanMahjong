@@ -9,7 +9,7 @@
   import ToggleSwitch from './ui/ToggleSwitch.svelte';
   import { autoHints, setAutoHints } from './hints.js';
   import FancyButton from './ui/FancyButton.svelte';
-  import { t } from './i18n.svelte.js';
+  import { t, LANGUAGES, i18n, setLang } from './i18n.svelte.js';
 </script>
 
 <main class="concept-page settings-page">
@@ -30,8 +30,17 @@
           </button>
         {/each}
       </div>
-      <SectionBanner text={t('聲音與輔助')} />
+      <SectionBanner text={t('偏好設定')} />
       <div class="audio-settings">
+        <!-- 語言：按鈕上一律用該語言自己的名字，看不懂目前語言的人也找得到 -->
+        <div class="volume-row lang-row">
+          <span>{t('語言')}</span>
+          <div class="lang-options" role="group" aria-label={t('語言')}>
+            {#each LANGUAGES as l}
+              <button type="button" lang={l.htmlLang} class:selected={i18n.lang === l.id} aria-pressed={i18n.lang === l.id} onclick={() => setLang(l.id)}>{l.name}</button>
+            {/each}
+          </div>
+        </div>
         <label class="volume-row">
           <span>{t('音樂音量')}</span>
           <input type="range" min="0" max="1" step="0.05" value={soundSettings.bgm} oninput={(event) => setVolume('bgm', Number(event.currentTarget.value))} />
@@ -73,13 +82,17 @@
   .style-option span { padding: clamp(4px, 1vh, 9px) 2px; font: 600 clamp(15px, 1.2vw, 19px) 'DFKai-SB', '標楷體', serif; color: var(--gold); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .style-option.selected { box-shadow: 0 0 0 2px #e4be60, 0 0 14px #e8c45e77; }
   .check { position: absolute; right: 7px; top: 7px; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 2px solid #fff0bd; background: #8e681c; color: #fff0bd; font-size: 18px; }
-  .audio-settings { display: grid; gap: clamp(6px, 1.6vh, 18px); }
+  .audio-settings { display: grid; gap: clamp(4px, 1vh, 14px); }
   .volume-row { display: grid; grid-template-columns: 100px minmax(0, 1fr) 48px; gap: 18px; align-items: center; }
   .volume-row > span, .mute-row > span { color: var(--text); font-size: 17px; letter-spacing: .08em; }
   .volume-row input { width: 100%; padding: 0; accent-color: var(--gold); min-height: 28px; }
   output { color: var(--gold); text-align: right; font-variant-numeric: tabular-nums; }
   .mute-row { display: grid; grid-template-columns: 100px 1fr; gap: 18px; align-items: center; }
   /* 靜音與新手提示排在同一行 */
+  .lang-row { grid-template-columns: 100px minmax(0, 1fr); }
+  .lang-options { display: flex; gap: 8px; grid-column: 2 / -1; min-width: 0; }
+  .lang-options button { flex: 0 1 120px; min-width: 0; padding: 4px 10px; }
+  .lang-options button.selected { color: var(--gold); border-color: var(--gold); background: rgba(255, 209, 102, 0.15); }
   .toggle-pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .toggle-pair .mute-row { grid-template-columns: auto 1fr; gap: 12px; }
   .toggle-pair .mute-row:first-child { grid-template-columns: 100px 1fr; gap: 18px; }
@@ -123,6 +136,10 @@
     .style-option span { padding: 2px; font-size: 13px; }
     .volume-row { grid-template-columns: 64px minmax(0, 1fr) 40px; gap: 8px; }
     .mute-row { grid-template-columns: 64px 1fr; gap: 8px; }
+    /* 靜音、自動提示兩組開關：欄位窄，標籤跟開關照內容寬度排，不再互相蓋到 */
+    .toggle-pair { grid-template-columns: auto auto; justify-content: start; column-gap: 18px; }
+    .toggle-pair .mute-row, .toggle-pair .mute-row:first-child { grid-template-columns: auto auto; gap: 8px; }
+    .toggle-pair .mute-row:first-child > span { min-width: 64px; }
     .volume-row > span, .mute-row > span { font-size: 14px; }
     .done :global(.fancy) { min-height: 32px; min-width: 0; font-size: 16px; padding: 2px 18px; }
   }
