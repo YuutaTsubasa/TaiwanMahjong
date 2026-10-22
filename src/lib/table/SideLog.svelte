@@ -109,7 +109,7 @@
               {#if it.kind === 'act'}
                 <span class="who">{it.seat.name}</span>
                 <span class="verb">{it.verb}</span>
-                {#if it.code && !usesKanji()}<span class="tile-ref"><Tile code={it.code} size="xs" /><b class="tname">({it.tile})</b></span>{:else}<b class="tname">{it.tile}</b>{/if}{#if it.note}<small>{it.note}</small>{/if}
+                <!-- 牌畫成小牌；中文、日文牌面就是字，英文等再附上名字 -->{#if it.code}<span class="tile-ref" title={it.tile}><Tile code={it.code} size="xs" />{#if !usesKanji()}<b class="tname">({it.tile})</b>{/if}</span>{:else}<b class="tname">{it.tile}</b>{/if}{#if it.note}<small>{it.note}</small>{/if}
               {:else}
                 {#if it.seat && !it.hideWho}<span class="who">{it.seat.name}</span>{/if}
                 <span class="txt">{it.text}</span>
@@ -201,7 +201,7 @@
   .av.sys { color: var(--muted); font-size: 10px; }
   .line { flex: 1; min-width: 0; }
   .tile-ref { display: inline-flex; align-items: center; gap: 3px; vertical-align: middle; }
-  .tile-ref :global(.tile) { --w: 18px; margin-bottom: 2px; }
+  .tile-ref :global(.tile) { --w: 20px; margin-bottom: 2px; }
   .tile-ref .tname { font-size: 13px; }
   .line > * + * { margin-left: 0.35em; }
   .who { color: var(--text); font-weight: 600; white-space: nowrap; }
