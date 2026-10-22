@@ -64,7 +64,7 @@ npm run server -- --port 7777 --dist dist
 會印出網址與「房主金鑰」。用瀏覽器開網址、首頁點「我是房主」輸入金鑰，就能當房主。
 其他參數：`--bots 3`（先放 3 個電腦）、`--start`（直接開打）、`--settings '{"turn_timeout":60}'`。
 
-線上公開伺服器（任何人都能開房，每個房間有 5 碼房號；部署在 Fly.io，設定在 `fly.toml`）：
+線上公開伺服器（任何人都能開房，每個房間有 5 碼房號；部署在 Railway，設定在 `railway.toml`）：
 
 ```bash
 npm run server -- --public --port 7799
@@ -72,11 +72,9 @@ npm run server -- --public --port 7799
 
 開發時在專案根目錄放一個 `.env.development.local`，寫 `VITE_ONLINE_SERVER=http://localhost:7799`，`npm run dev` 的「線上」房間就會連到本機。
 
-部署（房間都存在記憶體裡，所以只能有一台機器）：
-
-```bash
-fly deploy --ha=false
-```
+部署：Railway 連結這個 GitHub 專案後，推上 master 就會自動部署（只有 `crates/` 有改動時才會重建）。
+房間都存在記憶體裡，所以只能有一台機器（`railway.toml` 的 `numReplicas = 1`），重新部署時進行中的房間會消失。
+公開伺服器有連線數與頻率限制（見 `server.rs` 開頭的常數），帳單上限請在 Railway 的 Usage 設定。
 
 測試：
 
@@ -88,7 +86,7 @@ cargo test --manifest-path src-tauri/Cargo.toml --lib
 
 **線上房間（最簡單）**：在「開設牌局」選「線上」，會拿到一個 5 碼房號，例如 `K7QX2`。
 朋友在「加入牌局」輸入房號，或直接打開分享連結 `https://yuuta-tsubasa.studio/TaiwanMahjong/#join/K7QX2`（不用裝 App）。
-AI 也能加入：MCP 網址是 `https://taiwan-mahjong.fly.dev/r/房號/mcp`，已經是 https，ChatGPT 不用開通道。
+AI 也能加入：MCP 網址是 `https://taiwan-mahjong.up.railway.app/r/房號/mcp`，已經是 https，ChatGPT 不用開通道。
 房間沒人連線 15 分鐘後會自動關閉。
 
 **區網房間（桌面版）**：

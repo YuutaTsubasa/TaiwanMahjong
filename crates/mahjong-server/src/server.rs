@@ -8,15 +8,16 @@
 //!
 //! 兩種模式：
 //! - 單一房間（桌面版開房、區網）：上面的路徑直接對應唯一的房間
-//! - 公開伺服器（`--public`，放在 Fly.io）：`POST /api/rooms` 開房拿到房號，
+//! - 公開伺服器（`--public`，放在 Railway）：`POST /api/rooms` 開房拿到房號，
 //!   每個房間的路徑都在 `/r/{房號}/` 底下，例如 `/r/K7QX2/ws`、`/r/K7QX2/mcp`
 
 use axum::{
     body::Bytes,
     extract::{
         ws::{Message, WebSocket, WebSocketUpgrade},
-        FromRequestParts, Path, Query, State,
+        FromRequestParts, Path, Query, Request, State,
     },
+    middleware::{self, Next},
     http::{header, request::Parts, HeaderMap, StatusCode, Uri},
     response::{Html, IntoResponse, Response},
     routing::{get, post},
@@ -119,6 +120,44 @@ const ROOM_IDLE: Duration = Duration::from_secs(15 * 60);
 const CODE_CHARS: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 const CODE_LEN: usize = 5;
 
+// 防止被惡意連線灌爆（公開伺服器才限制；只有一個房間的區網伺服器不受影響）
+/// 每個房間最多幾個 WebSocket（4 個座位＋觀戰）
+const MAX_CONNS_PER_ROOM: usize = 12;
+/// 同一個 IP 最多同時幾個 WebSocket
+const MAX_CONNS_PER_IP: usize = 10;
+/// 整台伺服器最多幾個 WebSocket
+const MAX_TOTAL_CONNS: usize = 2000;
+/// 每個 WebSocket 每秒最多幾則訊息（可以短暫衝到 WS_BURST），超過就斷線
+const WS_RATE: f64 = 8.0;
+const WS_BURST: f64 = 20.0;
+/// 每個 IP 每秒最多幾個 HTTP 請求（可以短暫衝到 HTTP_BURST），超過回 429
+const HTTP_RATE: f64 = 10.0;
+const HTTP_BURST: f64 = 40.0;
+
+/// 令牌桶：每秒補 rate 個，最多存 burst 個，每次動作拿一個
+struct Bucket {
+    tokens: f64,
+    last: Instant,
+}
+
+impl Bucket {
+    fn new(burst: f64) -> Self {
+        Bucket { tokens: burst, last: Instant::now() }
+    }
+
+    fn take(&mut self, rate: f64, burst: f64) -> bool {
+        let now = Instant::now();
+        self.tokens = (self.tokens + now.duration_since(self.last).as_secs_f64() * rate).min(burst);
+        self.last = now;
+        if self.tokens >= 1.0 {
+            self.tokens -= 1.0;
+            true
+        } else {
+            false
+        }
+    }
+}
+
 /// 整台伺服器：單一房間模式只有 `default`；公開模式的房間放在 `rooms`
 pub struct Hub {
     default: Option<Arc<AppState>>,
@@ -127,6 +166,9 @@ pub struct Hub {
     assets: Option<AssetFn>,
     shutdown: watch::Receiver<bool>,
     creates: Mutex<HashMap<String, Vec<Instant>>>,
+    ip_conns: Mutex<HashMap<String, usize>>,
+    total_conns: AtomicUsize,
+    http_buckets: Mutex<HashMap<String, Bucket>>,
 }
 
 impl Hub {
@@ -173,7 +215,66 @@ impl Hub {
             st.conns.load(Ordering::Relaxed) > 0 || st.last_active.lock().unwrap().elapsed() < ROOM_IDLE
         });
         self.creates.lock().unwrap().retain(|_, v| v.iter().any(|t| t.elapsed() < CREATE_WINDOW));
+        self.http_buckets.lock().unwrap().retain(|_, b| b.last.elapsed() < Duration::from_secs(60));
     }
+
+    /// 公開伺服器：檢查連線數上限，通過就占一個名額（ConnGuard 消失時歸還）
+    fn admit(self: &Arc<Self>, st: &AppState, ip: &str) -> Result<Option<ConnGuard>, &'static str> {
+        if !self.public {
+            return Ok(None);
+        }
+        if st.conns.load(Ordering::Relaxed) >= MAX_CONNS_PER_ROOM {
+            return Err("這個房間的連線已滿");
+        }
+        if self.total_conns.load(Ordering::Relaxed) >= MAX_TOTAL_CONNS {
+            return Err("伺服器忙碌中，請稍後再試");
+        }
+        let mut ips = self.ip_conns.lock().unwrap();
+        let n = ips.entry(ip.to_string()).or_insert(0);
+        if *n >= MAX_CONNS_PER_IP {
+            return Err("同時開太多連線了");
+        }
+        *n += 1;
+        self.total_conns.fetch_add(1, Ordering::Relaxed);
+        Ok(Some(ConnGuard { hub: self.clone(), ip: ip.to_string() }))
+    }
+}
+
+struct ConnGuard {
+    hub: Arc<Hub>,
+    ip: String,
+}
+
+impl Drop for ConnGuard {
+    fn drop(&mut self) {
+        self.hub.total_conns.fetch_sub(1, Ordering::Relaxed);
+        let mut ips = self.hub.ip_conns.lock().unwrap();
+        if let Some(n) = ips.get_mut(&self.ip) {
+            *n = n.saturating_sub(1);
+            if *n == 0 {
+                ips.remove(&self.ip);
+            }
+        }
+    }
+}
+
+/// 公開伺服器：每個 IP 的 HTTP 請求頻率限制
+async fn rate_limit(State(hub): State<Arc<Hub>>, req: Request, next: Next) -> Response {
+    if hub.public {
+        let ip = client_ip(req.headers());
+        let ok = hub
+            .http_buckets
+            .lock()
+            .unwrap()
+            .entry(ip)
+            .or_insert_with(|| Bucket::new(HTTP_BURST))
+            .take(HTTP_RATE, HTTP_BURST);
+        if !ok {
+            return (StatusCode::TOO_MANY_REQUESTS, Json(json!({"ok": false, "error": "請求太頻繁，請放慢一點"})))
+                .into_response();
+        }
+    }
+    next.run(req).await
 }
 
 /// 單一房間模式（桌面版開房、區網伺服器）
@@ -188,12 +289,15 @@ pub async fn start(port: u16, settings: Settings, assets: Option<AssetFn>) -> Re
         assets,
         shutdown: sd_rx,
         creates: Mutex::new(HashMap::new()),
+        ip_conns: Mutex::new(HashMap::new()),
+        total_conns: AtomicUsize::new(0),
+        http_buckets: Mutex::new(HashMap::new()),
     };
     let port = serve(port, hub, sd_tx.subscribe()).await?;
     Ok(ServerHandle { state, shutdown: sd_tx, port, host_key })
 }
 
-/// 公開伺服器：任何人都能開房（放在 Fly.io 之類的主機上）。執行到收到 Ctrl+C 為止。
+/// 公開伺服器：任何人都能開房（放在 Railway 之類的主機上）。執行到收到 Ctrl+C 為止。
 pub async fn run_public(port: u16, assets: Option<AssetFn>) -> Result<(), String> {
     let (sd_tx, sd_rx) = watch::channel(false);
     let hub = Hub {
@@ -203,6 +307,9 @@ pub async fn run_public(port: u16, assets: Option<AssetFn>) -> Result<(), String
         assets,
         shutdown: sd_rx,
         creates: Mutex::new(HashMap::new()),
+        ip_conns: Mutex::new(HashMap::new()),
+        total_conns: AtomicUsize::new(0),
+        http_buckets: Mutex::new(HashMap::new()),
     };
     let port = serve(port, hub, sd_tx.subscribe()).await?;
     println!("虛擬台麻館公開伺服器已啟動，埠 {}", port);
@@ -292,6 +399,7 @@ pub fn router(hub: Arc<Hub>) -> Router {
         .route("/api/rooms", post(api_create_room))
         .route("/api/health", get(|| async { "ok" }))
         .fallback(static_handler)
+        .layer(middleware::from_fn_with_state(hub.clone(), rate_limit))
         .layer(CorsLayer::permissive())
         .with_state(hub)
 }
@@ -299,8 +407,10 @@ pub fn router(hub: Arc<Hub>) -> Router {
 // ───────────── 開房（公開伺服器） ─────────────
 
 fn client_ip(headers: &HeaderMap) -> String {
+    // 主機的代理伺服器會帶上真正的來源 IP（Railway：X-Real-IP；Fly.io：Fly-Client-IP）
     headers
-        .get("fly-client-ip")
+        .get("x-real-ip")
+        .or_else(|| headers.get("fly-client-ip"))
         .or_else(|| headers.get("x-forwarded-for"))
         .and_then(|h| h.to_str().ok())
         .and_then(|s| s.split(',').next())
@@ -330,8 +440,21 @@ async fn api_create_room(State(hub): State<Arc<Hub>>, headers: HeaderMap, body: 
 
 // ───────────── WebSocket（人類） ─────────────
 
-async fn ws_handler(ws: WebSocketUpgrade, RoomRef(st): RoomRef) -> Response {
-    ws.max_message_size(64 * 1024).on_upgrade(move |sock| ws_session(sock, st))
+async fn ws_handler(
+    ws: WebSocketUpgrade,
+    State(hub): State<Arc<Hub>>,
+    headers: HeaderMap,
+    RoomRef(st): RoomRef,
+) -> Response {
+    let guard = match hub.admit(&st, &client_ip(&headers)) {
+        Ok(g) => g,
+        Err(e) => return (StatusCode::SERVICE_UNAVAILABLE, Json(json!({"ok": false, "error": e}))).into_response(),
+    };
+    let limited = hub.public;
+    ws.max_message_size(64 * 1024).on_upgrade(move |sock| async move {
+        ws_session(sock, st, limited).await;
+        drop(guard);
+    })
 }
 
 struct WsCtx {
@@ -339,7 +462,8 @@ struct WsCtx {
     is_host: bool,
 }
 
-async fn ws_session(socket: WebSocket, st: Arc<AppState>) {
+async fn ws_session(socket: WebSocket, st: Arc<AppState>, limited: bool) {
+    let mut bucket = Bucket::new(WS_BURST);
     let (mut out, mut inp) = socket.split();
     let mut ctx = WsCtx { seat: None, is_host: false };
     let mut notify = st.notify.subscribe();
@@ -354,6 +478,8 @@ async fn ws_session(socket: WebSocket, st: Arc<AppState>) {
             m = inp.next() => {
                 match m {
                     Some(Ok(Message::Text(t))) => {
+                        // 狂送訊息的連線直接斷掉（每則訊息都會回傳整張牌桌，太多會把流量灌爆）
+                        if limited && !bucket.take(WS_RATE, WS_BURST) { break; }
                         st.mark_active();
                         let v: Value = serde_json::from_str(t.as_str()).unwrap_or(Value::Null);
                         let (replies, changed) = handle_ws_msg(&st, &mut ctx, &v);

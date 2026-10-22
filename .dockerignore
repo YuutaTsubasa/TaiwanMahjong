@@ -1,4 +1,4 @@
-# fly deploy 只需要 crates/mahjong-core 和 crates/mahjong-server
+# 部署線上伺服器只需要 crates/mahjong-core 和 crates/mahjong-server
 *
 !crates/mahjong-core/Cargo.toml
 !crates/mahjong-core/Cargo.lock

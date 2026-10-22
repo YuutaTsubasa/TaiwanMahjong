@@ -1,0 +1,14 @@
+# 線上對戰的公開伺服器（crates/mahjong-server），Railway 連結 GitHub 後推上 master 自動部署
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "crates/mahjong-server/Dockerfile"
+# 只有伺服器或牌局引擎改動時才重新部署（改前端不會讓進行中的房間消失）
+watchPatterns = ["crates/mahjong-core/**", "crates/mahjong-server/**", "railway.toml"]
+
+[deploy]
+# 房間都存在記憶體裡，只能有一台
+numReplicas = 1
+healthcheckPath = "/api/health"
+healthcheckTimeout = 60
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 5

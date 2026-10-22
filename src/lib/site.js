@@ -7,8 +7,8 @@ export const BASE_URL = env.BASE_URL || '/';
 // 純靜態網站（GitHub Pages）：沒有伺服器，https 頁面也連不到區網的 ws://
 export const staticSite = !!env.VITE_STATIC_SITE;
 
-// 線上對戰的公開伺服器（Fly.io）；開發時可以用 VITE_ONLINE_SERVER=http://localhost:7799 指到本機
-export const ONLINE_SERVER = (env.VITE_ONLINE_SERVER || 'https://taiwan-mahjong.fly.dev').replace(/\/$/, '');
+// 線上對戰的公開伺服器（Railway）；部署後換成實際網址。開發時可以用 VITE_ONLINE_SERVER=http://localhost:7799 指到本機
+export const ONLINE_SERVER = (env.VITE_ONLINE_SERVER || 'https://taiwan-mahjong.up.railway.app').replace(/\/$/, '');
 
 // 網頁版的網址：分享房間連結用（https://…/#join/房號）
 export const WEB_URL = env.VITE_WEB_URL || 'https://yuuta-tsubasa.studio/TaiwanMahjong/';

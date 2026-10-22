@@ -1,4 +1,4 @@
-# 線上公開伺服器（Fly.io）。在專案根目錄執行 fly deploy，設定在 fly.toml。
+# 線上公開伺服器（Railway）。設定在專案根目錄的 railway.toml；建置時以專案根目錄為 context。
 FROM rust:1.89-slim AS build
 WORKDIR /app
 COPY crates/mahjong-core crates/mahjong-core
