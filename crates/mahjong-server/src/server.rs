@@ -8,7 +8,7 @@
 //!
 //! 兩種模式：
 //! - 單一房間（桌面版開房、區網）：上面的路徑直接對應唯一的房間
-//! - 公開伺服器（`--public`，放在 Railway）：`POST /api/rooms` 開房拿到房號，
+//! - 公開伺服器（`--public`，自己架主機用）：`POST /api/rooms` 開房拿到房號，
 //!   每個房間的路徑都在 `/r/{房號}/` 底下，例如 `/r/K7QX2/ws`、`/r/K7QX2/mcp`
 
 use axum::{
@@ -24,6 +24,7 @@ use axum::{
     Json, Router,
 };
 use futures_util::{SinkExt, StreamExt};
+use mahjong_core::protocol::{client_disconnected, client_view, handle_client_msg, ClientCtx};
 use mahjong_core::room::{Phase, Room, SeatKind, Settings, CHARACTERS};
 use rand::{distributions::Alphanumeric, Rng};
 use serde::Deserialize;
@@ -297,7 +298,7 @@ pub async fn start(port: u16, settings: Settings, assets: Option<AssetFn>) -> Re
     Ok(ServerHandle { state, shutdown: sd_tx, port, host_key })
 }
 
-/// 公開伺服器：任何人都能開房（放在 Railway 之類的主機上）。執行到收到 Ctrl+C 為止。
+/// 公開伺服器：任何人都能開房（自己架在主機上用）。執行到收到 Ctrl+C 為止。
 pub async fn run_public(port: u16, assets: Option<AssetFn>) -> Result<(), String> {
     let (sd_tx, sd_rx) = watch::channel(false);
     let hub = Hub {
@@ -457,15 +458,10 @@ async fn ws_handler(
     })
 }
 
-struct WsCtx {
-    seat: Option<usize>,
-    is_host: bool,
-}
-
 async fn ws_session(socket: WebSocket, st: Arc<AppState>, limited: bool) {
     let mut bucket = Bucket::new(WS_BURST);
     let (mut out, mut inp) = socket.split();
-    let mut ctx = WsCtx { seat: None, is_host: false };
+    let mut ctx = ClientCtx::default();
     let mut notify = st.notify.subscribe();
     let mut shutdown = st.shutdown.clone();
     let mut ping = tokio::time::interval(Duration::from_secs(20));
@@ -482,7 +478,7 @@ async fn ws_session(socket: WebSocket, st: Arc<AppState>, limited: bool) {
                         if limited && !bucket.take(WS_RATE, WS_BURST) { break; }
                         st.mark_active();
                         let v: Value = serde_json::from_str(t.as_str()).unwrap_or(Value::Null);
-                        let (replies, changed) = handle_ws_msg(&st, &mut ctx, &v);
+                        let (replies, changed) = handle_client_msg(&mut st.room.lock().unwrap(), &st.host_key, &mut ctx, &v);
                         msgs = replies;
                         if changed { st.bump(); }
                         send_state = true;
@@ -504,8 +500,8 @@ async fn ws_session(socket: WebSocket, st: Arc<AppState>, limited: bool) {
         if send_state {
             let view = {
                 let room = st.room.lock().unwrap();
-                let mut v = st.view(&room, ctx.seat);
-                v["is_host"] = json!(ctx.is_host);
+                let mut v = client_view(&room, &ctx);
+                v["version"] = json!(st.version());
                 v
             };
             msgs.push(json!({"type": "state", "state": view}));
@@ -521,122 +517,12 @@ async fn ws_session(socket: WebSocket, st: Arc<AppState>, limited: bool) {
             break;
         }
     }
-    if let Some(s) = ctx.seat {
-        st.room.lock().unwrap().disconnect(s);
+    if ctx.seat.is_some() {
+        client_disconnected(&mut st.room.lock().unwrap(), &ctx);
         st.bump();
     }
     st.conns.fetch_sub(1, Ordering::Relaxed);
     st.mark_active();
-}
-
-fn err(msg: impl Into<String>) -> Value {
-    json!({"type": "error", "message": msg.into()})
-}
-
-fn handle_ws_msg(st: &AppState, ctx: &mut WsCtx, v: &Value) -> (Vec<Value>, bool) {
-    let ty = v.get("type").and_then(|x| x.as_str()).unwrap_or("");
-    let mut room = st.room.lock().unwrap();
-    match ty {
-        "hello" => {
-            if let Some(k) = v.get("host_key").and_then(|x| x.as_str()) {
-                ctx.is_host = !k.is_empty() && k == st.host_key;
-            }
-            if let Some(s) = ctx.seat.take() {
-                room.disconnect(s);
-            }
-            let token = v.get("token").and_then(|x| x.as_str()).unwrap_or("");
-            if let Some(s) = room.seat_of_token(token) {
-                ctx.seat = Some(s);
-                room.connect(s);
-                if ctx.is_host {
-                    room.host_seat = Some(s);
-                }
-                return (vec![json!({"type": "welcome", "seat": s, "token": token, "is_host": ctx.is_host})], true);
-            }
-            if v.get("spectate").and_then(|x| x.as_bool()).unwrap_or(false) {
-                return (vec![json!({"type": "welcome", "seat": null, "token": null, "is_host": ctx.is_host})], false);
-            }
-            let name = v.get("name").and_then(|x| x.as_str()).unwrap_or("");
-            let character = v.get("character").and_then(|x| x.as_str());
-            match room.join(name, SeatKind::Human, character) {
-                Ok((s, tok)) => {
-                    ctx.seat = Some(s);
-                    room.connect(s);
-                    if ctx.is_host {
-                        room.host_seat = Some(s);
-                    }
-                    (vec![json!({"type": "welcome", "seat": s, "token": tok, "is_host": ctx.is_host})], true)
-                }
-                Err(e) => (
-                    vec![
-                        err(format!("{}（以觀戰模式進入）", e)),
-                        json!({"type": "welcome", "seat": null, "token": null, "is_host": ctx.is_host}),
-                    ],
-                    false,
-                ),
-            }
-        }
-        "action" => {
-            let Some(s) = ctx.seat else { return (vec![err("你沒有座位")], false) };
-            match room.parse_action(s, v).and_then(|a| room.act(s, a)) {
-                Ok(()) => (vec![], true),
-                Err(e) => (vec![err(e)], false),
-            }
-        }
-        "character" => {
-            let Some(s) = ctx.seat else { return (vec![err("你沒有座位")], false) };
-            let id = v.get("id").and_then(|x| x.as_str()).unwrap_or("");
-            match room.set_character(s, id) {
-                Ok(()) => (vec![], true),
-                Err(e) => (vec![err(e)], false),
-            }
-        }
-        "auto" => {
-            let Some(s) = ctx.seat else { return (vec![err("你沒有座位")], false) };
-            let on = v.get("on").and_then(|x| x.as_bool()).unwrap_or(false);
-            room.set_auto(s, on);
-            (vec![], true)
-        }
-        "chat" => {
-            let text = v.get("text").and_then(|x| x.as_str()).unwrap_or("");
-            room.push_chat(ctx.seat, text);
-            (vec![], true)
-        }
-        "leave" => {
-            if let Some(s) = ctx.seat.take() {
-                let _ = room.remove_seat(s);
-            }
-            (vec![json!({"type": "welcome", "seat": null, "token": null, "is_host": ctx.is_host})], true)
-        }
-        "host" => {
-            if !ctx.is_host {
-                return (vec![err("只有房主可以這樣做")], false);
-            }
-            let seat = v.get("seat").and_then(|x| x.as_u64()).map(|x| x as usize);
-            let r = match v.get("cmd").and_then(|x| x.as_str()).unwrap_or("") {
-                "add_bot" => room.add_bot(seat).map(|_| ()),
-                "remove" => room.remove_seat(seat.unwrap_or(9)),
-                "start" => room.start_game(),
-                "reset" => {
-                    room.reset_to_lobby();
-                    Ok(())
-                }
-                "settings" => match serde_json::from_value::<Settings>(v.get("settings").cloned().unwrap_or(Value::Null)) {
-                    Ok(s) => {
-                        room.update_settings(s);
-                        Ok(())
-                    }
-                    Err(e) => Err(format!("設定格式錯誤：{}", e)),
-                },
-                other => Err(format!("未知指令 {}", other)),
-            };
-            match r {
-                Ok(()) => (vec![], true),
-                Err(e) => (vec![err(e)], false),
-            }
-        }
-        _ => (vec![err("未知訊息")], false),
-    }
 }
 
 // ───────────── HTTP API（AI / 程式） ─────────────

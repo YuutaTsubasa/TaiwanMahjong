@@ -7,11 +7,15 @@ export const BASE_URL = env.BASE_URL || '/';
 // 純靜態網站（GitHub Pages）：沒有伺服器，https 頁面也連不到區網的 ws://
 export const staticSite = !!env.VITE_STATIC_SITE;
 
-// 線上對戰的公開伺服器（Railway）；部署後換成實際網址。開發時可以用 VITE_ONLINE_SERVER=http://localhost:7799 指到本機
-export const ONLINE_SERVER = (env.VITE_ONLINE_SERVER || 'https://taiwan-mahjong.up.railway.app').replace(/\/$/, '');
+// 線上房間的配對服務（workers/signal，Cloudflare）。空字串 = 不提供線上房間，介面上相關的選項都會藏起來。
+// 開發時可以在 .env.development.local 寫 VITE_SIGNAL_SERVER=http://localhost:8787 用本機的 wrangler dev。
+export const SIGNAL_SERVER = (env.VITE_SIGNAL_SERVER ?? '').replace(/\/$/, '');
 
 // 網頁版的網址：分享房間連結用（https://…/#join/房號）
 export const WEB_URL = env.VITE_WEB_URL || 'https://yuuta-tsubasa.studio/TaiwanMahjong/';
+
+// 房號用的字元（去掉容易看錯的 0/O、1/I/L）
+export const ROOM_CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
 // 房號：5 個英文或數字，至少有一個英文字母（只打數字視為通訊埠）
 export function isRoomCode(text) {

@@ -168,7 +168,7 @@
     <aside class="side">
       <section class="art-panel invite">
         <h2 class="panel-title">{isHost ? '邀請入席' : '連線資訊'}</h2>
-        {#if isHost}
+        {#if isHost && !net.room}
           <div class="tabs" role="tablist">
             <button type="button" role="tab" class:sel={tab === 'friends'} aria-selected={tab === 'friends'} onclick={() => (tab = 'friends')}>朋友</button>
             <button type="button" role="tab" class:sel={tab === 'ai'} aria-selected={tab === 'ai'} onclick={() => (tab = 'ai')}>AI</button>
@@ -188,7 +188,14 @@
               <code>{shareLink}</code>
               <button type="button" class="copy-btn" onclick={() => copy(shareLink)}>複製</button>
             </div>
-            <p class="ok"><i class="dot on"></i>{isHost ? '線上房間已開啟' : '已連線'}</p>
+            {#if net.signalDown}
+              <p class="warn">配對服務暫時連不上：已經在房間裡的人不受影響，但新的人暫時進不來。</p>
+            {:else}
+              <p class="ok"><i class="dot on"></i>{isHost ? '線上房間已開啟' : '已連線'}</p>
+            {/if}
+            {#if isHost}
+              <p class="muted small">牌局在你的電腦上跑：開局後請別關掉或重新整理這個頁面。想跟 AI 一起打請用桌面版的區網房間。</p>
+            {/if}
           {:else}
             {#if isHost}<p>分享房間位址，邀請朋友加入。</p>{/if}
             <div class="copy-row">
@@ -425,6 +432,7 @@
   .room-code { font: 700 clamp(24px, 2.4vw, 34px) var(--heading-font) !important; letter-spacing: 0.3em; text-align: center; color: var(--gold); }
   .copy-btn { flex: none; font: 700 17px var(--heading-font); letter-spacing: 0.15em; padding: 0 16px; }
   .ok { display: flex; align-items: center; gap: 8px; }
+  .warn { color: #ffb36b; }
   .small { font-size: 12px !important; }
   .info { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 6px 12px; margin: 6px 0; font-size: 13px; }
   .info dt { color: var(--gold); }

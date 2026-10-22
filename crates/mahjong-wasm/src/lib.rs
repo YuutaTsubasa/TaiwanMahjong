@@ -7,6 +7,7 @@
 //!   game.act('{"action_id":3}');
 //! view() 回傳的 JSON 跟伺服器透過 WebSocket 送的狀態格式一樣，介面可以直接沿用。
 
+use mahjong_core::protocol::{client_disconnected, client_view, handle_client_msg, ClientCtx};
 use mahjong_core::room::{Room, SeatKind, Settings};
 use serde_json::json;
 use wasm_bindgen::prelude::*;
@@ -88,10 +89,104 @@ impl LocalGame {
     }
 }
 
+/// P2P 房間：開房者的瀏覽器就是伺服器。每個連線（房主自己也是一個）用一個數字 id，
+/// 收發的訊息跟 WebSocket 伺服器完全一樣（見 mahjong_core::protocol）。
+///
+/// JavaScript 端用法（見 src/lib/local/worker.js 的 p2p 模式）：
+///   const room = new HostGame('{"bot_delay_ms":700}');
+///   room.connect(0);                       // 房主自己
+///   room.message(0, '{"type":"hello","host_key":"…","name":"悠太"}');
+///   // 回傳 {"replies":[…], "changed":true}：replies 回給這個連線；changed 時把狀態送給所有連線
+///   room.view(0);                          // 這個連線看到的牌桌
+#[wasm_bindgen]
+pub struct HostGame {
+    room: Room,
+    host_key: String,
+    clients: std::collections::HashMap<u32, ClientCtx>,
+}
+
+#[wasm_bindgen]
+impl HostGame {
+    #[wasm_bindgen(constructor)]
+    pub fn new(host_key: &str, settings_json: Option<String>) -> Result<HostGame, JsValue> {
+        let mut room = Room::new(Settings::default());
+        if let Some(s) = settings_json.filter(|s| !s.trim().is_empty()) {
+            room.update_settings(serde_json::from_str(&s).map_err(js_err)?);
+        }
+        Ok(HostGame { room, host_key: host_key.to_string(), clients: Default::default() })
+    }
+
+    pub fn connect(&mut self, id: u32) {
+        self.clients.insert(id, ClientCtx::default());
+    }
+
+    /// 連線中斷。狀態有變（有人離線）時回傳 true。
+    pub fn disconnect(&mut self, id: u32) -> bool {
+        match self.clients.remove(&id) {
+            Some(ctx) if ctx.seat.is_some() => {
+                client_disconnected(&mut self.room, &ctx);
+                true
+            }
+            _ => false,
+        }
+    }
+
+    /// 處理一則訊息，回傳 `{"replies":[…],"changed":bool}`
+    pub fn message(&mut self, id: u32, msg_json: &str) -> String {
+        let v: serde_json::Value = serde_json::from_str(msg_json).unwrap_or(serde_json::Value::Null);
+        let Some(ctx) = self.clients.get_mut(&id) else {
+            return json!({"replies": [], "changed": false}).to_string();
+        };
+        let (replies, changed) = handle_client_msg(&mut self.room, &self.host_key, ctx, &v);
+        json!({"replies": replies, "changed": changed}).to_string()
+    }
+
+    pub fn tick(&mut self) -> bool {
+        self.room.tick()
+    }
+
+    /// 這個連線看到的牌桌狀態（JSON 字串）
+    pub fn view(&self, id: u32) -> String {
+        let ctx = self.clients.get(&id).cloned().unwrap_or_default();
+        let mut v = client_view(&self.room, &ctx);
+        v["mode"] = json!("p2p");
+        v.to_string()
+    }
+
+    /// 目前連著的 id（廣播用）
+    pub fn client_ids(&self) -> Vec<u32> {
+        self.clients.keys().copied().collect()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use mahjong_core::room::{Action, Phase};
+
+    #[test]
+    fn host_game_seats_host_and_guest() {
+        let mut g = HostGame::new("KEY", Some(r#"{"bot_delay_ms":0}"#.into())).unwrap();
+        g.connect(0);
+        g.connect(7);
+        let r: serde_json::Value =
+            serde_json::from_str(&g.message(0, r#"{"type":"hello","host_key":"KEY","name":"房主"}"#)).unwrap();
+        assert_eq!(r["replies"][0]["is_host"], true);
+        let r: serde_json::Value =
+            serde_json::from_str(&g.message(7, r#"{"type":"hello","host_key":"nope","name":"客人"}"#)).unwrap();
+        assert_eq!(r["replies"][0]["is_host"], false);
+        // 客人不能下房主指令
+        let r: serde_json::Value = serde_json::from_str(&g.message(7, r#"{"type":"host","cmd":"start"}"#)).unwrap();
+        assert_eq!(r["replies"][0]["type"], "error");
+        g.message(0, r#"{"type":"host","cmd":"start"}"#);
+        let v: serde_json::Value = serde_json::from_str(&g.view(7)).unwrap();
+        assert_eq!(v["phase"], "playing");
+        assert_eq!(v["mode"], "p2p");
+        assert!(g.disconnect(7));
+        let mut ids = g.client_ids();
+        ids.sort();
+        assert_eq!(ids, vec![0]);
+    }
 
     /// 用託管讓「你」也交給電腦，確認單機版能從頭打到結束
     #[test]

@@ -64,17 +64,25 @@ npm run server -- --port 7777 --dist dist
 會印出網址與「房主金鑰」。用瀏覽器開網址、首頁點「我是房主」輸入金鑰，就能當房主。
 其他參數：`--bots 3`（先放 3 個電腦）、`--start`（直接開打）、`--settings '{"turn_timeout":60}'`。
 
-線上公開伺服器（任何人都能開房，每個房間有 5 碼房號；部署在 Railway，設定在 `railway.toml`）：
+線上房間是 P2P：開房者的瀏覽器就是伺服器（牌局引擎跑在 Web Worker），其他人用 WebRTC 直接連過去，
+不用架主機。只有「配對」（交換 WebRTC 連線資訊）需要一個小服務，放在 Cloudflare Workers 免費方案（`workers/signal/`），
+超過免費額度只會暫時無法開新房，不會收費。
+
+本機開發：
 
 ```bash
-npm run server -- --public --port 7799
+cd workers/signal && npm install && npm run dev
 ```
 
-開發時在專案根目錄放一個 `.env.development.local`，寫 `VITE_ONLINE_SERVER=http://localhost:7799`，`npm run dev` 的「線上」房間就會連到本機。
+再在專案根目錄放一個 `.env.development.local`，寫 `VITE_SIGNAL_SERVER=http://localhost:8787`，`npm run dev` 就有「線上」房間。
 
-部署：Railway 連結這個 GitHub 專案後，推上 master 就會自動部署（只有 `crates/` 有改動時才會重建）。
-房間都存在記憶體裡，所以只能有一台機器（`railway.toml` 的 `numReplicas = 1`），重新部署時進行中的房間會消失。
-公開伺服器有連線數與頻率限制（見 `server.rs` 開頭的常數），帳單上限請在 Railway 的 Usage 設定。
+部署配對服務（第一次要先 `npx wrangler login`）：
+
+```bash
+cd workers/signal && npm run deploy
+```
+
+配對服務的網址寫在 `src/lib/site.js` 的 `SIGNAL_SERVER`。清空它（或配對服務連不上）時，介面上線上房間的選項會自動藏起來。
 
 測試：
 
@@ -86,8 +94,7 @@ cargo test --manifest-path src-tauri/Cargo.toml --lib
 
 **線上房間（最簡單）**：在「開設牌局」選「線上」，會拿到一個 5 碼房號，例如 `K7QX2`。
 朋友在「加入牌局」輸入房號，或直接打開分享連結 `https://yuuta-tsubasa.studio/TaiwanMahjong/#join/K7QX2`（不用裝 App）。
-AI 也能加入：MCP 網址是 `https://taiwan-mahjong.up.railway.app/r/房號/mcp`，已經是 https，ChatGPT 不用開通道。
-房間沒人連線 15 分鐘後會自動關閉。
+牌局在房主的瀏覽器上跑：房主關掉頁面，房間就結束了。AI 不能加入線上房間，想跟 AI 打請用下面的區網房間。
 
 **區網房間（桌面版）**：
 
@@ -190,11 +197,15 @@ src-tauri/src/
   game/bot.rs       內建電腦（向聽數 + 進張數）
   lib.rs            Tauri 指令：start_host / stop_host / host_status
   bin/mahjong-server.rs  無介面伺服器（只是呼叫 crates/mahjong-server）
+crates/mahjong-core/src/protocol.rs  玩家連線的訊息協定（伺服器與 P2P 房主共用）
+crates/mahjong-wasm/      瀏覽器裡的牌局引擎：單機（LocalGame）與 P2P 房主（HostGame）
+workers/signal/           線上房間的配對服務（Cloudflare Workers）
 crates/mahjong-server/src/
   server.rs         axum：WebSocket、HTTP API、MCP、llms.txt、OpenAPI、靜態檔；單一房間或公開多房間
-  cli.rs            mahjong-server 的參數（--public 是線上公開伺服器）
+  cli.rs            mahjong-server 的參數（--public 是多房間的公開伺服器，目前沒有部署）
 src/
-  lib/net.svelte.js 連線狀態
+  lib/net.svelte.js 連線狀態（WebSocket、P2P、單機）
+  lib/p2p.js        線上房間的 WebRTC 連線
   lib/Home / Lobby / Table / Result …  介面
 ```
 

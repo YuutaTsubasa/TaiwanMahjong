@@ -7,3 +7,5 @@ crates/*/target
 src/lib/local/pkg
 # 本機開發設定（例如 VITE_ONLINE_SERVER）
 .env*.local
+# wrangler dev 的本機資料
+.wrangler

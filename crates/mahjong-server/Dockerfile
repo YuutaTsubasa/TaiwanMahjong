@@ -1,4 +1,4 @@
-# 線上公開伺服器（Railway）。設定在專案根目錄的 railway.toml；建置時以專案根目錄為 context。
+# 多房間的公開伺服器（mahjong-server --public），想自己架在 Docker 主機上時用；以專案根目錄為建置 context。
 FROM rust:1.89-slim AS build
 WORKDIR /app
 COPY crates/mahjong-core crates/mahjong-core

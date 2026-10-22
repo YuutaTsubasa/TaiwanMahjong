@@ -4,6 +4,7 @@
 
 pub mod bot;
 pub mod hints;
+pub mod protocol;
 pub mod room;
 pub mod rules;
 pub mod scoring;
