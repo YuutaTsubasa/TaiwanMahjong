@@ -381,7 +381,8 @@
   .seat-pic :global(.avatar) { position: absolute; left: 50%; top: 0; width: 118% !important; height: auto !important; aspect-ratio: 1; transform: translateX(-50%); }
   .chair { width: 100%; height: 100%; padding: 14%; fill: #0009; }
   .seat-info { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 8px; min-width: 0; }
-  .seat-name { font: 700 clamp(18px, 1.65vw, 28px)/1.4 var(--heading-font); letter-spacing: 0.08em; padding-bottom: 2px; color: var(--text); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  /* flex: none：名字設了 overflow: hidden，不加的話會被直向排版壓扁、只剩半個字 */
+  .seat-name { flex: none; font: 700 clamp(18px, 1.65vw, 28px)/1.4 var(--heading-font); letter-spacing: 0.08em; padding-bottom: 2px; color: var(--text); max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .seat-name.wait { color: var(--text); }
   .role { font: 700 15px var(--heading-font); letter-spacing: 0.3em; padding: 2px 18px; border-radius: var(--small-radius); border: 1px solid #0006; }
   .role.host { background: linear-gradient(#ffe7a4, #d5a34d); color: #3a2410; }
