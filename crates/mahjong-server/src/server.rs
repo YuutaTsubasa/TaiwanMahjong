@@ -5,41 +5,77 @@
 //! - `/llms.txt`    給 AI 看的連線說明
 //! - `/openapi.json` 給 ChatGPT GPT Actions 用
 //! - 其他路徑       前端靜態檔（讓沒裝 App 的人用瀏覽器加入）
+//!
+//! 兩種模式：
+//! - 單一房間（桌面版開房、區網）：上面的路徑直接對應唯一的房間
+//! - 公開伺服器（`--public`，放在 Fly.io）：`POST /api/rooms` 開房拿到房號，
+//!   每個房間的路徑都在 `/r/{房號}/` 底下，例如 `/r/K7QX2/ws`、`/r/K7QX2/mcp`
 
-use crate::game::room::{Phase, Room, SeatKind, Settings, CHARACTERS};
 use axum::{
     body::Bytes,
     extract::{
         ws::{Message, WebSocket, WebSocketUpgrade},
-        Query, State,
+        FromRequestParts, Path, Query, State,
     },
-    http::{header, HeaderMap, StatusCode, Uri},
+    http::{header, request::Parts, HeaderMap, StatusCode, Uri},
     response::{Html, IntoResponse, Response},
     routing::{get, post},
     Json, Router,
 };
 use futures_util::{SinkExt, StreamExt};
+use mahjong_core::room::{Phase, Room, SeatKind, Settings, CHARACTERS};
 use rand::{distributions::Alphanumeric, Rng};
 use serde::Deserialize;
 use serde_json::{json, Value};
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tokio::sync::watch;
 use tower_http::cors::CorsLayer;
 
 pub type AssetFn = Arc<dyn Fn(&str) -> Option<(Vec<u8>, String)> + Send + Sync>;
 
+/// 一個房間（一張牌桌）
 pub struct AppState {
     pub room: Mutex<Room>,
     notify: watch::Sender<u64>,
     shutdown: watch::Receiver<bool>,
     pub host_key: String,
-    assets: Option<AssetFn>,
+    /// 公開伺服器上的房號；單一房間模式是 None
+    pub code: Option<String>,
     mcp_sessions: Mutex<HashMap<String, String>>,
+    /// 目前開著的 WebSocket 數量，和最後一次有人動作的時間：用來回收沒人的房間
+    conns: AtomicUsize,
+    last_active: Mutex<Instant>,
 }
 
 impl AppState {
+    fn new(settings: Settings, code: Option<String>, shutdown: watch::Receiver<bool>) -> Self {
+        let mut room = Room::new(Settings::default());
+        room.update_settings(settings);
+        let (notify, _) = watch::channel(0u64);
+        AppState {
+            room: Mutex::new(room),
+            notify,
+            shutdown,
+            host_key: gen_key(20),
+            code,
+            mcp_sessions: Mutex::new(HashMap::new()),
+            conns: AtomicUsize::new(0),
+            last_active: Mutex::new(Instant::now()),
+        }
+    }
+
+    fn mark_active(&self) {
+        *self.last_active.lock().unwrap() = Instant::now();
+    }
+
+    /// 這個房間在網址上的前綴（"/r/K7QX2"；單一房間是空字串）
+    fn prefix(&self) -> String {
+        self.code.as_ref().map(|c| format!("/r/{}", c)).unwrap_or_default()
+    }
+
     pub fn bump(&self) {
         self.notify.send_modify(|v| *v += 1);
     }
@@ -72,43 +108,139 @@ fn gen_key(n: usize) -> String {
     rand::thread_rng().sample_iter(&Alphanumeric).take(n).map(char::from).collect()
 }
 
+/// 公開伺服器的限制
+const MAX_ROOMS: usize = 300;
+/// 同一個 IP 在 CREATE_WINDOW 內最多開幾間房
+const MAX_CREATES_PER_IP: usize = 6;
+const CREATE_WINDOW: Duration = Duration::from_secs(10 * 60);
+/// 沒有任何連線、也沒人動作超過這麼久的房間會被回收
+const ROOM_IDLE: Duration = Duration::from_secs(15 * 60);
+/// 房號用的字元（去掉容易看錯的 0/O、1/I/L）
+const CODE_CHARS: &[u8] = b"ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+const CODE_LEN: usize = 5;
+
+/// 整台伺服器：單一房間模式只有 `default`；公開模式的房間放在 `rooms`
+pub struct Hub {
+    default: Option<Arc<AppState>>,
+    rooms: Mutex<HashMap<String, Arc<AppState>>>,
+    public: bool,
+    assets: Option<AssetFn>,
+    shutdown: watch::Receiver<bool>,
+    creates: Mutex<HashMap<String, Vec<Instant>>>,
+}
+
+impl Hub {
+    fn get_room(&self, code: &str) -> Option<Arc<AppState>> {
+        self.rooms.lock().unwrap().get(&code.to_ascii_uppercase()).cloned()
+    }
+
+    fn all_rooms(&self) -> Vec<Arc<AppState>> {
+        let mut v: Vec<_> = self.rooms.lock().unwrap().values().cloned().collect();
+        v.extend(self.default.clone());
+        v
+    }
+
+    fn create_room(&self, ip: &str, settings: Settings) -> Result<Arc<AppState>, String> {
+        {
+            let mut creates = self.creates.lock().unwrap();
+            let list = creates.entry(ip.to_string()).or_default();
+            list.retain(|t| t.elapsed() < CREATE_WINDOW);
+            if list.len() >= MAX_CREATES_PER_IP {
+                return Err("開房太頻繁了，請過幾分鐘再試".into());
+            }
+            list.push(Instant::now());
+        }
+        let mut rooms = self.rooms.lock().unwrap();
+        if rooms.len() >= MAX_ROOMS {
+            return Err("伺服器的房間滿了，請稍後再試".into());
+        }
+        let mut rng = rand::thread_rng();
+        let code = loop {
+            let c: String = (0..CODE_LEN).map(|_| CODE_CHARS[rng.gen_range(0..CODE_CHARS.len())] as char).collect();
+            // 至少要有一個英文字母，才不會跟「只打通訊埠號碼」的位址搞混
+            if !rooms.contains_key(&c) && c.bytes().any(|b| b.is_ascii_alphabetic()) {
+                break c;
+            }
+        };
+        let st = Arc::new(AppState::new(settings, Some(code.clone()), self.shutdown.clone()));
+        rooms.insert(code, st.clone());
+        Ok(st)
+    }
+
+    /// 回收沒人的房間
+    fn sweep(&self) {
+        self.rooms.lock().unwrap().retain(|_, st| {
+            st.conns.load(Ordering::Relaxed) > 0 || st.last_active.lock().unwrap().elapsed() < ROOM_IDLE
+        });
+        self.creates.lock().unwrap().retain(|_, v| v.iter().any(|t| t.elapsed() < CREATE_WINDOW));
+    }
+}
+
+/// 單一房間模式（桌面版開房、區網伺服器）
 pub async fn start(port: u16, settings: Settings, assets: Option<AssetFn>) -> Result<ServerHandle, String> {
+    let (sd_tx, sd_rx) = watch::channel(false);
+    let state = Arc::new(AppState::new(settings, None, sd_rx.clone()));
+    let host_key = state.host_key.clone();
+    let hub = Hub {
+        default: Some(state.clone()),
+        rooms: Mutex::new(HashMap::new()),
+        public: false,
+        assets,
+        shutdown: sd_rx,
+        creates: Mutex::new(HashMap::new()),
+    };
+    let port = serve(port, hub, sd_tx.subscribe()).await?;
+    Ok(ServerHandle { state, shutdown: sd_tx, port, host_key })
+}
+
+/// 公開伺服器：任何人都能開房（放在 Fly.io 之類的主機上）。執行到收到 Ctrl+C 為止。
+pub async fn run_public(port: u16, assets: Option<AssetFn>) -> Result<(), String> {
+    let (sd_tx, sd_rx) = watch::channel(false);
+    let hub = Hub {
+        default: None,
+        rooms: Mutex::new(HashMap::new()),
+        public: true,
+        assets,
+        shutdown: sd_rx,
+        creates: Mutex::new(HashMap::new()),
+    };
+    let port = serve(port, hub, sd_tx.subscribe()).await?;
+    println!("虛擬台麻館公開伺服器已啟動，埠 {}", port);
+    let _ = tokio::signal::ctrl_c().await;
+    let _ = sd_tx.send(true);
+    Ok(())
+}
+
+async fn serve(port: u16, hub: Hub, sd_rx: watch::Receiver<bool>) -> Result<u16, String> {
     let listener = tokio::net::TcpListener::bind(("0.0.0.0", port))
         .await
         .map_err(|e| format!("無法監聽埠 {}：{}", port, e))?;
     let port = listener.local_addr().map(|a| a.port()).unwrap_or(port);
-    let (sd_tx, sd_rx) = watch::channel(false);
-    let (notify, _) = watch::channel(0u64);
-    let mut room = Room::new(Settings::default());
-    room.update_settings(settings);
-    let host_key = gen_key(20);
-    let state = Arc::new(AppState {
-        room: Mutex::new(room),
-        notify,
-        shutdown: sd_rx.clone(),
-        host_key: host_key.clone(),
-        assets,
-        mcp_sessions: Mutex::new(HashMap::new()),
-    });
+    let hub = Arc::new(hub);
 
-    // 計時器：電腦出牌、逾時
-    let st = state.clone();
+    // 計時器：電腦出牌、逾時；公開伺服器順便回收沒人的房間
+    let h = hub.clone();
     let mut sd1 = sd_rx.clone();
     tokio::spawn(async move {
         let mut iv = tokio::time::interval(Duration::from_millis(150));
+        let mut n: u32 = 0;
         loop {
             tokio::select! {
                 _ = iv.tick() => {
-                    let changed = st.room.lock().unwrap().tick();
-                    if changed { st.bump(); }
+                    for st in h.all_rooms() {
+                        let changed = st.room.lock().unwrap().tick();
+                        if changed { st.bump(); }
+                    }
+                    n = n.wrapping_add(1);
+                    if h.public && n % 200 == 0 { h.sweep(); }
                 }
                 _ = sd1.changed() => break,
             }
         }
     });
 
-    let app = router(state.clone());
-    let mut sd2 = sd_rx.clone();
+    let app = router(hub);
+    let mut sd2 = sd_rx;
     tokio::spawn(async move {
         let _ = axum::serve(listener, app)
             .with_graceful_shutdown(async move {
@@ -116,11 +248,30 @@ pub async fn start(port: u16, settings: Settings, assets: Option<AssetFn>) -> Re
             })
             .await;
     });
-
-    Ok(ServerHandle { state, shutdown: sd_tx, port, host_key })
+    Ok(port)
 }
 
-pub fn router(state: Arc<AppState>) -> Router {
+/// 從網址找出要操作的房間：`/r/{code}/…` 用房號找，其他路徑用單一房間
+struct RoomRef(Arc<AppState>);
+
+impl FromRequestParts<Arc<Hub>> for RoomRef {
+    type Rejection = Response;
+
+    async fn from_request_parts(parts: &mut Parts, hub: &Arc<Hub>) -> Result<Self, Self::Rejection> {
+        let code = Path::<HashMap<String, String>>::from_request_parts(parts, hub)
+            .await
+            .ok()
+            .and_then(|p| p.0.get("code").cloned());
+        let st = match code {
+            Some(c) => hub.get_room(&c).ok_or("找不到這個房號（房間可能已經關閉了）"),
+            None => hub.default.clone().ok_or("這是公開伺服器，請在網址加上房號，例如 /r/房號/llms.txt"),
+        };
+        st.map(RoomRef)
+            .map_err(|e| (StatusCode::NOT_FOUND, Json(json!({"ok": false, "error": e}))).into_response())
+    }
+}
+
+fn room_routes() -> Router<Arc<Hub>> {
     Router::new()
         .route("/ws", get(ws_handler))
         .route("/api/info", get(api_info))
@@ -132,15 +283,55 @@ pub fn router(state: Arc<AppState>) -> Router {
         .route("/llms.txt", get(llms_txt))
         .route("/openapi.json", get(openapi))
         .route("/mcp", post(mcp_post).get(mcp_get).delete(mcp_delete))
+}
+
+pub fn router(hub: Arc<Hub>) -> Router {
+    Router::new()
+        .merge(room_routes())
+        .nest("/r/{code}", room_routes())
+        .route("/api/rooms", post(api_create_room))
+        .route("/api/health", get(|| async { "ok" }))
         .fallback(static_handler)
         .layer(CorsLayer::permissive())
-        .with_state(state)
+        .with_state(hub)
+}
+
+// ───────────── 開房（公開伺服器） ─────────────
+
+fn client_ip(headers: &HeaderMap) -> String {
+    headers
+        .get("fly-client-ip")
+        .or_else(|| headers.get("x-forwarded-for"))
+        .and_then(|h| h.to_str().ok())
+        .and_then(|s| s.split(',').next())
+        .map(|s| s.trim().to_string())
+        .unwrap_or_else(|| "local".into())
+}
+
+async fn api_create_room(State(hub): State<Arc<Hub>>, headers: HeaderMap, body: Bytes) -> Response {
+    if !hub.public {
+        return (StatusCode::NOT_FOUND, Json(json!({"ok": false, "error": "這台伺服器只有一個房間，不能另外開房"})))
+            .into_response();
+    }
+    let v = match parse_body(&body) {
+        Ok(v) => v,
+        Err(r) => return r,
+    };
+    let settings = v
+        .get("settings")
+        .cloned()
+        .and_then(|s| serde_json::from_value::<Settings>(s).ok())
+        .unwrap_or_default();
+    match hub.create_room(&client_ip(&headers), settings) {
+        Ok(st) => Json(json!({"ok": true, "code": st.code, "host_key": st.host_key})).into_response(),
+        Err(e) => (StatusCode::TOO_MANY_REQUESTS, Json(json!({"ok": false, "error": e}))).into_response(),
+    }
 }
 
 // ───────────── WebSocket（人類） ─────────────
 
-async fn ws_handler(ws: WebSocketUpgrade, State(st): State<Arc<AppState>>) -> Response {
-    ws.on_upgrade(move |sock| ws_session(sock, st))
+async fn ws_handler(ws: WebSocketUpgrade, RoomRef(st): RoomRef) -> Response {
+    ws.max_message_size(64 * 1024).on_upgrade(move |sock| ws_session(sock, st))
 }
 
 struct WsCtx {
@@ -154,6 +345,8 @@ async fn ws_session(socket: WebSocket, st: Arc<AppState>) {
     let mut notify = st.notify.subscribe();
     let mut shutdown = st.shutdown.clone();
     let mut ping = tokio::time::interval(Duration::from_secs(20));
+    st.conns.fetch_add(1, Ordering::Relaxed);
+    st.mark_active();
     loop {
         let mut msgs: Vec<Value> = Vec::new();
         let mut send_state = false;
@@ -161,6 +354,7 @@ async fn ws_session(socket: WebSocket, st: Arc<AppState>) {
             m = inp.next() => {
                 match m {
                     Some(Ok(Message::Text(t))) => {
+                        st.mark_active();
                         let v: Value = serde_json::from_str(t.as_str()).unwrap_or(Value::Null);
                         let (replies, changed) = handle_ws_msg(&st, &mut ctx, &v);
                         msgs = replies;
@@ -205,6 +399,8 @@ async fn ws_session(socket: WebSocket, st: Arc<AppState>) {
         st.room.lock().unwrap().disconnect(s);
         st.bump();
     }
+    st.conns.fetch_sub(1, Ordering::Relaxed);
+    st.mark_active();
 }
 
 fn err(msg: impl Into<String>) -> Value {
@@ -323,7 +519,7 @@ fn bad(msg: impl Into<String>) -> Response {
     (StatusCode::BAD_REQUEST, Json(json!({"ok": false, "error": msg.into()}))).into_response()
 }
 
-async fn api_info(State(st): State<Arc<AppState>>) -> Json<Value> {
+async fn api_info(RoomRef(st): RoomRef) -> Json<Value> {
     let room = st.room.lock().unwrap();
     let seats: Vec<Value> = (0..4)
         .map(|s| {
@@ -339,9 +535,9 @@ async fn api_info(State(st): State<Arc<AppState>>) -> Json<Value> {
         "rules": "台灣十六張麻將",
         "phase": room.phase,
         "seats": seats,
-        "docs": "/llms.txt",
-        "mcp": "/mcp",
-        "openapi": "/openapi.json",
+        "docs": format!("{}/llms.txt", st.prefix()),
+        "mcp": format!("{}/mcp", st.prefix()),
+        "openapi": format!("{}/openapi.json", st.prefix()),
     }))
 }
 
@@ -366,6 +562,7 @@ struct JoinReq {
 }
 
 fn do_join(st: &AppState, name: &str, token: Option<&str>, character: Option<&str>) -> Result<(usize, String), String> {
+    st.mark_active();
     let mut room = st.room.lock().unwrap();
     if let Some(tok) = token {
         if let Some(s) = room.seat_of_token(tok) {
@@ -380,7 +577,7 @@ fn do_join(st: &AppState, name: &str, token: Option<&str>, character: Option<&st
     Ok((s, tok))
 }
 
-async fn api_join(State(st): State<Arc<AppState>>, body: Bytes) -> Response {
+async fn api_join(RoomRef(st): RoomRef, body: Bytes) -> Response {
     let req: JoinReq = match parse_body(&body) {
         Ok(v) => serde_json::from_value(v).unwrap_or_default(),
         Err(r) => return r,
@@ -391,7 +588,7 @@ async fn api_join(State(st): State<Arc<AppState>>, body: Bytes) -> Response {
             "seat": seat,
             "character": st.room.lock().unwrap().seats[seat].as_ref().map(|i| i.character.clone()),
             "token": token,
-            "next": format!("GET /api/wait?token={}&format=text", token),
+            "next": format!("GET {}/api/wait?token={}&format=text", st.prefix(), token),
         }))
         .into_response(),
         Err(e) => bad(e),
@@ -432,10 +629,11 @@ fn seat_from_token(st: &AppState, token: Option<&str>) -> Result<usize, String> 
         .seat_of_token(token.unwrap_or(""))
         .ok_or("token 無效。請先呼叫 join 取得 token（如果你被換成電腦代打，需要重新加入）")?;
     room.touch(s);
+    st.mark_active();
     Ok(s)
 }
 
-async fn api_state(State(st): State<Arc<AppState>>, Query(q): Query<StateQ>) -> Response {
+async fn api_state(RoomRef(st): RoomRef, Query(q): Query<StateQ>) -> Response {
     match seat_from_token(&st, q.token.as_deref()) {
         Ok(s) => state_response(&st, s, q.format.as_deref(), json!({})),
         Err(e) => bad(e),
@@ -466,7 +664,7 @@ async fn wait_for_turn(st: &AppState, token: &str, timeout: Duration) -> Result<
     }
 }
 
-async fn api_wait(State(st): State<Arc<AppState>>, Query(q): Query<StateQ>) -> Response {
+async fn api_wait(RoomRef(st): RoomRef, Query(q): Query<StateQ>) -> Response {
     let timeout = Duration::from_secs(q.timeout.unwrap_or(30).clamp(1, 120));
     match wait_for_turn(&st, q.token.as_deref().unwrap_or(""), timeout).await {
         Ok((seat, ready)) => {
@@ -487,7 +685,7 @@ fn do_action(st: &AppState, seat: usize, v: &Value) -> Result<String, String> {
     Ok(label)
 }
 
-async fn api_action(State(st): State<Arc<AppState>>, Query(q): Query<StateQ>, body: Bytes) -> Response {
+async fn api_action(RoomRef(st): RoomRef, Query(q): Query<StateQ>, body: Bytes) -> Response {
     let v = match parse_body(&body) {
         Ok(v) => v,
         Err(r) => return r,
@@ -503,7 +701,7 @@ async fn api_action(State(st): State<Arc<AppState>>, Query(q): Query<StateQ>, bo
     }
 }
 
-async fn api_chat(State(st): State<Arc<AppState>>, body: Bytes) -> Response {
+async fn api_chat(RoomRef(st): RoomRef, body: Bytes) -> Response {
     let v = match parse_body(&body) {
         Ok(v) => v,
         Err(r) => return r,
@@ -561,8 +759,8 @@ fn base_url(headers: &HeaderMap) -> String {
     format!("{}://{}", proto, host)
 }
 
-async fn llms_txt(headers: HeaderMap) -> Response {
-    let base = base_url(&headers);
+async fn llms_txt(RoomRef(st): RoomRef, headers: HeaderMap) -> Response {
+    let base = format!("{}{}", base_url(&headers), st.prefix());
     let body = format!(
         r#"# 虛擬台麻館 — AI 玩家連線說明
 
@@ -614,8 +812,8 @@ OpenAPI 規格：{base}/openapi.json
     ([(header::CONTENT_TYPE, "text/plain; charset=utf-8")], body).into_response()
 }
 
-async fn openapi(headers: HeaderMap) -> Json<Value> {
-    let base = base_url(&headers);
+async fn openapi(RoomRef(st): RoomRef, headers: HeaderMap) -> Json<Value> {
+    let base = format!("{}{}", base_url(&headers), st.prefix());
     let token_param = json!({"name": "token", "in": "query", "required": true, "schema": {"type": "string"}});
     let text_resp = json!({"200": {"description": "文字版牌桌狀態", "content": {"text/plain": {"schema": {"type": "string"}}}}});
     Json(json!({
@@ -874,7 +1072,7 @@ async fn handle_rpc(st: &AppState, req: &Value, session: Option<&str>) -> Option
     Some((resp, new_session))
 }
 
-async fn mcp_post(State(st): State<Arc<AppState>>, headers: HeaderMap, body: String) -> Response {
+async fn mcp_post(RoomRef(st): RoomRef, headers: HeaderMap, body: String) -> Response {
     let req: Value = match serde_json::from_str(&body) {
         Ok(v) => v,
         Err(_) => {
@@ -917,7 +1115,7 @@ async fn mcp_get() -> Response {
     (StatusCode::METHOD_NOT_ALLOWED, "This MCP server does not offer an SSE stream; use POST.").into_response()
 }
 
-async fn mcp_delete(State(st): State<Arc<AppState>>, headers: HeaderMap) -> Response {
+async fn mcp_delete(RoomRef(st): RoomRef, headers: HeaderMap) -> Response {
     if let Some(s) = headers.get("mcp-session-id").and_then(|h| h.to_str().ok()) {
         st.mcp_sessions.lock().unwrap().remove(s);
     }
@@ -926,7 +1124,7 @@ async fn mcp_delete(State(st): State<Arc<AppState>>, headers: HeaderMap) -> Resp
 
 // ───────────── 靜態檔 ─────────────
 
-async fn static_handler(State(st): State<Arc<AppState>>, uri: Uri, headers: HeaderMap) -> Response {
+async fn static_handler(State(hub): State<Arc<Hub>>, uri: Uri, headers: HeaderMap) -> Response {
     let path = uri.path().trim_start_matches('/');
     let path = if path.is_empty() { "index.html" } else { path };
     // index.html 不能快取，否則改版後瀏覽器會繼續載入舊的程式；
@@ -940,7 +1138,7 @@ async fn static_handler(State(st): State<Arc<AppState>>, uri: Uri, headers: Head
             "public, max-age=3600"
         }
     };
-    if let Some(f) = &st.assets {
+    if let Some(f) = &hub.assets {
         if let Some((bytes, mime)) = f(path) {
             return ([(header::CONTENT_TYPE, mime), (header::CACHE_CONTROL, cache(path).to_string())], bytes).into_response();
         }

@@ -1,6 +1,7 @@
 /// 牌局引擎在 crates/mahjong-core；沿用 `game` 這個名字，原本的 `crate::game::…` 路徑都不用改
 pub use mahjong_core as game;
-pub mod server;
+/// 連線伺服器在 crates/mahjong-server（線上公開伺服器也用同一份）
+pub use mahjong_server::server;
 
 use game::room::Settings;
 use serde::Serialize;

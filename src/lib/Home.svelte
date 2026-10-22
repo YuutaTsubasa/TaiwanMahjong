@@ -1,8 +1,9 @@
 <script>
   import { onMount } from 'svelte';
-  import { net, inTauri, connect, disconnect, startHost, stopHost, hostStatus, toast, setCharacter, savedCharacter, startLocal } from './net.svelte.js';
+  import { net, inTauri, connect, disconnect, startHost, stopHost, hostStatus, toast, setCharacter, savedCharacter, startLocal, joinRoom, createRoom } from './net.svelte.js';
   import Tile from './Tile.svelte';
-  import { staticSite } from './site.js';
+  import { staticSite, isRoomCode } from './site.js';
+  import { roomCodeFromHash } from './menu.js';
   import OrnateHeading from './ui/OrnateHeading.svelte';
   import PortraitGrid from './ui/PortraitGrid.svelte';
   import FancyButton from './ui/FancyButton.svelte';
@@ -13,7 +14,7 @@
     ['#join', '加入牌局'],
     ['#gallery', '角色圖鑑'],
     ['#settings', '遊戲設定'],
-  ].filter(([href]) => !(staticSite && href === '#host')); // 網頁版沒辦法自己開房
+  ];
   import Avatar from './Avatar.svelte';
   import Brand from './Brand.svelte';
   import { getSelectableCharacters, getCharacter } from './characters.js';
@@ -60,7 +61,12 @@
   const servedByServer = !inTauri && !staticSite && location.port !== '1420' && location.protocol.startsWith('http');
   let name = $state(load('mj_name', ''));
   let port = $state(load('mj_port', '7777'));
-  let address = $state(servedByServer ? location.host : load('mj_address', ''));
+  // 分享連結（#join/房號）直接帶入房號
+  let address = $state(roomCodeFromHash(location.hash) || (servedByServer ? location.host : load('mj_address', '')));
+  // 開房方式：線上（公開伺服器，給房號）或區網（桌面版自己當伺服器；瀏覽器則是用金鑰管理自架伺服器）
+  const canLan = inTauri || !staticSite;
+  let hostMode = $state(canLan ? load('mj_host_mode', 'online') : 'online');
+  const online = $derived(!canLan || hostMode === 'online');
   let hostKey = $state('');
   let busy = $state(false);
   const available = getSelectableCharacters(get(ayiUnlocked));
@@ -78,8 +84,20 @@
     catch (error) { toast(String(error)); }
     finally { busy = false; }
   }
+  async function hostOnline() {
+    save('mj_name', name);
+    save('mj_host_mode', hostMode);
+    busy = true;
+    try { await createRoom({ name: playerName(), character }); }
+    catch (error) { toast(error.message || String(error)); }
+    finally { busy = false; }
+  }
   function join(spectate = false) {
-    if (!address.trim()) return toast('請輸入房主的位址，例如 192.168.1.5:7777');
+    if (!isHostPage && isRoomCode(address.trim())) {
+      save('mj_name', name);
+      return joinRoom(address, { name: playerName(), spectate });
+    }
+    if (!address.trim()) return toast(staticSite ? '請輸入房號，例如 K7QX2' : '請輸入房號，或房主的位址（例如 192.168.1.5:7777）');
     if (isHostPage && !hostKey.trim()) return toast('請輸入伺服器顯示的房主金鑰');
     save('mj_name', name);
     if (!servedByServer) save('mj_address', address);
@@ -89,6 +107,7 @@
     event.preventDefault();
     if (busy || connecting) return;
     if (isSolo) return startSolo();
+    if (isHostPage && online) return hostOnline();
     if (isHostPage && inTauri) {
       if (net.hostInfo) {
         save('mj_name', name);
@@ -165,11 +184,22 @@
           </div>
         {:else if connecting}
           <div class="connection-status" role="status">
-            <span>連線到 {net.address} 中…</span>
+            <span>{net.room ? `連線到房間 ${net.room} 中…` : `連線到 ${net.address} 中…`}</span>
             <button type="button" onclick={disconnect}>取消連線</button>
           </div>
         {:else}
-          {#if isHostPage && inTauri}
+          {#if isHostPage && canLan}
+            <div class="field">
+              <span>開房方式</span>
+              <div class="seg" role="radiogroup" aria-label="開房方式">
+                <button type="button" role="radio" aria-checked={hostMode === 'online'} class:sel={hostMode === 'online'} onclick={() => (hostMode = 'online')}>線上</button>
+                <button type="button" role="radio" aria-checked={hostMode === 'lan'} class:sel={hostMode === 'lan'} onclick={() => (hostMode = 'lan')}>{inTauri ? '區網' : '自架伺服器'}</button>
+              </div>
+            </div>
+          {/if}
+          {#if isHostPage && online}
+            <p class="hint">在線上伺服器開一個房間，拿到房號後分享給朋友；不用開通訊埠。</p>
+          {:else if isHostPage && inTauri}
             {#if net.hostInfo}
               <p class="hint">房間已在通訊埠 <strong>{net.hostInfo.port}</strong> 運作中。</p>
             {:else}
@@ -181,8 +211,8 @@
             {/if}
           {:else}
             <label class="field">
-              <span>{isHostPage ? '伺服器位址' : '房間地址'}</span>
-              <input form="room-entry" bind:value={address} placeholder="192.168.1.5:7777" required spellcheck="false" autocapitalize="none" />
+              <span>{isHostPage ? '伺服器位址' : staticSite ? '房號' : '房號或位址'}</span>
+              <input form="room-entry" bind:value={address} placeholder={isHostPage ? '192.168.1.5:7777' : staticSite ? '例如 K7QX2' : 'K7QX2 或 192.168.1.5:7777'} required spellcheck="false" autocapitalize="characters" />
             </label>
             {#if isHostPage}
               <label class="field">
@@ -191,13 +221,13 @@
               </label>
               <p class="hint">瀏覽器可管理已啟動的伺服器；在桌面版可直接建立房間。</p>
             {:else if staticSite}
-              <p class="hint">網頁版只能連到 https 通道位址（例如 xxx.trycloudflare.com）；區網 IP 請改用桌面版。</p>
+              <p class="hint">輸入房主給你的 5 碼房號。也可以填 https 通道位址（例如 xxx.trycloudflare.com）；區網 IP 請改用桌面版。</p>
             {:else}
-              <p class="hint">輸入房主提供的 IP 與通訊埠。</p>
+              <p class="hint">輸入房主給你的 5 碼房號；區網房間則輸入房主的 IP 與通訊埠。</p>
             {/if}
           {/if}
           <div class="actions">
-            {#if isHostPage && inTauri && net.hostInfo}
+            {#if isHostPage && !online && inTauri && net.hostInfo}
               <FancyButton variant="red" disabled={busy} onclick={closeRoom}>關閉房間</FancyButton>
             {:else if isHostPage}
               <FancyButton variant="red" href="#title">取消</FancyButton>
@@ -205,7 +235,7 @@
               <FancyButton variant="red" onclick={() => join(true)}>觀戰</FancyButton>
             {/if}
             <FancyButton variant="gold" tile="C" type="submit" form="room-entry" disabled={busy}>
-              {busy ? '處理中…' : isHostPage ? (inTauri ? (net.hostInfo ? '回到房間' : '開設牌局') : '以房主連線') : '加入牌局'}
+              {busy ? '處理中…' : isHostPage ? (online ? '開設牌局' : inTauri ? (net.hostInfo ? '回到房間' : '開設牌局') : '以房主連線') : '加入牌局'}
             </FancyButton>
           </div>
         {/if}

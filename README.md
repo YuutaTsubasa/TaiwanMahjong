@@ -64,6 +64,20 @@ npm run server -- --port 7777 --dist dist
 會印出網址與「房主金鑰」。用瀏覽器開網址、首頁點「我是房主」輸入金鑰，就能當房主。
 其他參數：`--bots 3`（先放 3 個電腦）、`--start`（直接開打）、`--settings '{"turn_timeout":60}'`。
 
+線上公開伺服器（任何人都能開房，每個房間有 5 碼房號；部署在 Fly.io，設定在 `fly.toml`）：
+
+```bash
+npm run server -- --public --port 7799
+```
+
+開發時在專案根目錄放一個 `.env.development.local`，寫 `VITE_ONLINE_SERVER=http://localhost:7799`，`npm run dev` 的「線上」房間就會連到本機。
+
+部署（房間都存在記憶體裡，所以只能有一台機器）：
+
+```bash
+fly deploy --ha=false
+```
+
 測試：
 
 ```bash
@@ -72,7 +86,14 @@ cargo test --manifest-path src-tauri/Cargo.toml --lib
 
 ## 怎麼玩
 
-1. 房主在 App 按「開房」。
+**線上房間（最簡單）**：在「開設牌局」選「線上」，會拿到一個 5 碼房號，例如 `K7QX2`。
+朋友在「加入牌局」輸入房號，或直接打開分享連結 `https://yuuta-tsubasa.studio/TaiwanMahjong/#join/K7QX2`（不用裝 App）。
+AI 也能加入：MCP 網址是 `https://taiwan-mahjong.fly.dev/r/房號/mcp`，已經是 https，ChatGPT 不用開通道。
+房間沒人連線 15 分鐘後會自動關閉。
+
+**區網房間（桌面版）**：
+
+1. 房主在 App 的「開設牌局」選「區網」再按「開設牌局」。
 2. 大廳右邊的「邀請玩家與 AI」有現成的指令可以複製：
    - **朋友**：App 選「加入房間」輸入 `IP:7777`，或瀏覽器開 `http://IP:7777/`
    - **Claude Code**：
@@ -169,9 +190,11 @@ src-tauri/src/
   game/scoring.rs   台數計算
   game/room.rs      房間與牌局狀態機（權威）、給 UI / AI 的狀態輸出
   game/bot.rs       內建電腦（向聽數 + 進張數）
-  server.rs         axum：WebSocket、HTTP API、MCP、llms.txt、OpenAPI、靜態檔
   lib.rs            Tauri 指令：start_host / stop_host / host_status
-  bin/mahjong-server.rs  無介面伺服器
+  bin/mahjong-server.rs  無介面伺服器（只是呼叫 crates/mahjong-server）
+crates/mahjong-server/src/
+  server.rs         axum：WebSocket、HTTP API、MCP、llms.txt、OpenAPI、靜態檔；單一房間或公開多房間
+  cli.rs            mahjong-server 的參數（--public 是線上公開伺服器）
 src/
   lib/net.svelte.js 連線狀態
   lib/Home / Lobby / Table / Result …  介面

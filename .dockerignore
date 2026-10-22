@@ -1,0 +1,8 @@
+# fly deploy 只需要 crates/mahjong-core 和 crates/mahjong-server
+*
+!crates/mahjong-core/Cargo.toml
+!crates/mahjong-core/Cargo.lock
+!crates/mahjong-core/src
+!crates/mahjong-server/Cargo.toml
+!crates/mahjong-server/Cargo.lock
+!crates/mahjong-server/src

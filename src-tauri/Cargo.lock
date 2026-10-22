@@ -1853,6 +1853,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "mahjong-server"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "futures-util",
+ "mahjong-core",
+ "rand 0.8.8",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower-http",
+]
+
+[[package]]
 name = "markup5ever"
 version = "0.38.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3218,16 +3232,13 @@ dependencies = [
 name = "taiwan-mahjong"
 version = "0.4.3"
 dependencies = [
- "axum",
- "futures-util",
  "mahjong-core",
- "rand 0.8.8",
+ "mahjong-server",
  "serde",
  "serde_json",
  "tauri",
  "tauri-build",
  "tokio",
- "tower-http",
 ]
 
 [[package]]

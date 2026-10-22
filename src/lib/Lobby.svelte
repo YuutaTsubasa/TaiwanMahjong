@@ -1,6 +1,7 @@
 <script>
   // 房間大廳，依 docs/art/concepts/lobby-host-anime90.png（房主）與 lobby-guest-anime90.png（訪客）排版。
-  import { net, hostCmd, leave, disconnect, serverUrls, toast, send, setCharacter } from './net.svelte.js';
+  import { net, hostCmd, leave, disconnect, serverUrls, toast, send, setCharacter, inTauri } from './net.svelte.js';
+  import { WEB_URL } from './site.js';
   import Avatar from './Avatar.svelte';
   import Brand from './Brand.svelte';
   import OrnateHeading from './ui/OrnateHeading.svelte';
@@ -21,6 +22,9 @@
   let urlIdx = $state(0);
   const base = $derived(urls[Math.min(urlIdx, urls.length - 1)] || 'http://localhost:7777');
   const address = $derived(base.replace(/^https?:\/\//, ''));
+  // 線上房間：分享房號與連結（App 裡沒有網址可用，改給網頁版的連結）
+  const webBase = !inTauri && location.protocol.startsWith('http') ? location.origin + location.pathname : WEB_URL;
+  const shareLink = $derived(net.room ? `${webBase}#join/${net.room}` : '');
 
   let tab = $state('friends');
   let aiTab = $state('claude');
@@ -173,14 +177,28 @@
         {/if}
 
         {#if !isHost || tab === 'friends'}
-          {#if isHost}<p>分享房間位址，邀請朋友加入。</p>{/if}
-          <div class="copy-row">
-            <code>{address}</code>
-            <button type="button" class="copy-btn" onclick={() => copy(address)}>複製</button>
-          </div>
-          <p class="ok"><i class="dot on"></i>{isHost ? '房間已開啟' : '已連線'}</p>
-          {#if isHost}
-            <p class="muted small">沒有 App 的朋友可直接用瀏覽器打開 <code>{base}/</code></p>
+          {#if net.room}
+            {#if isHost}<p>把房號告訴朋友，在「加入牌局」輸入就能入席。</p>{/if}
+            <div class="copy-row">
+              <code class="room-code">{net.room}</code>
+              <button type="button" class="copy-btn" onclick={() => copy(net.room)}>複製</button>
+            </div>
+            <p class="small">或分享連結（不用裝 App）：</p>
+            <div class="copy-row">
+              <code>{shareLink}</code>
+              <button type="button" class="copy-btn" onclick={() => copy(shareLink)}>複製</button>
+            </div>
+            <p class="ok"><i class="dot on"></i>{isHost ? '線上房間已開啟' : '已連線'}</p>
+          {:else}
+            {#if isHost}<p>分享房間位址，邀請朋友加入。</p>{/if}
+            <div class="copy-row">
+              <code>{address}</code>
+              <button type="button" class="copy-btn" onclick={() => copy(address)}>複製</button>
+            </div>
+            <p class="ok"><i class="dot on"></i>{isHost ? '房間已開啟' : '已連線'}</p>
+            {#if isHost}
+              <p class="muted small">沒有 App 的朋友可直接用瀏覽器打開 <code>{base}/</code></p>
+            {/if}
           {/if}
         {:else if tab === 'ai'}
           <div class="subtabs">
@@ -195,8 +213,13 @@
               <p>2. 開一個<b>新的</b> claude 工作階段，貼上：</p>
               <div class="copy-row"><code class="wrap">{aiPrompt('Claude')}</code><button type="button" class="copy-btn" onclick={() => copy(aiPrompt('Claude'))}>複製</button></div>
             {:else if aiTab === 'chatgpt'}
-              <p>ChatGPT 需要 https 公開網址，先開通道：</p>
-              <div class="copy-row"><code>{tunnelCmd}</code><button type="button" class="copy-btn" onclick={() => copy(tunnelCmd)}>複製</button></div>
+              {#if net.room}
+                <p>線上房間已經是 https 網址，不用開通道。</p>
+                <div class="copy-row"><code>{base}/mcp</code><button type="button" class="copy-btn" onclick={() => copy(`${base}/mcp`)}>複製</button></div>
+              {:else}
+                <p>ChatGPT 需要 https 公開網址，先開通道：</p>
+                <div class="copy-row"><code>{tunnelCmd}</code><button type="button" class="copy-btn" onclick={() => copy(tunnelCmd)}>複製</button></div>
+              {/if}
               <p class="small">再把 <code>https://…/mcp</code> 加成 ChatGPT 的連接器（設定 → 應用程式與連接器 → 開發者模式），或在自訂 GPT 匯入 <code>/openapi.json</code>，然後貼上：</p>
               <div class="copy-row"><code class="wrap">{aiPrompt('ChatGPT').replace('mahjong MCP 工具', '麻將工具')}</code><button type="button" class="copy-btn" onclick={() => copy(aiPrompt('ChatGPT').replace('mahjong MCP 工具', '麻將工具'))}>複製</button></div>
             {:else}
@@ -218,7 +241,11 @@
             <dt>AI 說明</dt><dd><code>{base}/llms.txt</code></dd>
             <dt>OpenAPI</dt><dd><code>{base}/openapi.json</code></dd>
           </dl>
-          <p class="muted small">需在同一個區網，或房主的防火牆／路由器有開放這個埠。</p>
+          {#if net.room}
+            <p class="muted small">線上房間：大家都連到線上伺服器。房間沒人連線 15 分鐘後會自動關閉。</p>
+          {:else}
+            <p class="muted small">需在同一個區網，或房主的防火牆／路由器有開放這個埠。</p>
+          {/if}
         {/if}
       </section>
 
@@ -395,6 +422,7 @@
     border: 1px solid var(--art-line);
   }
   .copy-row code.wrap { white-space: pre-wrap; font-family: var(--ui-font); font-size: 13px; }
+  .room-code { font: 700 clamp(24px, 2.4vw, 34px) var(--heading-font) !important; letter-spacing: 0.3em; text-align: center; color: var(--gold); }
   .copy-btn { flex: none; font: 700 17px var(--heading-font); letter-spacing: 0.15em; padding: 0 16px; }
   .ok { display: flex; align-items: center; gap: 8px; }
   .small { font-size: 12px !important; }

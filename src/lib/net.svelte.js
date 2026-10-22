@@ -1,5 +1,6 @@
 // 與遊戲伺服器的 WebSocket 連線（全域狀態）。
 import { isTauri, invoke } from '@tauri-apps/api/core';
+import { ONLINE_SERVER } from './site.js';
 
 export const inTauri = isTauri();
 
@@ -12,6 +13,7 @@ export const net = $state({
   receivedAt: 0,
   hostInfo: null, // 本機開房時：{ port, host_key, ips }
   mode: 'online', // online：連到伺服器；local：單機（瀏覽器裡的 WebAssembly 引擎）
+  room: null, // 線上公開伺服器的房號（區網／自架伺服器是 null）
   toasts: [],
 });
 
@@ -19,6 +21,7 @@ export const clock = $state({ now: performance.now() });
 setInterval(() => (clock.now = performance.now()), 200);
 
 let ws = null;
+let wsUrl = '';
 let worker = null; // 單機版的 Web Worker
 let wantOpen = false;
 let hello = null;
@@ -63,6 +66,36 @@ export function connect(address, { name, hostKey, spectate = false, character } 
   disconnect();
   address = normalizeAddress(address);
   if (!address) return;
+  const secure = typeof location !== 'undefined' && location.protocol === 'https:' && !inTauri;
+  wsUrl = `${secure ? 'wss' : 'ws'}://${address}/ws`;
+  openSession(address, { name, hostKey, spectate, character });
+}
+
+/** 線上房間：連到公開伺服器上的某個房號 */
+export function joinRoom(code, { name, hostKey, spectate = false, character } = {}) {
+  disconnect();
+  code = code.trim().toUpperCase();
+  const server = new URL(ONLINE_SERVER);
+  wsUrl = `${server.protocol === 'https:' ? 'wss' : 'ws'}://${server.host}/r/${code}/ws`;
+  net.room = code;
+  openSession(`${server.host}/r/${code}`, { name, hostKey, spectate, character });
+}
+
+/** 在公開伺服器開一個新房間，自己當房主 */
+export async function createRoom({ name, character } = {}) {
+  let res;
+  try {
+    res = await fetch(`${ONLINE_SERVER}/api/rooms`, { method: 'POST', body: '{}' });
+  } catch {
+    throw new Error('連不上線上伺服器，請檢查網路');
+  }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || !data.ok) throw new Error(data.error || `線上伺服器錯誤（${res.status}）`);
+  joinRoom(data.code, { name, hostKey: data.host_key, character });
+  return data.code;
+}
+
+function openSession(address, { name, hostKey, spectate, character }) {
   if (hostKey) store(hostKeyKey(address), hostKey);
   net.address = address;
   net.status = 'connecting';
@@ -78,10 +111,9 @@ export function connect(address, { name, hostKey, spectate = false, character } 
 }
 
 function open() {
-  const secure = typeof location !== 'undefined' && location.protocol === 'https:' && !inTauri;
   let socket;
   try {
-    socket = new WebSocket(`${secure ? 'wss' : 'ws'}://${net.address}/ws`);
+    socket = new WebSocket(wsUrl);
   } catch (e) {
     toast(`無法連線：${e}`);
     net.status = 'idle';
@@ -119,10 +151,22 @@ function open() {
     if (wantOpen) {
       net.status = net.state ? 'reconnecting' : 'connecting';
       retryTimer = setTimeout(open, 1500);
+      if (net.room) checkRoomExists(net.room);
     } else {
       net.status = 'idle';
     }
   };
+}
+
+// 線上房間連不上時，問伺服器這個房號還在不在；房間已經被回收就別一直重連
+async function checkRoomExists(code) {
+  try {
+    const res = await fetch(`${ONLINE_SERVER}/r/${code}/api/info`);
+    if (res.status === 404 && net.room === code) {
+      toast(`找不到房號 ${code}（房間可能已經關閉了）`);
+      disconnect();
+    }
+  } catch {}
 }
 
 export function disconnect() {
@@ -131,6 +175,7 @@ export function disconnect() {
     worker = null;
   }
   net.mode = 'online';
+  net.room = null;
   wantOpen = false;
   clearTimeout(retryTimer);
   if (ws) {
@@ -213,6 +258,7 @@ export async function hostStatus() {
 
 /** 給其他人用的伺服器網址清單 */
 export function serverUrls() {
+  if (net.room) return [`${ONLINE_SERVER}/r/${net.room}`];
   if (net.hostInfo) {
     return net.hostInfo.ips.map((ip) => `http://${ip}:${net.hostInfo.port}`);
   }

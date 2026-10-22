@@ -5,3 +5,5 @@ src-tauri/gen
 crates/*/target
 # wasm-pack 產生的單機版引擎（npm run build:wasm）
 src/lib/local/pkg
+# 本機開發設定（例如 VITE_ONLINE_SERVER）
+.env*.local
