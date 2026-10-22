@@ -471,7 +471,8 @@
     .lobby2 { height: auto; min-height: 100%; overflow: auto; }
     .lobby-head { grid-template-columns: 1fr auto; }
     .head-brand { display: none; }
-    .lobby-body { grid-template-columns: 1fr; grid-template-areas: 'seats' 'rules' 'start' 'side'; }
+    /* 改成一欄時列高也要跟著改：沿用寬螢幕的 minmax(0, 1fr) 會把座位那一列壓成 0，名單被下面蓋住 */
+    .lobby-body { flex: none; grid-template-columns: 1fr; grid-template-rows: auto; grid-template-areas: 'seats' 'rules' 'start' 'side'; }
     .seats-area { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-height: 0; padding-top: 58px; }
     .seat { position: static; width: auto; height: 150px; }
     .fill-note { position: static; transform: none; grid-column: 1 / -1; justify-self: center; }
