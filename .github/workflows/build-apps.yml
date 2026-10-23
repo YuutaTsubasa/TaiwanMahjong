@@ -57,8 +57,10 @@ jobs:
         if: runner.os == 'Linux'
         timeout-minutes: 16
         run: |
+          # timeout 放在 sudo 裡面才殺得到 apt-get；apt 本身也設網路逾時與重試
+          APT="-o Acquire::http::Timeout=30 -o Acquire::https::Timeout=30 -o Acquire::Retries=3"
           for i in 1 2 3; do
-            timeout 300 sudo apt-get update &&             timeout 300 sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf && exit 0
+            sudo timeout -k 10 300 apt-get $APT update &&             sudo timeout -k 10 300 apt-get $APT install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf && exit 0
             echo "apt-get 失敗或逾時，重試第 $i 次"; sleep 10
           done
           exit 1
