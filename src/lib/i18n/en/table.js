@@ -231,4 +231,6 @@ export default {
   "打開牌桌紀錄": "Show table log",
   "Start／B：關閉選單": "Start / B: close menu",
   "手把：Start 打開遊戲選單（託管、離開牌局…），LB／RB 在手牌、牌桌紀錄、工具列之間跳。": "Gamepad: Start opens the menu (auto-play, leave game…). LB / RB jump between your hand, the table log and the toolbar.",
+  // 進牌桌前載入圖片
+  "準備牌桌…": "Setting up the table…",
 };

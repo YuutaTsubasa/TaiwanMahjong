@@ -2,7 +2,7 @@
   import MsgText from './MsgText.svelte';
   import { formatMsg } from './msg.js';
   // 對局畫面，依 docs/art/concepts/gameplay-anime90-v2.png 排版：
-  //   中間是俯視牌桌（public/ui/<畫風>/table.png），四家各有半身立繪名牌；
+  //   中間是俯視牌桌（public/ui/<畫風>/table.webp），四家各有半身立繪名牌；
   //   桌面上是各家的手牌牆、副露、花與牌河，中央是局數／剩餘張數／倒數；
   //   下方是自己的名牌、提示列與手牌；右側是牌桌紀錄與聊天。
   import { onMount } from 'svelte';
@@ -20,6 +20,7 @@
   import { get } from 'svelte/store';
   import { t, isZh, usesKanji } from './i18n.svelte.js';
   import { seatName, tileName } from './tiles.js';
+  import { preloadAll, tableImages, allLoaded } from './preload.js';
 
   let confirmation;
 
@@ -104,6 +105,20 @@
   // 選牌：第一下選取、第二下打出
   let selected = $state(null);
   let submittedDecision = null;
+  let preparing = $state(false);
+  onMount(() => {
+    const urls = tableImages(net.state, get(artStyle));
+    if (allLoaded(urls)) return;
+    let finished = false;
+    const show = setTimeout(() => !finished && (preparing = true), 150);
+    preloadAll(urls, 3000).then(() => {
+      finished = true;
+      clearTimeout(show);
+      preparing = false;
+    });
+    return () => clearTimeout(show);
+  });
+
   onMount(() => {
     const cancel = () => {
       selected = null;
@@ -233,7 +248,7 @@
   }
 </script>
 
-<div class="gamescreen" class:noside={!showSide} class:compact class:strip={stripMode} style:--table-img={`url('${asset(`/ui/${$artStyle}/table.png`)}')`}>
+<div class="gamescreen" class:noside={!showSide} class:compact class:strip={stripMode} style:--table-img={`url('${asset(`/ui/${$artStyle}/table.webp`)}')`}>
   <div class="tableboard">
     {#if stripMode}
       <!-- 手機直向：上家｜對家｜下家 排在牌桌上方 -->
@@ -454,6 +469,10 @@
   {/if}
 </div>
 
+{#if preparing}
+  <div class="preparing" role="status" aria-live="polite"><span>{t('準備牌桌…')}</span></div>
+{/if}
+
 <ConfirmDialog bind:this={confirmation} />
 
 <!-- 遊戲選單：手把按 Start 打開；滑鼠、觸控用原本畫面上的按鈕即可 -->
@@ -475,6 +494,10 @@
 </dialog>
 
 <style>
+  .preparing { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: color-mix(in srgb, var(--felt-dark) 92%, transparent); pointer-events: none; }
+  .preparing span { padding: 12px 28px; font: 700 20px var(--heading-font); letter-spacing: .12em; color: var(--gold); border: 1px solid var(--art-line); background: var(--art-panel); border-radius: var(--surface-radius); animation: prep-pulse 1.2s ease-in-out infinite alternate; }
+  @keyframes prep-pulse { from { opacity: .55; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .preparing span { animation: none; } }
   .game-menu { width: min(340px, calc(100vw - 32px)); padding: 22px; color: var(--text); background: var(--panel-solid); border: 2px solid var(--gold); border-radius: 14px; box-shadow: 0 16px 60px #0009; }
   .game-menu::backdrop { background: #000a; }
   .game-menu h2 { margin: 0 0 14px; text-align: center; font: 700 22px var(--heading-font); color: var(--gold); letter-spacing: .12em; }
@@ -516,7 +539,7 @@
   .seat-right { grid-area: sr; align-self: center; position: relative; z-index: 3; }
   .seat-me { grid-area: me; align-self: end; z-index: 3; }
 
-  /* ───── 牌桌：table.png 是 1600×1100，桌子在 (300,50) 起 1000×1000 ───── */
+  /* ───── 牌桌：table.webp 是 1600×1100，桌子在 (300,50) 起 1000×1000 ───── */
   .table-wrap { grid-area: table; min-height: 0; display: grid; place-items: center; container-type: size; }
   .table {
     position: relative;

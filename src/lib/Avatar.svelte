@@ -8,6 +8,16 @@
 
   const c = $derived(getCharacter(id));
   const img = $derived(getCharacterImage(id, expression, $artStyle));
+  // 換圖時先透明，載好再淡入（已經載過的圖幾乎立刻就好）
+  let loaded = $state(false);
+  $effect.pre(() => {
+    img;
+    loaded = false;
+  });
+  // 圖如果在綁上 onload 之前就已經好了（快取），直接顯示，免得一直透明
+  function ifComplete(node) {
+    if (node.complete && node.naturalWidth) loaded = true;
+  }
   const uid = `av${Math.random().toString(36).slice(2, 9)}`;
 
   const SKIN = '#ffe6d6';
@@ -34,7 +44,9 @@
 
 <div class="avatar" class:crop style:width="{size}px" style:height="{size}px">
   {#if img}
-    <img src={img} alt={c.name} class:pixel={isPixelStyle($artStyle)} />
+    {#key img}
+      <img src={img} alt={c.name} class:pixel={isPixelStyle($artStyle)} class:loaded use:ifComplete onload={() => (loaded = true)} onerror={() => (loaded = true)} />
+    {/key}
   {:else}
     <svg viewBox={view} xmlns="http://www.w3.org/2000/svg" aria-label={c.name}>
       <defs>
@@ -192,4 +204,7 @@
   svg, img { width: 100%; height: 100%; display: block; }
   img { object-fit: cover; object-position: top; }
   img.pixel { image-rendering: pixelated; }
+  img { opacity: 0; transition: opacity .25s ease; }
+  img.loaded { opacity: 1; }
+  @media (prefers-reduced-motion: reduce) { img { transition: none; } }
 </style>

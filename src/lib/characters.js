@@ -1,7 +1,7 @@
 // 常駐角色的 id、名字要跟 crates/mahjong-core/src/room.rs 的 CHARACTERS 一致。
 //
 // 想換成自己的圖：在 public/characters/<id>/ 放 PNG，然後在該角色加上
-//   images: { normal: '/characters/<id>/normal.png', happy: '...', surprised: '...', sad: '...', win: '...' }
+//   images: { normal: '/characters/<id>/normal.webp', happy: '...', surprised: '...', sad: '...', win: '...' }
 // 沒給的表情會退回 normal 那張；完全沒給 images 就用內建的 SVG 畫法。
 //
 // faceShift：臉在圖裡位置比較低時（0～1，占整張圖的比例），牌桌名牌裁切時往上移這麼多。
@@ -21,7 +21,7 @@ function characterImages(id, style = 'anime90') {
   const directory = asset(`/characters/${id}${style === 'anime90' ? '' : `/${style}`}`);
   return Object.fromEntries(
     ['normal', 'happy', 'surprised', 'sad', 'win'].map((expression) => [
-      expression, `${directory}/${expression}.png`,
+      expression, `${directory}/${expression}.webp`,
     ]),
   );
 }

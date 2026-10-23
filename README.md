@@ -128,9 +128,9 @@ cargo test --manifest-path src-tauri/Cargo.toml --lib
 碰、槓、吃、胡、放槍時，角色會換表情並冒出對話泡泡；胡牌時結算畫面會有贏家立繪。
 
 - 角色圖鑑：網址後面加 `#gallery`（例如 `http://localhost:7777/#gallery`）可以看到所有角色與表情
-- 換成自己的圖：把 90 年代版 PNG 放到 `public/characters/<id>/`，在 `src/lib/characters.js` 該角色加上
-  `images: { normal: '/characters/<id>/normal.png', happy: …, surprised: …, sad: …, win: … }`，沒給的表情會用 normal。
-  另外兩種畫風請放入對應的 `pc98/`、`msdos/` 子目錄，五張檔名均為 `normal.png`、`happy.png`、`surprised.png`、`sad.png`、`win.png`。
+- 換成自己的圖：把 90 年代版的圖（512×512）放到 `public/characters/<id>/`，檔名 `normal`、`happy`、`surprised`、`sad`、`win`；
+  其他畫風放進對應的子目錄（`pc98/`、`msdos/`、`taiwan-print/`、`gameboy/`、`modern-paint/`）。
+  圖一律用 WebP：先放 PNG，再執行 `python scripts/to-webp.py <檔案…>` 轉檔（像素畫風會用無損壓縮）。
 - 新增角色：在 `src/lib/characters.js` 加一筆，並在 `src-tauri/src/game/room.rs` 的 `CHARACTERS` 加上同樣的 id（給電腦分配與 AI 選用）
 
 ## 音樂與音效（PC-98 風）

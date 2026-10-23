@@ -25,7 +25,7 @@ export function isRoomCode(text) {
   return /^[A-Za-z0-9]{5}$/.test(text || '') && /[A-Za-z]/.test(text);
 }
 
-// public/ 底下的檔案路徑，例如 asset('/ui/anime90/logo.png')
+// public/ 底下的檔案路徑，例如 asset('/ui/anime90/logo.webp')
 export function asset(path) {
   return BASE_URL + path.replace(/^\//, '');
 }

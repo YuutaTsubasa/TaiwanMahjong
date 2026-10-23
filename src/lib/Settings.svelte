@@ -24,7 +24,7 @@
       <div class="style-options" role="group" aria-label={t('畫面風格')}>
         {#each ART_STYLES as style}
           <button type="button" class="style-option" class:selected={$artStyle === style.id} aria-pressed={$artStyle === style.id} onclick={() => setArtStyle(style.id)}>
-            <img src={asset(`/ui/${style.id}/parlor.png`)} alt={t('{style}麻將館預覽', { style: t(style.name) })} class:pixel={isPixelStyle(style.id)} />
+            <img src={asset(`/ui/${style.id}/parlor.webp`)} alt={t('{style}麻將館預覽', { style: t(style.name) })} class:pixel={isPixelStyle(style.id)} />
             <span>{t(style.name)}</span>
             {#if $artStyle === style.id}<b class="check" aria-hidden="true">✓</b>{/if}
           </button>

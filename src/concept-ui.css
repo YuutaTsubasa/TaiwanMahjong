@@ -1,7 +1,7 @@
 /* Live controls over independent illustration layers; no concept screenshot is an interactive surface. */
 :root {
-  --scene-title: url('/ui/anime90/title-scene.png');
-  --scene-parlor: url('/ui/anime90/parlor.png');
+  --scene-title: url('/ui/anime90/title-scene.webp');
+  --scene-parlor: url('/ui/anime90/parlor.webp');
   --art-panel: linear-gradient(135deg, #072e26f5, #071e1bf0);
   --art-line: #c4a661;
 }
@@ -24,13 +24,13 @@
 }
 :root[data-ui-style='pc98'] {
   --art-panel: #211b38f5; --art-line: #a79ac5;
-  --scene-title: url('/ui/pc98/title-scene.png');
-  --scene-parlor: url('/ui/pc98/parlor.png');
+  --scene-title: url('/ui/pc98/title-scene.webp');
+  --scene-parlor: url('/ui/pc98/parlor.webp');
 }
 :root[data-ui-style='msdos'] {
   --art-panel: #000080f5; --art-line: #c0c0c0;
-  --scene-title: url('/ui/msdos/title-scene.png');
-  --scene-parlor: url('/ui/msdos/parlor.png');
+  --scene-title: url('/ui/msdos/title-scene.webp');
+  --scene-parlor: url('/ui/msdos/parlor.webp');
 }
 html[data-ui-style] .concept-page {
   position: relative;

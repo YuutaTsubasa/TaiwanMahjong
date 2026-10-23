@@ -10,7 +10,7 @@ root = sys.argv[1] if len(sys.argv) > 1 else "."
 W, H = 1200, 630
 
 # ── 預覽圖：標題畫面＋左側壓暗＋書法標誌＋一行介紹 ──
-scene = Image.open(f'{root}/public/ui/anime90/title-scene.png').convert('RGB')
+scene = Image.open(f'{root}/public/ui/anime90/title-scene.webp').convert('RGB')
 scale = W / scene.width
 scene = scene.resize((W, round(scene.height * scale)), Image.LANCZOS)
 top = (scene.height - H) // 2
@@ -24,7 +24,7 @@ for x in range(W):
     d.line([(x, 0), (x, H)], fill=(4, 22, 17, a))
 og = Image.alpha_composite(og, shade)
 
-logo = Image.open(f'{root}/public/ui/anime90/logo.png').convert('RGBA')
+logo = Image.open(f'{root}/public/ui/anime90/logo.webp').convert('RGBA')
 lw = 470
 logo = logo.resize((lw, round(logo.height * lw / logo.width)), Image.LANCZOS)
 og.alpha_composite(logo, (30, 178))

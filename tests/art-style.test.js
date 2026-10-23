@@ -29,7 +29,7 @@ test('each style resolves a different complete set without changing identities',
   for (const c of characters.CHARACTERS) {
     for (const style of STYLE_IDS) {
       for (const expression of ['normal', 'happy', 'surprised', 'sad', 'win']) {
-        const expected = `/characters/${c.id}/${style === 'anime90' ? '' : style + '/'}${expression}.png`;
+        const expected = `/characters/${c.id}/${style === 'anime90' ? '' : style + '/'}${expression}.webp`;
         assert.equal(characters.getCharacterImage(c.id, expression, style), expected);
         paths.add(expected);
       }
@@ -60,14 +60,14 @@ test('Ayi is hidden from new players but renderable for opponents and unlocked p
   assert.equal(characters.getCharacter('ayi').hidden, true);
   assert.ok(!characters.getSelectableCharacters(false).some(c => c.id === 'ayi'));
   assert.ok(characters.getSelectableCharacters(true).some(c => c.id === 'ayi'));
-  assert.equal(characters.getCharacterImage('ayi', 'win', 'pc98'), '/characters/ayi/pc98/win.png');
+  assert.equal(characters.getCharacterImage('ayi', 'win', 'pc98'), '/characters/ayi/pc98/win.webp');
 });
 
 test('unknown style, expression and character have safe portrait fallbacks', () => {
   assert.equal(typeof characters.getCharacterImage, 'function');
-  assert.equal(characters.getCharacterImage('xiaocui', 'sad', 'bad'), '/characters/xiaocui/sad.png');
-  assert.equal(characters.getCharacterImage('xiaocui', 'bad', 'pc98'), '/characters/xiaocui/pc98/normal.png');
-  assert.equal(characters.getCharacterImage('bad', 'win', 'msdos'), '/characters/xiaocui/msdos/win.png');
+  assert.equal(characters.getCharacterImage('xiaocui', 'sad', 'bad'), '/characters/xiaocui/sad.webp');
+  assert.equal(characters.getCharacterImage('xiaocui', 'bad', 'pc98'), '/characters/xiaocui/pc98/normal.webp');
+  assert.equal(characters.getCharacterImage('bad', 'win', 'msdos'), '/characters/xiaocui/msdos/win.webp');
 });
 
 test('first visit defaults to anime, switching notifies subscribers and persists', async () => {
@@ -101,11 +101,22 @@ test('only pixel-art styles request nearest-neighbor rendering', async () => {
   assert.equal(isPixelStyle('unknown'), false);
 });
 
-test('every selectable style has complete PNG artwork on disk', () => {
+// WebP 的寬高：VP8X（有透明等延伸資訊）、VP8L（無損）、VP8（有損）三種格式各放在不同位置
+function webpSize(bytes) {
+  const kind = bytes.subarray(12, 16).toString();
+  if (kind === 'VP8X') return [1 + bytes.readUIntLE(24, 3), 1 + bytes.readUIntLE(27, 3)];
+  if (kind === 'VP8L') {
+    const b = bytes.readUInt32LE(21);
+    return [1 + (b & 0x3fff), 1 + ((b >> 14) & 0x3fff)];
+  }
+  return [bytes.readUInt16LE(26) & 0x3fff, bytes.readUInt16LE(28) & 0x3fff];
+}
+
+test('every selectable style has complete WebP artwork on disk', () => {
   function png(path, dimensions) {
     const bytes = readFileSync(new URL(`../public${path}`, import.meta.url));
-    assert.equal(bytes.subarray(1, 4).toString(), 'PNG', path);
-    if (dimensions) assert.deepEqual([bytes.readUInt32BE(16), bytes.readUInt32BE(20)], dimensions, path);
+    assert.equal(bytes.subarray(0, 4).toString() + bytes.subarray(8, 12).toString(), 'RIFFWEBP', path);
+    if (dimensions) assert.deepEqual(webpSize(bytes), dimensions, path);
   }
   for (const style of STYLE_IDS) {
     for (const c of characters.CHARACTERS) {
@@ -113,10 +124,10 @@ test('every selectable style has complete PNG artwork on disk', () => {
         png(characters.getCharacterImage(c.id, expression, style), [512, 512]);
       }
     }
-    png(`/ui/${style}/logo.png`, [1400, 420]);
-    png(`/ui/${style}/table.png`, [1600, 1100]);
-    png(`/ui/${style}/title-scene.png`);
-    png(`/ui/${style}/parlor.png`);
+    png(`/ui/${style}/logo.webp`, [1400, 420]);
+    png(`/ui/${style}/table.webp`, [1600, 1100]);
+    png(`/ui/${style}/title-scene.webp`);
+    png(`/ui/${style}/parlor.webp`);
   }
 });
 

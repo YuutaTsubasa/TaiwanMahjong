@@ -1,7 +1,7 @@
 /* Additional art directions share the same controls and table geometry. */
 :root[data-ui-style='taiwan-print'] {
-  --scene-title: url('/ui/taiwan-print/title-scene.png');
-  --scene-parlor: url('/ui/taiwan-print/parlor.png');
+  --scene-title: url('/ui/taiwan-print/title-scene.webp');
+  --scene-parlor: url('/ui/taiwan-print/parlor.webp');
   --felt: #305c45; --felt-dark: #153c32; --wood: #82492f;
   --panel: #173f34; --panel-solid: #173f34; --raised: #315a46; --recessed: #102f28;
   --text: #f4e1b3; --muted: #d5c395; --gold: #f0c878; --line: #b49053;
@@ -29,8 +29,8 @@
 }
 
 :root[data-ui-style='modern-paint'] {
-  --scene-title: url('/ui/modern-paint/title-scene.png');
-  --scene-parlor: url('/ui/modern-paint/parlor.png');
+  --scene-title: url('/ui/modern-paint/title-scene.webp');
+  --scene-parlor: url('/ui/modern-paint/parlor.webp');
   --heading-font: 'Microsoft JhengHei', 'PingFang TC', system-ui, sans-serif;
   --felt: #23594e; --felt-dark: #101e37; --wood: #725245;
   --panel: #152e4d; --panel-solid: #152e4d; --raised: #294d70; --recessed: #10243f;
@@ -77,8 +77,8 @@ html[data-ui-style='modern-paint'] .title-menu:not(:hover):not(:focus-within) .m
 }
 
 :root[data-ui-style='gameboy'] {
-  --scene-title: url('/ui/gameboy/title-scene.png');
-  --scene-parlor: url('/ui/gameboy/parlor.png');
+  --scene-title: url('/ui/gameboy/title-scene.webp');
+  --scene-parlor: url('/ui/gameboy/parlor.webp');
   --ui-font: 'MingLiU', '細明體', monospace; --heading-font: 'MingLiU', '細明體', monospace;
   --felt: #306230; --felt-dark: #0f380f; --wood: #0f380f;
   --panel: #0f380f; --panel-solid: #0f380f; --raised: #306230; --recessed: #0f380f;

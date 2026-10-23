@@ -16,6 +16,7 @@
   import Brand from './lib/Brand.svelte';
   import { artStyle } from './lib/art-style.js';
   import { processEvents, resetReactions } from './lib/reactions.svelte.js';
+  import { preloadAll, tableImages } from './lib/preload.js';
 
   $effect(() => {
     if (net.state) processEvents(net.state);
@@ -40,6 +41,10 @@
 
   // 音樂與音效跟著牌局走
   $effect(() => onGameState(net.state));
+  // 大廳裡有人入席、換角色、換畫風時，先在背景把這桌會用到的圖載好
+  $effect(() => {
+    if (net.state) preloadAll(tableImages(net.state, $artStyle), 60000);
+  });
   $effect(() => {
     const s = net.state;
     onCountdown(s, s?.deadline_ms == null ? null : s.deadline_ms - (clock.now - net.receivedAt));

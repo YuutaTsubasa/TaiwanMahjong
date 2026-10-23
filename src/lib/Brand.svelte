@@ -30,8 +30,8 @@
   onpointercancel={cancelHold} onpointerleave={cancelHold} onblur={cancelHold}
   oncontextmenu={(event) => event.preventDefault()}
   onclick={(event) => { if (event.detail === 0) openSecret(); }}>
-  <!-- 書法標誌（public/ui/<畫風>/logo.png，1400×420 透明 PNG） -->
-  <img class="logo" src={asset(`/ui/${$artStyle}/logo.png`)} alt={t('虛擬台麻館 Virtual Taiwan Mahjong Parlor')} draggable="false" />
+  <!-- 書法標誌（public/ui/<畫風>/logo.webp，1400×420 透明 WebP） -->
+  <img class="logo" src={asset(`/ui/${$artStyle}/logo.webp`)} alt={t('虛擬台麻館 Virtual Taiwan Mahjong Parlor')} draggable="false" />
 </button>
 
 <style>
