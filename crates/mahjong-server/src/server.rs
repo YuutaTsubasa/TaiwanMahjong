@@ -885,6 +885,12 @@ async fn openapi(RoomRef(st): RoomRef, headers: HeaderMap) -> Json<Value> {
 }
 
 // ───────────── MCP（Streamable HTTP） ─────────────
+//
+// 每個工具都標上 annotations（MCP 規範的四個提示），讓 Claude、ChatGPT 等主機知道：
+// - readOnlyHint：只讀不改（get_state、wait_for_turn、get_rules），主機可以不必每次都請使用者確認
+// - destructiveHint：都是 false——出手、聊天只影響這一局，不會刪除或覆寫任何資料
+// - idempotentHint：只讀的才是 true；同樣的出手、聊天呼叫兩次結果不同
+// - openWorldHint：都是 false——只跟這台遊戲伺服器互動，不碰外部網路
 
 fn mcp_tools() -> Value {
     let token = json!({"type": "string", "description": "join_game 回傳的 token（同一個 MCP 連線中可省略）"});
@@ -897,6 +903,8 @@ fn mcp_tools() -> Value {
     json!([
         {
             "name": "join_game",
+            "title": "加入牌桌",
+            "annotations": {"readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": false},
             "description": "加入虛擬台麻館的台灣十六張麻將牌桌。回傳 token 與座位。加入後請反覆呼叫 wait_for_turn → take_action 直到遊戲結束。若之前加入過，可帶 token 重連。",
             "inputSchema": {"type": "object", "properties": {
                 "name": {"type": "string", "description": "你在牌桌上的名字，例如 Claude 或 ChatGPT"},
@@ -906,6 +914,8 @@ fn mcp_tools() -> Value {
         },
         {
             "name": "wait_for_turn",
+            "title": "等待輪到自己",
+            "annotations": {"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false},
             "description": "等待直到輪到你做決定（打牌、吃碰槓胡、下一局）或遊戲結束。回傳文字版牌桌、你的手牌與編號的可執行動作。若回傳「還沒輪到你」就再呼叫一次。",
             "inputSchema": {"type": "object", "properties": {
                 "token": token,
@@ -914,11 +924,15 @@ fn mcp_tools() -> Value {
         },
         {
             "name": "get_state",
+            "title": "查看牌桌",
+            "annotations": {"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false},
             "description": "立即取得目前牌桌狀態（不等待）。",
             "inputSchema": {"type": "object", "properties": {"token": token}}
         },
         {
             "name": "take_action",
+            "title": "出手（打牌、吃碰槓胡）",
+            "annotations": {"readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": false},
             "description": "執行一個動作。最簡單是傳 action_id（wait_for_turn 列出的編號）。也可以傳 type + tile，例如 type=discard tile=5m；type=chow start=3m；type=pung / kong / ron / tsumo / pass / next / skill（技能模式發動角色技能）。",
             "inputSchema": {"type": "object", "properties": {
                 "token": token,
@@ -931,11 +945,15 @@ fn mcp_tools() -> Value {
         },
         {
             "name": "send_chat",
+            "title": "發聊天訊息",
+            "annotations": {"readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": false},
             "description": "在牌桌上發聊天訊息給其他玩家。",
             "inputSchema": {"type": "object", "properties": {"token": token, "text": {"type": "string"}}, "required": ["text"]}
         },
         {
             "name": "get_rules",
+            "title": "查看規則",
+            "annotations": {"readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false},
             "description": "取得規則、牌代碼與台數表。",
             "inputSchema": {"type": "object", "properties": {}}
         }
@@ -1186,4 +1204,105 @@ pub fn local_ips() -> Vec<String> {
     }
     v.push("127.0.0.1".into());
     v
+}
+
+#[cfg(test)]
+mod mcp_tests {
+    use super::*;
+    use mahjong_core::room::{Action, Step};
+    use mahjong_core::tiles::code;
+
+    fn state() -> AppState {
+        let settings = Settings { bot_delay_ms: 0, turn_timeout: 0, claim_timeout: 0, next_hand_delay: 0, ..Default::default() };
+        AppState::new(settings, None, watch::channel(false).1)
+    }
+
+    async fn call(st: &AppState, session: &str, name: &str, args: Value) -> Value {
+        let req = json!({"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": name, "arguments": args}});
+        let (resp, _) = handle_rpc(st, &req, Some(session)).await.unwrap();
+        resp["result"].clone()
+    }
+
+    fn text(result: &Value) -> String {
+        result["content"][0]["text"].as_str().unwrap_or("").to_string()
+    }
+
+    #[tokio::test]
+    async fn every_tool_declares_all_four_annotation_hints() {
+        let st = state();
+        let (resp, _) = handle_rpc(&st, &json!({"jsonrpc": "2.0", "id": 1, "method": "tools/list"}), None).await.unwrap();
+        let tools = resp["result"]["tools"].as_array().unwrap().clone();
+        assert_eq!(tools.len(), 6);
+        for tool in &tools {
+            let name = tool["name"].as_str().unwrap();
+            assert!(tool["title"].is_string(), "{name} 缺 title");
+            for hint in ["readOnlyHint", "destructiveHint", "idempotentHint", "openWorldHint"] {
+                assert!(tool["annotations"][hint].is_boolean(), "{name} 缺 {hint}");
+            }
+        }
+        let read_only: Vec<&str> = tools
+            .iter()
+            .filter(|t| t["annotations"]["readOnlyHint"] == json!(true))
+            .map(|t| t["name"].as_str().unwrap())
+            .collect();
+        assert_eq!(read_only, ["wait_for_turn", "get_state", "get_rules"]);
+    }
+
+    /// 一個 AI 玩家從加入到出手：join_game → get_rules → get_state → wait_for_turn → take_action → send_chat
+    #[tokio::test]
+    async fn ai_player_can_use_every_tool() {
+        let st = state();
+        let (init, session) = handle_rpc(&st, &json!({"jsonrpc": "2.0", "id": 0, "method": "initialize", "params": {}}), None).await.unwrap();
+        assert_eq!(init["result"]["serverInfo"]["name"], "taiwan-mahjong");
+        let session = session.unwrap();
+
+        let joined = call(&st, &session, "join_game", json!({"name": "Claude", "character": "yuehua"})).await;
+        assert_eq!(joined["isError"], false, "{}", text(&joined));
+        assert!(text(&joined).contains("已加入"));
+
+        let rules = call(&st, &session, "get_rules", json!({})).await;
+        assert_eq!(rules["isError"], false);
+        assert!(!text(&rules).is_empty());
+
+        let state_text = call(&st, &session, "get_state", json!({})).await;
+        assert_eq!(state_text["isError"], false, "{}", text(&state_text));
+
+        // 其他三家補電腦、開局，然後讓電腦打到輪到 AI 玩家打牌
+        let seat = {
+            let mut room = st.room.lock().unwrap();
+            for _ in 0..3 {
+                room.add_bot(None).unwrap();
+            }
+            room.start_game().unwrap();
+            let seat = (0..4).find(|&s| room.seats[s].as_ref().map_or(false, |i| i.name == "Claude")).unwrap();
+            for _ in 0..10_000 {
+                let my_discard = matches!(room.hand.as_ref().map(|h| &h.step), Some(Step::Turn { seat: s, .. }) if *s == seat)
+                    && room.phase == Phase::Playing;
+                if my_discard {
+                    break;
+                }
+                if room.has_actions(seat) {
+                    // 輪到別人打的牌可以吃碰：先過
+                    let _ = room.act(seat, Action::Pass);
+                }
+                room.tick();
+            }
+            seat
+        };
+
+        let waited = call(&st, &session, "wait_for_turn", json!({"timeout_seconds": 2})).await;
+        assert_eq!(waited["isError"], false, "{}", text(&waited));
+
+        let tile = {
+            let room = st.room.lock().unwrap();
+            code(room.hand.as_ref().unwrap().players[seat].concealed[0])
+        };
+        let acted = call(&st, &session, "take_action", json!({"type": "discard", "tile": tile})).await;
+        assert_eq!(acted["isError"], false, "{}", text(&acted));
+        assert!(text(&acted).contains("已執行"));
+
+        let chatted = call(&st, &session, "send_chat", json!({"text": "這把我要胡！"})).await;
+        assert_eq!(chatted["isError"], false, "{}", text(&chatted));
+        assert!(st.room.lock().unwrap().chat.iter().any(|c| c.text == "這把我要胡！"));
+    }
 }
