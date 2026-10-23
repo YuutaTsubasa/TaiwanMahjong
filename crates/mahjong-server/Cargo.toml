@@ -1,6 +1,7 @@
 [package]
 name = "mahjong-server"
 version = "0.1.0"
+license = "MIT"
 description = "虛擬台麻館的連線伺服器：WebSocket、HTTP API、MCP；桌面版開房與線上公開伺服器共用"
 edition = "2021"
 rust-version = "1.89"

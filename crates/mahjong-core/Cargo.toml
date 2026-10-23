@@ -1,6 +1,7 @@
 [package]
 name = "mahjong-core"
 version = "0.1.0"
+license = "MIT"
 description = "虛擬台麻館的牌局引擎：台灣十六張麻將的規則、台數、電腦玩家與房間狀態機"
 edition = "2021"
 rust-version = "1.89"

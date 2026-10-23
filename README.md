@@ -210,3 +210,10 @@ src/
 ```
 
 註：最新版 Tauri 需要 Rust 1.90，`src-tauri/.cargo/config.toml` 設了 `incompatible-rust-versions = "fallback"`，讓 Rust 1.89 自動選用相容的版本（目前是 Tauri 2.11）。npm 的 `@tauri-apps/api` 也固定在 2.11，跟 Rust 的 `tauri` 版本一致。
+
+## 授權
+
+- **程式碼**：[MIT](LICENSE)
+- **美術、角色與台詞**：[CC BY-NC 4.0](LICENSE-ART.md)——可以分享、改作、做同人與影片，標示出處即可；商業使用請先聯絡作者
+
+詳細範圍見 [`LICENSE-ART.md`](LICENSE-ART.md)。
