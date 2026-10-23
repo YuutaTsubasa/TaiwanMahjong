@@ -318,7 +318,7 @@ export function setAuto(on) {
 }
 
 export function hostCmd(cmd, extra = {}) {
-  // 單機沒有大廳：「回大廳」「結束牌局」就是回到標題
+  // 單機沒有大廳：「回大廳」「結束牌局」就是結束牌局，回到單機設定頁
   if (worker && net.mode === 'local' && cmd === 'reset') return disconnect();
   send({ type: 'host', cmd, ...extra });
 }

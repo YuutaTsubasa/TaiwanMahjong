@@ -217,7 +217,7 @@ export const sfx = {
 const INTERACTIVE = 'a[href], button, [role="radio"], [role="switch"], input[type="range"]';
 const isBack = (el) =>
   el.matches('.back-link, a[href="#title"], .fancy.red, .close, .exit, .end, .open-side') ||
-  /返回|取消|離開|回首頁|回標題|關閉|Back to|Cancel|Leave|Close/.test(el.textContent || '');
+  /返回|取消|離開|回首頁|回標題|回單機設定|回大廳|關閉|Back to|Cancel|Leave|Close|へ$|戻る|キャンセル|閉じる|退出/.test(el.textContent || '');
 
 function uiSoundFor(el) {
   if (el.closest('.pgrid .cell')) return el.closest('.cell').classList.contains('locked') ? 'deny' : 'pick';

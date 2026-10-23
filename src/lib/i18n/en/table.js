@@ -122,7 +122,7 @@ export default {
   第二名: '2nd',
   第三名: '3rd',
   第四名: '4th',
-  回標題: 'Back to title',
+  回單機設定: 'Back to setup',
   回大廳: 'Back to lobby',
   再來一場: 'Play again',
   回首頁: 'Back to home',
