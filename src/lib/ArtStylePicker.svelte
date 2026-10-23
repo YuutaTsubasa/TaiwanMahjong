@@ -5,13 +5,14 @@
 
 <div class="style-picker" role="group" aria-label={t('整體風格：介面與角色')}>
   <span class="label">{t('整體風格')}</span>
-  <select aria-label={t('整體風格：介面與角色')} value={$artStyle} onchange={(event) => setArtStyle(event.currentTarget.value)}>
+  <select data-gamepad-start aria-label={t('整體風格：介面與角色')} value={$artStyle} onchange={(event) => setArtStyle(event.currentTarget.value)}>
     {#each ART_STYLES as style}<option value={style.id}>{t(style.name)}</option>{/each}
   </select>
   {#each ART_STYLES as style}
     <button
       type="button"
       class:selected={$artStyle === style.id}
+      data-gamepad-start={$artStyle === style.id ? '' : undefined}
       aria-pressed={$artStyle === style.id}
       title={t(style.description)}
       onclick={() => setArtStyle(style.id)}

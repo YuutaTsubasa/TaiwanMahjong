@@ -27,8 +27,8 @@ export function keyToControl(event) {
   return upper === 'A' || upper === 'B' ? upper : null;
 }
 
-/** Standard gamepad mapping: 0=A, 1=B, 12–15=D-pad; left stick has a 0.55 deadzone.
- * Confirm/back are rising edges only. Direction repeats navigate but never advance a secret code.
+/** Standard gamepad mapping: 0=A, 1=B, 4/5=LB/RB, 8/9=Select/Start, 12–15=D-pad; left stick has a 0.55 deadzone.
+ * Confirm/back/menu/region are rising edges only. Direction repeats navigate but never advance a secret code.
  */
 export function gamepadCommands(pad, previous = {}, now = 0) {
   const pressed = index => !!pad?.buttons?.[index]?.pressed || pad?.buttons?.[index]?.value > 0.5;
@@ -50,7 +50,14 @@ export function gamepadCommands(pad, previous = {}, now = 0) {
   }
   if (b && !previous.b) commands.push({ token: 'B', repeat: false });
   if (a && !previous.a) commands.push({ token: 'A', repeat: false });
-  return { commands, snapshot: { direction, a, b, repeatAt } };
+  // Start／Select：遊戲選單；LB／RB：在畫面的幾個區塊之間跳
+  const start = pressed(9) || pressed(8);
+  const lb = pressed(4);
+  const rb = pressed(5);
+  if (start && !previous.start) commands.push({ token: 'Start', repeat: false });
+  if (lb && !previous.lb) commands.push({ token: 'PrevRegion', repeat: false });
+  if (rb && !previous.rb) commands.push({ token: 'NextRegion', repeat: false });
+  return { commands, snapshot: { direction, a, b, start, lb, rb, repeatAt } };
 }
 
 /** Spatial navigation receives only enabled, visible semantic controls from the DOM layer. */

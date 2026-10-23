@@ -221,4 +221,14 @@ export default {
   '你有七朵花，別人摸到第八朵，向他搶來胡牌。': 'You hold seven flowers and win by claiming the eighth when another player draws it.',
   '閒家第一次摸牌就自摸（之前沒人吃碰槓）。': "A non-dealer self-draws on their first draw (before anyone chows, pungs or kongs).",
   '莊家開門的牌就已經胡了。': "The dealer's starting hand is already a winning hand.",
+
+  // 手把：遊戲選單
+  "遊戲選單": "Menu",
+  "繼續遊戲": "Resume",
+  "取消託管": "Stop auto-play",
+  "看提示": "Show hint",
+  "收起牌桌紀錄": "Hide table log",
+  "打開牌桌紀錄": "Show table log",
+  "Start／B：關閉選單": "Start / B: close menu",
+  "手把：Start 打開遊戲選單（託管、離開牌局…），LB／RB 在手牌、牌桌紀錄、工具列之間跳。": "Gamepad: Start opens the menu (auto-play, leave game…). LB / RB jump between your hand, the table log and the toolbar.",
 };

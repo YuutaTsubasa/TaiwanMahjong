@@ -203,6 +203,31 @@
     }
     confirmation.ask({ message: t('離開後由電腦代打，確定？'), confirmLabel: t('離開房局'), onconfirm: leave });
   }
+  // 遊戲選單（手把 Start）：把不好用方向鍵走到的東西集中在這裡
+  let menuDialog = $state(null);
+  let menuReturn = null;
+  function toggleMenu() {
+    if (!menuDialog) return;
+    if (menuDialog.open) return menuDialog.close();
+    if (document.querySelector('dialog[open]')) return;
+    menuReturn = document.activeElement;
+    menuDialog.showModal();
+    menuDialog.querySelector('[data-menu-first]')?.focus();
+  }
+  function menuClosed() {
+    if (menuReturn?.isConnected) menuReturn.focus({ preventScroll: true });
+    menuReturn = null;
+  }
+  function menuDo(fn) {
+    menuReturn = null;
+    menuDialog.close();
+    fn();
+  }
+  $effect(() => {
+    window.addEventListener('mahjong-menu', toggleMenu);
+    return () => window.removeEventListener('mahjong-menu', toggleMenu);
+  });
+
   function askEnd() {
     confirmation.ask({ message: t('結束這場遊戲並回到大廳？'), confirmLabel: t('結束牌局'), onconfirm: () => hostCmd('reset') });
   }
@@ -292,7 +317,7 @@
     <div class="seat-me">
       <PlayerCard seat={mine} variant={compact ? 'chip' : 'me'} active={active(me)} thinking={thinking(me)} isMe={isPlayer} bubble="up" />
     </div>
-    <div class="bottom" bind:this={bottomEl}>
+    <div class="bottom" bind:this={bottomEl} data-gamepad-region data-gamepad-home>
       <div class="prompt-row">
         <div class="prompt-main">
         {#if auto && s.phase === 'playing'}
@@ -431,7 +456,33 @@
 
 <ConfirmDialog bind:this={confirmation} />
 
+<!-- 遊戲選單：手把按 Start 打開；滑鼠、觸控用原本畫面上的按鈕即可 -->
+<dialog bind:this={menuDialog} class="game-menu" aria-labelledby="game-menu-title" onclose={menuClosed}>
+  <h2 id="game-menu-title">{t('遊戲選單')}</h2>
+  <div class="menu-buttons">
+    <button type="button" data-menu-first onclick={() => menuDialog.close()}>{t('繼續遊戲')}</button>
+    {#if isPlayer && s.phase === 'playing'}
+      <button type="button" onclick={() => menuDo(() => setAuto(!auto))}>{auto ? t('取消託管') : t('託管')}</button>
+      {#if !auto}<button type="button" onclick={() => menuDo(toggleHint)}>{hintOpen ? t('關上提示') : t('看提示')}</button>{/if}
+    {/if}
+    <button type="button" onclick={() => menuDo(() => (showSide = !showSide))}>{showSide ? t('收起牌桌紀錄') : t('打開牌桌紀錄')}</button>
+    {#if net.isHost && net.mode !== 'local'}
+      <button type="button" onclick={() => menuDo(askEnd)}>{t('結束牌局')}</button>
+    {/if}
+    <button type="button" class="danger" onclick={() => menuDo(askLeave)}>{net.mode === 'local' ? t('離開牌局') : t('離開房局')}</button>
+  </div>
+  <p class="menu-tip">{t('Start／B：關閉選單')}</p>
+</dialog>
+
 <style>
+  .game-menu { width: min(340px, calc(100vw - 32px)); padding: 22px; color: var(--text); background: var(--panel-solid); border: 2px solid var(--gold); border-radius: 14px; box-shadow: 0 16px 60px #0009; }
+  .game-menu::backdrop { background: #000a; }
+  .game-menu h2 { margin: 0 0 14px; text-align: center; font: 700 22px var(--heading-font); color: var(--gold); letter-spacing: .12em; }
+  .menu-buttons { display: grid; gap: 10px; }
+  .menu-buttons button { min-height: 46px; font-size: 17px; }
+  .menu-buttons button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .menu-buttons .danger { color: #ffe9c7; background: linear-gradient(#7a1c22, #4a0f14); }
+  .menu-tip { margin: 12px 0 0; text-align: center; font-size: 12px; color: var(--muted); }
   .gamescreen {
     position: relative;
     height: 100%;

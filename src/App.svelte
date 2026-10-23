@@ -47,7 +47,7 @@
 </script>
 
 <div class="app-shell" class:menu-shell={!inGame}>
-  <div class="topbar">
+  <div class="topbar" data-gamepad-region>
     {#if page === 'table'}<div class="topbar-brand"><Brand compact /></div>{/if}
     <ArtStylePicker />
     <LanguagePicker />

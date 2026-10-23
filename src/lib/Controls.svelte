@@ -85,7 +85,10 @@
     if (!candidates.includes(active)) {
       const start = candidates.find(element => element.closest('.actions')) ??
         candidates.filter(element => element.matches('[data-hand-tile]')).at(-1) ??
-        candidates.find(element => element.matches('[data-gamepad-start]'));
+        // 還沒輪到自己：牌桌下方（提示、託管）
+        candidates.find(element => element.closest('[data-gamepad-home]')) ??
+        // 區塊裡的起點（工具列的畫風、牌桌紀錄的「離開牌局」）只給 LB／RB 用，第一次按方向鍵不會跳過去
+        candidates.find(element => element.matches('[data-gamepad-start]') && !element.closest('[data-gamepad-region]'));
       if (start) {
         start.focus({ preventScroll: true });
         start.scrollIntoView({ block: 'nearest', inline: 'nearest' });
@@ -131,7 +134,49 @@
     // Keyboard A/B enter the menu code only; Enter and Space keep native button semantics.
   }
 
+  // 畫面上的區塊（[data-gamepad-region]：手牌與按鈕、牌桌紀錄、上方工具列…），LB／RB 在之間跳
+  function jumpRegion(step) {
+    if (document.querySelector('dialog[open]')) return;
+    const regions = [...document.querySelectorAll('[data-gamepad-region]')].filter(visible);
+    if (!regions.length) return;
+    const all = controls();
+    const current = regions.findIndex((region) => region.contains(document.activeElement));
+    for (let i = 1; i <= regions.length; i++) {
+      const region = regions[(Math.max(current, step > 0 ? -1 : 0) + step * i + regions.length * 4) % regions.length];
+      const inside = all.filter((element) => region.contains(element));
+      const target = inside.find((element) => element.closest('.actions')) ??
+        inside.filter((element) => element.matches('[data-hand-tile]')).at(-1) ??
+        inside.find((element) => element.matches('[data-gamepad-start]')) ??
+        inside[0];
+      if (target) {
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        return;
+      }
+    }
+  }
+
+  // 第一次在牌局裡用手把時，告訴玩家 Start、LB／RB 能做什麼（每次開啟遊戲只說一次）
+  let padTipShown = false;
+  function padTip() {
+    if (padTipShown || !gameState) return;
+    padTipShown = true;
+    notice = t('手把：Start 打開遊戲選單（託管、離開牌局…），LB／RB 在手牌、牌桌紀錄、工具列之間跳。');
+    clearTimeout(noticeTimer);
+    noticeTimer = setTimeout(() => (notice = ''), 7000);
+  }
+
   function gamepadCommand({ token, repeat }) {
+    padTip();
+    if (token === 'Start') {
+      // 牌局中：打開遊戲選單（選單已經開著就關上）
+      if (gameState) window.dispatchEvent(new CustomEvent('mahjong-menu'));
+      return;
+    }
+    if (token === 'PrevRegion' || token === 'NextRegion') {
+      jumpRegion(token === 'NextRegion' ? 1 : -1);
+      return;
+    }
     const active = document.activeElement;
     const editing = isEditableTarget(active);
     const modal = !!document.querySelector('dialog[open]');

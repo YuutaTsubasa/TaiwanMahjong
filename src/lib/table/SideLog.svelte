@@ -87,7 +87,7 @@
   }
 </script>
 
-<aside class="sidelog">
+<aside class="sidelog" data-gamepad-region>
   <section class="log-sec">
     <header>
       <h2>{t('牌桌紀錄')}</h2>
@@ -150,7 +150,7 @@
     {#if onend}
       <button type="button" class="end" onclick={onend}>{t('結束牌局')}</button>
     {/if}
-    <button type="button" class="exit" onclick={onleave}>⇦ {leaveLabel}</button>
+    <button type="button" class="exit" data-gamepad-start onclick={onleave}>⇦ {leaveLabel}</button>
   </div>
 </aside>
 

@@ -53,6 +53,17 @@ test('A and B only fire on rising edges, while held directions repeat after a de
   assert.deepEqual(result.commands, [{ token: 'B', repeat: false }, { token: 'A', repeat: false }]);
 });
 
+test('Start/Select open the menu and LB/RB jump regions, each once per press', () => {
+  let result = gamepadCommands(pad([9]), undefined, 0);
+  assert.deepEqual(result.commands, [{ token: 'Start', repeat: false }]);
+  result = gamepadCommands(pad([9]), result.snapshot, 500);
+  assert.deepEqual(result.commands, [], 'holding Start does not repeat');
+  result = gamepadCommands(pad([8]), gamepadCommands(pad()).snapshot, 0);
+  assert.deepEqual(result.commands, [{ token: 'Start', repeat: false }], 'Select works the same as Start');
+  assert.deepEqual(gamepadCommands(pad([4])).commands, [{ token: 'PrevRegion', repeat: false }]);
+  assert.deepEqual(gamepadCommands(pad([5])).commands, [{ token: 'NextRegion', repeat: false }]);
+});
+
 test('left stick uses a deadzone and a single dominant direction', () => {
   assert.deepEqual(gamepadCommands(pad([], [0.3, -0.3])).commands, []);
   assert.deepEqual(gamepadCommands(pad([], [0.8, -0.7])).commands, [{ token: 'ArrowRight', repeat: false }]);
