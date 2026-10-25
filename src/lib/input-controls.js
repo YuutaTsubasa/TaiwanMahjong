@@ -27,12 +27,39 @@ export function keyToControl(event) {
   return upper === 'A' || upper === 'B' ? upper : null;
 }
 
-/** Standard gamepad mapping: 0=A, 1=B, 4/5=LB/RB, 8/9=Select/Start, 12–15=D-pad; left stick has a 0.55 deadzone.
+/**
+ * 十字鍵：標準配置是按鈕 12–15。沒有標準配置的手把（例如有些手機接 Razer Kishi 之類的手把）
+ * 常把十字鍵報成「hat」軸（axes[9]，-1＝上，順時針每 45 度 +0.2857，沒按是 >1）或 axes 6／7。
+ */
+export function padDpad(pad) {
+  const pressed = (i) => !!pad?.buttons?.[i]?.pressed || pad?.buttons?.[i]?.value > 0.5;
+  const d = { up: pressed(12), down: pressed(13), left: pressed(14), right: pressed(15) };
+  if (pad?.mapping === 'standard') return d;
+  const axes = pad?.axes ?? [];
+  const hat = axes[9];
+  if (typeof hat === 'number' && hat >= -1.05 && hat <= 1.05) {
+    const step = Math.round((hat + 1) / (2 / 7)) % 8; // 0 上 1 右上 2 右 3 右下 4 下 5 左下 6 左 7 左上
+    d.up ||= step === 7 || step === 0 || step === 1;
+    d.right ||= step >= 1 && step <= 3;
+    d.down ||= step >= 3 && step <= 5;
+    d.left ||= step >= 5 && step <= 7;
+  }
+  if (axes.length >= 8) {
+    d.left ||= axes[6] < -0.5;
+    d.right ||= axes[6] > 0.5;
+    d.up ||= axes[7] < -0.5;
+    d.down ||= axes[7] > 0.5;
+  }
+  return d;
+}
+
+/** Standard gamepad mapping: 0=A, 1=B, 4/5=LB/RB, 8/9=Select/Start, 12–15=D-pad (or the hat fallback above); left stick has a 0.55 deadzone.
  * Confirm/back/menu/region are rising edges only. Direction repeats navigate but never advance a secret code.
  */
 export function gamepadCommands(pad, previous = {}, now = 0) {
   const pressed = index => !!pad?.buttons?.[index]?.pressed || pad?.buttons?.[index]?.value > 0.5;
-  let direction = [12, 13, 14, 15].map((index, i) => pressed(index) ? ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'][i] : null).find(Boolean) ?? null;
+  const dpad = padDpad(pad);
+  let direction = ['up', 'down', 'left', 'right'].map((k, i) => dpad[k] ? ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'][i] : null).find(Boolean) ?? null;
   const [x = 0, y = 0] = pad?.axes ?? [];
   if (!direction && Math.max(Math.abs(x), Math.abs(y)) > 0.55) {
     direction = Math.abs(x) > Math.abs(y) ? (x > 0 ? 'ArrowRight' : 'ArrowLeft') : (y > 0 ? 'ArrowDown' : 'ArrowUp');

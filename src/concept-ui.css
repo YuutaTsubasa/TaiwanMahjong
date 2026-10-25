@@ -180,3 +180,28 @@ html[data-ui-style] .game .drawn-gap { flex-shrink: 0; }
   html[data-ui-style] .lobby-page .seat-av { left: 12px; right: auto; }
   html[data-ui-style] .lobby-page .settings { grid-template-columns: 1fr; }
 }
+
+
+/* ── 鍵盤、手把選到的東西 ──
+   只靠變色的話，本來就是金色的按鈕（開始遊戲、再來一場…）選到時看不出來：
+   一律加閃爍的外框，按鈕、手牌再稍微放大。滑鼠、觸控不顯示（data-input 由 Controls.svelte 設定）。 */
+html[data-ui-style][data-input='key'] :is(button, a, input, select, summary):focus-visible,
+html[data-ui-style][data-input='pad'] :is(button, a, input, select, summary):focus {
+  outline: 3px solid var(--focus-ring, var(--gold));
+  outline-offset: 3px;
+  animation: focus-blink 0.8s ease-in-out infinite alternate;
+}
+html[data-ui-style][data-input='key'] :is(.fancy, .menu-item, button.tile, .act, .cell, .style-option):focus-visible,
+html[data-ui-style][data-input='pad'] :is(.fancy, .menu-item, button.tile, .act, .cell, .style-option):focus {
+  scale: 1.06;
+  z-index: 2;
+}
+@keyframes focus-blink {
+  from { outline-color: var(--focus-ring-alt, #fff); }
+  to { outline-color: var(--focus-ring, var(--gold)); }
+}
+html[data-ui-style='gameboy'] { --focus-ring: #0f380f; --focus-ring-alt: #8bac0f; }
+html[data-ui-style='msdos'] { --focus-ring: #ffff55; }
+@media (prefers-reduced-motion: reduce) {
+  html[data-ui-style][data-input] :is(button, a, input, select, summary):is(:focus, :focus-visible) { animation: none; }
+}

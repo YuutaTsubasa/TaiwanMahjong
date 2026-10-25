@@ -196,4 +196,8 @@ export default {
   退格: 'Backspace',
   清除: 'Clear',
   套用輸入: 'Apply',
+  // 手把接上／拔掉的提示
+  "手把": "Controller",
+  "偵測到手把：{name}": "Controller connected: {name}",
+  "手把已中斷：{name}": "Controller disconnected: {name}",
 };

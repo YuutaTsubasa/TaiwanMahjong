@@ -4,6 +4,7 @@
   import { createCheatTracker, gamepadCommands, isEditableTarget, keyToControl, chooseDirectionalTarget, steppedValue, setControlValue, nextSelectIndex } from './input-controls.js';
   import ControlsKeyboard from './ControlsKeyboard.svelte';
   import { t } from './i18n.svelte.js';
+  import { toast } from './net.svelte.js';
 
   let { state: gameState = null, onback = () => {} } = $props();
   let pad;
@@ -109,7 +110,13 @@
     else onback();
   }
 
+  // 目前用什麼操作（key／pad／pointer／touch）：鍵盤、手把時才畫出「選到的按鈕」的外框
+  function setInputKind(kind) {
+    if (document.documentElement.dataset.input !== kind) document.documentElement.dataset.input = kind;
+  }
+
   function keydown(event) {
+    if (!['Shift', 'Control', 'Alt', 'Meta'].includes(event.key)) setInputKind('key');
     if (event.defaultPrevented || isEditableTarget(event.target) || event.isComposing) {
       cheat.reset();
       return;
@@ -219,15 +226,28 @@
       try { pads = navigator.getGamepads?.() ?? []; } catch {}
       const connected = new Set();
       for (const gamepad of pads) {
-        if (!gamepad?.connected || (gamepad.mapping && gamepad.mapping !== 'standard')) continue;
+        // 所有連上的手把都收：沒有標準配置的（常見於手機接手把）十字鍵由 padDpad 處理
+        if (!gamepad?.connected) continue;
         connected.add(gamepad.index);
         const result = gamepadCommands(gamepad, snapshots.get(gamepad.index), now);
         snapshots.set(gamepad.index, result.snapshot);
+        if (result.commands.length) setInputKind('pad');
         if (!document.hidden) result.commands.forEach(gamepadCommand);
       }
       for (const index of snapshots.keys()) if (!connected.has(index)) snapshots.delete(index);
       frame = requestAnimationFrame(poll);
     }
+    const pointerdown = (e) => setInputKind(e.pointerType === 'touch' ? 'touch' : 'pointer');
+    // 手把接上／拔掉時提示一下（接了卻沒出現這個訊息，就是瀏覽器沒把手把交給網頁）
+    const padName = (gamepad) => (gamepad.id || '').replace(/\s*\(.*$/, '').trim() || t('手把');
+    const padConnected = (e) => {
+      setInputKind('pad');
+      toast(t('偵測到手把：{name}', { name: padName(e.gamepad) }), 'info');
+    };
+    const padDisconnected = (e) => toast(t('手把已中斷：{name}', { name: padName(e.gamepad) }), 'info');
+    window.addEventListener('pointerdown', pointerdown, true);
+    window.addEventListener('gamepadconnected', padConnected);
+    window.addEventListener('gamepaddisconnected', padDisconnected);
     window.addEventListener('keydown', keydown);
     window.addEventListener('mahjong-open-cheat', openPad);
     frame = requestAnimationFrame(poll);
@@ -236,6 +256,9 @@
       cancelAnimationFrame(frame);
       clearTimeout(noticeTimer);
       window.removeEventListener('keydown', keydown);
+      window.removeEventListener('pointerdown', pointerdown, true);
+      window.removeEventListener('gamepadconnected', padConnected);
+      window.removeEventListener('gamepaddisconnected', padDisconnected);
       window.removeEventListener('mahjong-open-cheat', openPad);
     };
   });

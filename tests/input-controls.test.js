@@ -64,6 +64,20 @@ test('Start/Select open the menu and LB/RB jump regions, each once per press', (
   assert.deepEqual(gamepadCommands(pad([5])).commands, [{ token: 'NextRegion', repeat: false }]);
 });
 
+test('non-standard pads: D-pad from the hat axis or axes 6/7', () => {
+  const hatPad = (hat) => ({ mapping: '', buttons: [], axes: [0, 0, 0, 0, 0, 0, 0, 0, 0, hat] });
+  assert.deepEqual(input.padDpad(hatPad(-1)), { up: true, down: false, left: false, right: false }, 'hat -1 is up');
+  assert.deepEqual(input.padDpad(hatPad(-1 + 2 * (2 / 7))), { up: false, down: false, left: false, right: true }, 'right');
+  assert.deepEqual(input.padDpad(hatPad(-1 + 4 * (2 / 7))), { up: false, down: true, left: false, right: false }, 'down');
+  assert.deepEqual(input.padDpad(hatPad(-1 + 6 * (2 / 7))), { up: false, down: false, left: true, right: false }, 'left');
+  assert.deepEqual(input.padDpad(hatPad(3.28)), { up: false, down: false, left: false, right: false }, 'released (>1)');
+  const axesPad = { mapping: '', buttons: [], axes: [0, 0, 0, 0, 0, 0, -1, 0] };
+  assert.equal(input.padDpad(axesPad).left, true, 'axes 6 = left/right');
+  assert.deepEqual(gamepadCommands(hatPad(-1)).commands, [{ token: 'ArrowUp', repeat: false }], 'menus move with the hat too');
+  const standard = { mapping: 'standard', buttons: [], axes: [0, 0, 0, 0, 0, 0, 0, 0, 0, -1] };
+  assert.equal(input.padDpad(standard).up, false, 'standard pads ignore the hat axis');
+});
+
 test('left stick uses a deadzone and a single dominant direction', () => {
   assert.deepEqual(gamepadCommands(pad([], [0.3, -0.3])).commands, []);
   assert.deepEqual(gamepadCommands(pad([], [0.8, -0.7])).commands, [{ token: 'ArrowRight', repeat: false }]);
