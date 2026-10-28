@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { parseMML, chordNotes } from '../src/lib/audio/synth.js';
-import { SONGS } from '../src/lib/audio/music.js';
+import { parseMML, chordNotes } from 'virtual-core/audio/synth.js';
+import { SONGS } from '../src/lib/audio/songs.js';
 
 test('MML basics: notes, octaves, lengths, dots, ties, loops', () => {
   const { notes, length } = parseMML('o4 l8 c d4 e4. r f&f g+ <a >[b]3');

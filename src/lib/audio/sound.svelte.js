@@ -1,6 +1,7 @@
 // 音樂與音效的總管：設定（音量、靜音）、音效、依牌局狀態切換 BGM 與短曲。
-import { audioContext, buses, fmNote, ssgNote, drum, noiseHit, setBusVolume, PATCHES } from './synth.js';
-import { Player, SONGS } from './music.js';
+import { audioContext, buses, fmNote, ssgNote, drum, noiseHit, setBusVolume, PATCHES } from 'virtual-core/audio/synth.js';
+import { Player } from 'virtual-core/audio/music.js';
+import { SONGS } from './songs.js';
 import { CHARACTER_THEMES, themeName } from './themes.js';
 
 /** 'char:<角色 id>' 是角色主題曲，其他是 SONGS 裡的曲子 */

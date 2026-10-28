@@ -2,7 +2,7 @@
 // 當莊家時播莊家的主題曲；角色圖鑑選到誰就播誰的。
 //
 // 每首 16 小節（A 段 8 小節＋B 段 8 小節）循環。旋律用 MML 手寫，
-// 貝斯、和弦、琶音依和弦進行自動產生（見 music.js 的 bass／chords／arp）。
+// 貝斯、和弦、琶音依和弦進行自動產生（見 VirtualCore 的 audio/music.js 的 bass／chords／arp）。
 // 旋律裡的 | 是小節線，只是方便閱讀；tests/music.test.js 會檢查每小節剛好 4 拍。
 
 function theme({ bpm, lead, patch = 'lead', prog, comp, bass, arp, pad, drums, gain, counter }) {

@@ -16,7 +16,7 @@
 
 ## 下載 App
 
-各平台的安裝檔都由 GitHub Actions 打包（[`.github/workflows/build-apps.yml`](.github/workflows/build-apps.yml)）：
+各平台的安裝檔都由 GitHub Actions 打包（[`.github/workflows/build-apps.yml`](.github/workflows/build-apps.yml)，步驟在 VirtualCore 的可重用 workflow）：
 
 | 平台 | 檔案 | 備註 |
 | --- | --- | --- |
@@ -65,13 +65,15 @@ npm run server -- --port 7777 --dist dist
 其他參數：`--bots 3`（先放 3 個電腦）、`--start`（直接開打）、`--settings '{"turn_timeout":60}'`。
 
 線上房間是 P2P：開房者的瀏覽器就是伺服器（牌局引擎跑在 Web Worker），其他人用 WebRTC 直接連過去，
-不用架主機。只有「配對」（交換 WebRTC 連線資訊）需要一個小服務，放在 Cloudflare Workers 免費方案（`workers/signal/`），
+不用架主機。只有「配對」（交換 WebRTC 連線資訊）需要一個小服務，放在 Cloudflare Workers 免費方案（Virtual 系列共用的 [VirtualCore](https://github.com/YuutaTsubasa/VirtualCore) 的 `workers/signal/`），
 超過免費額度只會暫時無法開新房，不會收費。
 
 本機開發：
 
 ```bash
-cd workers/signal && npm install && npm run dev
+# VirtualCore clone 在旁邊（Virtual/VirtualCore）
+npm --prefix ../VirtualCore/workers/signal install
+npm --prefix ../VirtualCore/workers/signal run dev
 ```
 
 再在專案根目錄放一個 `.env.development.local`，寫 `VITE_SIGNAL_SERVER=http://localhost:8787`，`npm run dev` 就有「線上」房間。
@@ -79,10 +81,10 @@ cd workers/signal && npm install && npm run dev
 部署配對服務（第一次要先 `npx wrangler login`）：
 
 ```bash
-cd workers/signal && npm run deploy
+npm --prefix ../VirtualCore/workers/signal run deploy:mahjong
 ```
 
-配對服務的網址寫在 `src/lib/site.js` 的 `SIGNAL_SERVER`。清空它（或配對服務連不上）時，介面上線上房間的選項會自動藏起來。
+配對服務的網址寫在 `src/lib/site.js` 的 `DEFAULT_SIGNAL_SERVER`。`VITE_SIGNAL_SERVER=off`（或配對服務連不上）時，介面上線上房間的選項會自動藏起來。
 
 測試：
 
@@ -136,7 +138,7 @@ cargo test --manifest-path src-tauri/Cargo.toml --lib
 ## 音樂與音效（PC-98 風）
 
 全部用 Web Audio 即時合成，沒有任何音檔：模仿 PC-98 的 YM2608（OPNA）音源——FM 音色、SSG 方波、節奏音源。
-曲子用 MML 寫在 `src/lib/audio/music.js`，全部原創：大廳、對局、海底（剩 16 張以內）三首循環曲，
+曲子用 MML 寫在 `src/lib/audio/songs.js`（音源與播放器在 VirtualCore），全部原創：大廳、對局、海底（剩 16 張以內）三首循環曲，
 加上胡牌、別人胡、放槍、流局、遊戲結束五段短曲；打牌、吃碰、槓、補花、輪到你、倒數也都有音效。
 上方工具列可以調整音樂／音效音量或靜音（瀏覽器規定要先點一下畫面才會出聲）。
 `npm test` 會檢查每首循環曲的各音軌小節數是否對齊。
@@ -199,13 +201,11 @@ src-tauri/src/
   bin/mahjong-server.rs  無介面伺服器（只是呼叫 crates/mahjong-server）
 crates/mahjong-core/src/protocol.rs  玩家連線的訊息協定（伺服器與 P2P 房主共用）
 crates/mahjong-wasm/      瀏覽器裡的牌局引擎：單機（LocalGame）與 P2P 房主（HostGame）
-workers/signal/           線上房間的配對服務（Cloudflare Workers）
 crates/mahjong-server/src/
   server.rs         axum：WebSocket、HTTP API、MCP、llms.txt、OpenAPI、靜態檔；單一房間或公開多房間
   cli.rs            mahjong-server 的參數（--public 是多房間的公開伺服器，目前沒有部署）
 src/
-  lib/net.svelte.js 連線狀態（WebSocket、P2P、單機）
-  lib/p2p.js        線上房間的 WebRTC 連線
+  lib/net.svelte.js 連線狀態（WebSocket、P2P、單機）；WebRTC 傳輸、FM 音源、手把、多國語言的共用部分在 VirtualCore（node_modules/virtual-core）
   lib/Home / Lobby / Table / Result …  介面
 ```
 

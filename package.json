@@ -1,14 +1,14 @@
 {
   "name": "taiwan-mahjong",
   "private": true,
-  "version": "0.7.5",
+  "version": "0.8.0",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "build:wasm": "wasm-pack build crates/mahjong-wasm --target web --release --out-dir ../../src/lib/local/pkg --no-pack",
     "predev": "npm run build:wasm",
     "prebuild": "npm run build:wasm",
-    "test": "node --test tests/art-style.test.js tests/music.test.js tests/menu.test.js tests/unlocks.test.js tests/input-controls.test.js tests/dialogue-i18n.test.js",
+    "test": "node --test tests/art-style.test.js tests/music.test.js tests/menu.test.js tests/unlocks.test.js tests/components.test.js tests/dialogue-i18n.test.js",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -16,7 +16,8 @@
     "server": "cargo run --manifest-path src-tauri/Cargo.toml --bin mahjong-server --"
   },
   "dependencies": {
-    "@tauri-apps/api": "~2.11.0"
+    "@tauri-apps/api": "~2.11.0",
+    "virtual-core": "github:YuutaTsubasa/VirtualCore#v0.5.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5",
