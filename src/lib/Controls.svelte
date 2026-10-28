@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte';
   import { ayiUnlocked, isWinningMatch, unlockAyi } from './unlocks.js';
-  import { createCheatTracker, gamepadCommands, isEditableTarget, keyToControl, chooseDirectionalTarget, steppedValue, setControlValue, nextSelectIndex } from './input-controls.js';
+  import { createCheatTracker, gamepadCommands, isEditableTarget, keyToControl, chooseDirectionalTarget, steppedValue, setControlValue, nextSelectIndex } from 'virtual-core/input/controls.js';
   import ControlsKeyboard from './ControlsKeyboard.svelte';
   import { t } from './i18n.svelte.js';
   import { toast } from './net.svelte.js';

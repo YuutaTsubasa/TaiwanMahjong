@@ -1,8 +1,11 @@
 // 與遊戲伺服器的連線（全域狀態）：WebSocket（區網／自架伺服器）、WebRTC（線上房間）或單機引擎。
 import { isTauri, invoke } from '@tauri-apps/api/core';
 import { SIGNAL_SERVER, ROOM_CODE_CHARS } from './site.js';
-import { P2PHost, P2PGuest, signalAvailable } from './p2p.js';
+import { P2PHost, P2PGuest, signalAvailable, setTranslator } from 'virtual-core/net/p2p.js';
 import { t } from './i18n.svelte.js';
+
+// VirtualCore 的 p2p.js 給玩家看的錯誤訊息用台麻的翻譯
+setTranslator(t);
 
 export const inTauri = isTauri();
 

@@ -1,5 +1,10 @@
-# 把單機版（WebAssembly 引擎）部署到 GitHub Pages：
+# 把單機版與線上房間（牌局引擎是 WebAssembly）部署到 GitHub Pages：
 # https://yuuta-tsubasa.studio/TaiwanMahjong/
+# 步驟在 VirtualCore 的可重用 workflow（Virtual 系列共用）：
+#   https://github.com/YuutaTsubasa/VirtualCore/blob/main/.github/workflows/pages.yml
+#
+# 線上房間的配對服務預設用 src/lib/site.js 裡已部署的網址；要換成別的，在 repo 的 Variables
+# （Settings → Secrets and variables → Actions → Variables）設 SIGNAL_SERVER。
 name: Deploy web version to GitHub Pages
 
 on:
@@ -17,42 +22,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: wasm32-unknown-unknown
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: crates/mahjong-wasm
-
-      - run: npm ci
-
-      # prebuild 會先跑 npm run build:wasm（wasm-pack）
-      - run: npm run build
-        env:
-          PAGES_BASE: /${{ github.event.repository.name }}/
-          VITE_STATIC_SITE: '1'
-
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - id: deployment
-        uses: actions/deploy-pages@v4
+  pages:
+    uses: YuutaTsubasa/VirtualCore/.github/workflows/pages.yml@v0.4.0
+    with:
+      core-crate: mahjong-core
+      wasm-crate: mahjong-wasm
+      # 網頁版沒有伺服器：藏掉區網開房（VITE_STATIC_SITE=1）
+      static-site: true
