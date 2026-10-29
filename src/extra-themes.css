@@ -31,7 +31,7 @@
 :root[data-ui-style='modern-paint'] {
   --scene-title: url('/ui/modern-paint/title-scene.webp');
   --scene-parlor: url('/ui/modern-paint/parlor.webp');
-  --heading-font: 'Microsoft JhengHei', 'PingFang TC', system-ui, sans-serif;
+  --heading-font: 'VSans', 'Microsoft JhengHei', sans-serif;
   --felt: #23594e; --felt-dark: #101e37; --wood: #725245;
   --panel: #152e4d; --panel-solid: #152e4d; --raised: #294d70; --recessed: #10243f;
   --text: #f0f7ff; --muted: #bed5ed; --gold: #ffe5b4; --line: #87b5d1;
@@ -79,7 +79,7 @@ html[data-ui-style='modern-paint'] .title-menu:not(:hover):not(:focus-within) .m
 :root[data-ui-style='gameboy'] {
   --scene-title: url('/ui/gameboy/title-scene.webp');
   --scene-parlor: url('/ui/gameboy/parlor.webp');
-  --ui-font: 'MingLiU', '細明體', monospace; --heading-font: 'MingLiU', '細明體', monospace;
+  --ui-font: 'VPixel', monospace; --heading-font: 'VPixel', monospace;
   --felt: #306230; --felt-dark: #0f380f; --wood: #0f380f;
   --panel: #0f380f; --panel-solid: #0f380f; --raised: #306230; --recessed: #0f380f;
   --text: #9bbc0f; --muted: #8bac0f; --gold: #9bbc0f; --line: #8bac0f;
@@ -179,29 +179,29 @@ html[data-ui-style='gameboy'] .gamescreen .tname { color: #9bbc0f; }
 /* 英文介面：楷書字型裡的英文字母像打字機，標題改用襯線體（中文字仍然落到楷書）。像素風格維持原本的字型。 */
 :root[lang='en'][data-ui-style='anime90'],
 :root[lang='en']:not([data-ui-style]) {
-  --heading-font: Georgia, 'Palatino Linotype', 'Book Antiqua', 'DFKai-SB', '標楷體', 'Kaiti TC', serif;
+  --heading-font: 'VSerif', 'VKai', serif;
 }
 :root[lang='en'][data-ui-style='taiwan-print'] {
-  --heading-font: Georgia, 'Palatino Linotype', 'Book Antiqua', 'DFKai-SB', '標楷體', serif;
+  --heading-font: 'VSerif', 'VKai', serif;
 }
 
-/* 標楷體字型（中文介面的標題、名牌等）。英文、日文換成有對應字母／假名的字型 */
-:root { --kai-font: 'DFKai-SB', '標楷體', serif; }
-:root[lang='en'] { --kai-font: Georgia, 'Palatino Linotype', 'DFKai-SB', '標楷體', serif; }
-:root[lang='ja'] { --kai-font: 'Yu Mincho', YuMincho, 'Hiragino Mincho ProN', 'MS PMincho', 'DFKai-SB', serif; }
+/* 楷書字型（中文介面的標題、名牌等，霞鶩文楷）。英文、日文換成有對應字母／假名的字型（字型都附在 src/fonts，見 fonts.config.json） */
+:root { --kai-font: 'VKai', serif; }
+:root[lang='en'] { --kai-font: 'VSerif', 'VKai', serif; }
+:root[lang='ja'] { --kai-font: 'VKaiJP', 'VKai', serif; }
 
-/* 日文介面：楷書沒有假名，標題改用明朝體、內文用日文黑體。像素風格維持原本的字型（假名會落到 MS Gothic） */
+/* 日文介面：標題改用日文教科書體（Klee One）、內文用日文黑體（Noto Sans JP），漢字才是日文字形。像素風格維持原本的字型（俐方體有假名） */
 :root[lang='ja'][data-ui-style='anime90'],
 :root[lang='ja']:not([data-ui-style]),
 :root[lang='ja'][data-ui-style='taiwan-print'] {
-  --heading-font: 'Yu Mincho', YuMincho, 'Hiragino Mincho ProN', 'MS PMincho', 'DFKai-SB', serif;
-  --ui-font: 'Yu Gothic UI', 'Yu Gothic', 'Hiragino Sans', Meiryo, 'Microsoft JhengHei', sans-serif;
+  --heading-font: 'VKaiJP', 'VKai', serif;
+  --ui-font: 'VSansJP', 'VSans', sans-serif;
 }
 :root[lang='ja'][data-ui-style='modern-paint'] {
-  --heading-font: 'Yu Gothic UI', 'Yu Gothic', 'Hiragino Sans', Meiryo, sans-serif;
-  --ui-font: 'Yu Gothic UI', 'Yu Gothic', 'Hiragino Sans', Meiryo, sans-serif;
+  --heading-font: 'VSansJP', 'VSans', sans-serif;
+  --ui-font: 'VSansJP', 'VSans', sans-serif;
 }
 
-/* 日文字型（游明朝、游ゴシック）預設行高很高，整頁會變長；先給一個一般的行高（:where 不提高權重，元件自己有設的照用） */
+/* 日文字型預設行高很高，整頁會變長；先給一個一般的行高（:where 不提高權重，元件自己有設的照用） */
 :where(html[lang='ja']) { line-height: 1.35; }
 :where(html[lang='ja']) :where(button, input, select, h1, h2, h3, h4, strong, b, span, a, label, p) { line-height: 1.2; }

@@ -1,0 +1,13 @@
+{
+  "out": "src/fonts",
+  "text": ["src", "crates", "index.html"],
+  "families": [
+    "VSans",
+    "VKai",
+    "VPixel",
+    "VMono",
+    "VSerif",
+    { "family": "VSansJP", "text": ["src/lib/i18n/ja"] },
+    { "family": "VKaiJP", "text": ["src/lib/i18n/ja"] }
+  ]
+}

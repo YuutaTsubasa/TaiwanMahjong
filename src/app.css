@@ -10,7 +10,7 @@
   --gold: #ffd166;
   --red: #ef476f;
   --accent: #06d6a0;
-  font-family: 'Microsoft JhengHei', 'PingFang TC', 'Noto Sans TC', system-ui, sans-serif;
+  font-family: 'VSans', 'Microsoft JhengHei', 'PingFang TC', sans-serif;
   color: var(--text);
   background: #071a12;
   font-size: 15px;
@@ -57,7 +57,7 @@ input, select {
 input:focus, select:focus { border-color: var(--gold); }
 
 code, pre {
-  font-family: 'Cascadia Code', Consolas, monospace;
+  font-family: 'VMono', 'VSans', monospace;
   font-size: 13px;
 }
 
