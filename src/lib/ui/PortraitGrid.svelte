@@ -58,6 +58,8 @@
   .pic {
     position: relative;
     display: block;
+    /* 寬度一定跟格子一樣：舊版 Android WebView（109）在 --pic-h 定了高度時會照 aspect-ratio 算寬度，圖就超出格子 */
+    width: 100%;
     aspect-ratio: 1.22;
     /* 外層可用 --pic-h 依視窗高度限制圖片高度（寬螢幕但不高的時候） */
     height: var(--pic-h, auto);
