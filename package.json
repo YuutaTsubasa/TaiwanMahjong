@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@tauri-apps/api": "~2.11.0",
-    "virtual-core": "github:YuutaTsubasa/VirtualCore#v0.5.0"
+    "virtual-core": "github:YuutaTsubasa/VirtualCore#v0.7.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5",
