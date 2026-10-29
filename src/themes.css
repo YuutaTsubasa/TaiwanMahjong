@@ -2,8 +2,8 @@
    Layout and interaction stay in the components; this file owns appearance. */
 :root,
 :root[data-ui-style='anime90'] {
-  --ui-font: 'Microsoft JhengHei', 'PingFang TC', system-ui, sans-serif;
-  --heading-font: 'DFKai-SB', '標楷體', 'Kaiti TC', serif;
+  --ui-font: 'VSans', 'Microsoft JhengHei', sans-serif;
+  --heading-font: 'VKai', serif;
   --felt: #175c48;
   --felt-dark: #092e27;
   --wood: #9f6341;
@@ -70,8 +70,8 @@
 }
 
 :root[data-ui-style='pc98'] {
-  --ui-font: 'MingLiU', '細明體', 'MS Gothic', 'Cascadia Mono', monospace;
-  --heading-font: 'MingLiU', '細明體', serif;
+  --ui-font: 'VPixel', monospace;
+  --heading-font: 'VPixel', monospace;
   --felt: #232641;
   --felt-dark: #111329;
   --wood: #9b80b4;
@@ -138,8 +138,8 @@
 }
 
 :root[data-ui-style='msdos'] {
-  --ui-font: 'Cascadia Mono', 'Consolas', 'MingLiU', '細明體', monospace;
-  --heading-font: 'Cascadia Mono', 'Consolas', 'MingLiU', monospace;
+  --ui-font: 'VMono', 'VPixel', monospace;
+  --heading-font: 'VMono', 'VPixel', monospace;
   --felt: #0000a0;
   --felt-dark: #000060;
   --wood: #c0c0c0;
@@ -350,7 +350,7 @@ html[data-ui-style='msdos'] .side-head button { color: #000; }
 html[data-ui-style='msdos'] .sound input { accent-color: #0000aa; }
 html[data-ui-style='msdos'] .topbar :focus-visible { outline-color: #0000aa; }
 html[data-ui-style='msdos'] :is(.dealer-tag, .streak) { background: #aa0000; color: #fff; }
-html[data-ui-style='msdos'] .tile { font-family: 'MingLiU', '細明體', monospace; }
+html[data-ui-style='msdos'] .tile { font-family: 'VPixel', monospace; }
 html[data-ui-style='msdos'] .tile .flower { color: #790091; }
 html[data-ui-style='msdos'] .tile .flower.season { color: #994400; }
 html[data-ui-style='pc98'] *,

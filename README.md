@@ -86,6 +86,12 @@ npm --prefix ../VirtualCore/workers/signal run deploy:mahjong
 
 配對服務的網址寫在 `src/lib/site.js` 的 `DEFAULT_SIGNAL_SERVER`。`VITE_SIGNAL_SERVER=off`（或配對服務連不上）時，介面上線上房間的選項會自動藏起來。
 
+字型：介面用的字型附在 `src/fonts`（各平台系統字型不同，Android 沒有正黑體、標楷體、細明體），只收了原始碼用到的字。改了介面文字、`npm test` 說有字不在字型裡時，重產一次（要先 `python -m pip install fonttools brotli`；設定在 `fonts.config.json`）：
+
+```bash
+npm run fonts
+```
+
 測試：
 
 ```bash
@@ -217,3 +223,5 @@ src/
 - **美術、角色與台詞**：[CC BY-NC 4.0](LICENSE-ART.md)——可以分享、改作、做同人與影片，標示出處即可；商業使用請先聯絡作者
 
 詳細範圍見 [`LICENSE-ART.md`](LICENSE-ART.md)。
+
+- **字型**：Noto Sans TC／JP、Noto Serif、霞鶩文楷 TC、Klee One、Cascadia Mono（SIL Open Font License 1.1）與俐方體 11 號，各自的授權在 [`src/fonts/licenses/`](src/fonts/licenses/)

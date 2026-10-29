@@ -162,7 +162,7 @@
     margin-bottom: calc(var(--w) * 0.12);
     transition: transform 0.12s ease, box-shadow 0.12s ease;
     user-select: none;
-    font-family: 'DFKai-SB', 'BiauKai', '標楷體', 'Kaiti TC', 'KaiTi', 'Noto Serif TC', serif;
+    font-family: 'VKai', serif;
   }
   .xl { --w: 54px; }
   .lg { --w: 46px; }

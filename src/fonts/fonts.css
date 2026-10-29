@@ -1,0 +1,11 @@
+/* 自動產生，不要手改：node node_modules/virtual-core/scripts/fonts/build.mjs（VirtualCore 的 scripts/fonts）。
+ * 只收了原始碼裡用到的字（chars.txt）；玩家自己打的字（名字、聊天）沒收到時會落到系統字型。授權見 licenses/。 */
+@font-face { font-family: 'VSans'; src: url('./vsans.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'VKai'; src: url('./vkai-0.woff2') format('woff2'); font-weight: 100 500; font-display: swap; }
+@font-face { font-family: 'VKai'; src: url('./vkai-1.woff2') format('woff2'); font-weight: 600 900; font-display: swap; }
+@font-face { font-family: 'VPixel'; src: url('./vpixel.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'VMono'; src: url('./vmono.woff2') format('woff2'); font-weight: 200 700; font-display: swap; }
+@font-face { font-family: 'VSerif'; src: url('./vserif.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'VSansJP'; src: url('./vsansjp.woff2') format('woff2'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'VKaiJP'; src: url('./vkaijp-0.woff2') format('woff2'); font-weight: 100 500; font-display: swap; }
+@font-face { font-family: 'VKaiJP'; src: url('./vkaijp-1.woff2') format('woff2'); font-weight: 600 900; font-display: swap; }

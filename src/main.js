@@ -1,4 +1,5 @@
 import { mount } from 'svelte';
+import './fonts/fonts.css';
 import './app.css';
 import './themes.css';
 import './concept-ui.css';
